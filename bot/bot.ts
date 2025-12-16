@@ -28,11 +28,15 @@ export function createBot(): Bot {
 export async function startBot(): Promise<void> {
   const bot = createBot();
 
+  // eslint-disable-next-line no-console
   console.log('🤖 Бот запускается...');
+  // eslint-disable-next-line no-console
   console.log(`📱 Имя бота: ${config.botUsername}`);
+  // eslint-disable-next-line no-console
   console.log(`🌐 Web App URL: ${config.webAppUrl}`);
 
   await bot.start();
+  // eslint-disable-next-line no-console
   console.log('✅ Бот успешно запущен!');
 }
 

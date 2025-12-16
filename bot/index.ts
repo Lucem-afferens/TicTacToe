@@ -6,11 +6,13 @@ import { startBot } from './bot.js';
 
 // Обработка сигналов завершения
 process.on('SIGINT', () => {
+  // eslint-disable-next-line no-console
   console.log('\n🛑 Получен сигнал SIGINT, завершение работы...');
   process.exit(0);
 });
 
 process.on('SIGTERM', () => {
+  // eslint-disable-next-line no-console
   console.log('\n🛑 Получен сигнал SIGTERM, завершение работы...');
   process.exit(0);
 });

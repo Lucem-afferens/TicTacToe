@@ -10,8 +10,8 @@ export const BOARD_SIZE = 3;
 /**
  * Символы игроков
  */
-export const PLAYER_X: 'X' = 'X';
-export const PLAYER_O: 'O' = 'O';
+export const PLAYER_X = 'X' as const;
+export const PLAYER_O = 'O' as const;
 
 /**
  * Все возможные выигрышные комбинации (индексы ячеек)

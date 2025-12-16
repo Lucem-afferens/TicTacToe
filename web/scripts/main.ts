@@ -143,22 +143,25 @@ function checkGameResult() {
   setBoardDisabled(true);
 
   switch (result) {
-    case 'win':
+    case 'win': {
       const promoCode = generateAndSendPromoCode();
       showWinScreen(promoCode);
       break;
+    }
 
-    case 'lose':
+    case 'lose': {
       const loseData: WebAppData = { type: 'lose' };
       sendDataToBot(loseData);
       showLoseScreen();
       break;
+    }
 
-    case 'draw':
+    case 'draw': {
       const drawData: WebAppData = { type: 'draw' };
       sendDataToBot(drawData);
       showDrawScreen();
       break;
+    }
   }
 }
 

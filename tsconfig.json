@@ -39,7 +39,9 @@
     "shared/**/*",
     "bot/**/*",
     "web/**/*",
-    "tests/**/*"
+    "tests/**/*",
+    "*.config.ts",
+    "*.config.js"
   ],
   "exclude": [
     "node_modules",

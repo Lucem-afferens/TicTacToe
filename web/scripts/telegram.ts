@@ -56,6 +56,7 @@ export function sendDataToBot(data: object): void {
     window.Telegram.WebApp.sendData(dataStr);
     console.log('Data sent to bot:', data);
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Error sending data to bot:', error);
   }
 }
