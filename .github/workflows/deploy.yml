@@ -95,8 +95,6 @@ jobs:
         echo "📦 Подготовка Web App файлов..."
         mkdir -p deploy-web
         cp -r dist/web/* deploy-web/ 2>/dev/null || true
-        # Копируем PHP скрипт для автоматической настройки
-        cp web/setup-webhook.php deploy-web/setup-webhook.php 2>/dev/null || true
         echo "✅ Файлы подготовлены"
       
     - name: Deploy Web App to Beget FTP
@@ -117,97 +115,22 @@ jobs:
           **/*.map
         log-level: verbose
       
-    - name: Set bot deployment path
-      id: bot-path
-      run: |
-        if [ -n "${{ secrets.FTP_BOT_PATH }}" ]; then
-          echo "path=${{ secrets.FTP_BOT_PATH }}" >> $GITHUB_OUTPUT
-        else
-          echo "path=${{ secrets.FTP_WEB_PATH }}/bot" >> $GITHUB_OUTPUT
-        fi
-      
-    - name: Prepare bot deployment directory
-      run: |
-        echo "📦 Подготовка файлов для деплоя бота..."
-        mkdir -p deploy-bot/bot deploy-bot/shared
-        cp -r dist/bot/* deploy-bot/bot/ 2>/dev/null || true
-        cp -r dist/shared/* deploy-bot/shared/ 2>/dev/null || true
-        cp dist/bot/.env deploy-bot/bot/.env 2>/dev/null || true
-        
-        # Копируем скрипты запуска
-        cp bot/start.sh deploy-bot/bot/start.sh 2>/dev/null || true
-        cp bot/install-and-start.sh deploy-bot/bot/install-and-start.sh 2>/dev/null || true
-        chmod +x deploy-bot/bot/*.sh 2>/dev/null || true
-        
-        echo "✅ Файлы подготовлены"
-        echo "📁 Структура deploy-bot/:"
-        ls -la deploy-bot/ | head -10
-        echo "📁 Bot файлы:"
-        ls -la deploy-bot/bot/ | head -10
-        echo "📁 Shared файлы:"
-        ls -la deploy-bot/shared/ | head -5
-      
-    - name: Deploy Bot, Shared modules and .env to Beget FTP
-      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
-      with:
-        server: ${{ secrets.FTP_HOST }}
-        username: ${{ secrets.FTP_USERNAME }}
-        password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: ./deploy-bot/
-        server-dir: ${{ steps.bot-path.outputs.path }}/
-        dangerous-clean-slate: false
-        dry-run: false
-        exclude: |
-          **/.git*
-          **/.git*/**
-          **/.DS_Store
-          **/Thumbs.db
-        log-level: verbose
-      
-    - name: Prepare package files for bot
-      run: |
-        echo "📦 Подготовка package.json для бота..."
-        mkdir -p deploy-bot
-        cp package.json deploy-bot/package.json
-        cp package-lock.json deploy-bot/package-lock.json 2>/dev/null || true
-        echo "✅ Файлы подготовлены"
-      
-    - name: Deploy package files for bot
-      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
-      with:
-        server: ${{ secrets.FTP_HOST }}
-        username: ${{ secrets.FTP_USERNAME }}
-        password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: ./deploy-bot/
-        server-dir: ${{ steps.bot-path.outputs.path }}/
-        dangerous-clean-slate: false
-        dry-run: false
-        exclude: |
-          **/.git*
-          **/.git*/**
-          **/.DS_Store
-          **/Thumbs.db
-          bot/**
-          shared/**
-        log-level: verbose
-      
     - name: Deployment Success
       run: |
-        echo "🎉 Деплой успешно завершен!"
+        echo "🎉 Деплой Web App успешно завершен!"
         echo "🌐 Web App: https://develonik.ru/"
-        echo "🤖 Bot: задеплоен в ${{ steps.bot-path.outputs.path }}/"
-        echo "🔐 .env файл загружен на сервер (безопасно, не в Git)"
         echo ""
-        echo "📋 Следующие шаги на сервере:"
-        echo "   1. Подключитесь к серверу через SSH"
-        echo "   2. Перейдите в директорию бота: cd ${{ steps.bot-path.outputs.path }}"
-        echo "   3. Запустите автоматический скрипт: bash install-and-start.sh"
+        echo "⚠️ ВАЖНО: Telegram Bot НЕ деплоится на Beget!"
+        echo "   Beget не поддерживает Node.js и постоянные процессы."
         echo ""
-        echo "   Или вручную:"
-        echo "   cd ${{ steps.bot-path.outputs.path }}"
-        echo "   npm install --production"
-        echo "   npm run build:bot"
-        echo "   npm run start:webhook"
+        echo "📋 Что делать с ботом:"
+        echo "   1. Деплой бота на отдельный сервер с Node.js:"
+        echo "      • Railway.app (рекомендуется, бесплатно)"
+        echo "      • Render.com (бесплатно, может засыпать)"
+        echo "      • Fly.io (бесплатно)"
+        echo "      • VPS (DigitalOcean, Vultr и т.д.)"
+        echo ""
+        echo "   2. См. инструкции: BOT_DEPLOYMENT.md"
         echo ""
         echo "📅 Время: $(date)"
 
