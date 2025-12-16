@@ -65,6 +65,13 @@ export async function startBotWebhook(_port: number = 3001): Promise<Bot> {
   // eslint-disable-next-line no-console
   console.log(`🌐 Web App URL: ${config.webAppUrl}`);
 
+  // Инициализируем бота (обязательно для Grammy)
+  // eslint-disable-next-line no-console
+  console.log('🔧 Инициализация бота...');
+  await bot.init();
+  // eslint-disable-next-line no-console
+  console.log('✅ Бот инициализирован');
+
   // Удаляем старый webhook если есть
   await bot.api.deleteWebhook({ drop_pending_updates: true });
   
