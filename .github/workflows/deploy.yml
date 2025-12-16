@@ -132,21 +132,25 @@ jobs:
           echo "path=${{ secrets.FTP_WEB_PATH }}/bot" >> $GITHUB_OUTPUT
         fi
       
-    - name: Deploy Bot and .env to Beget FTP
+    - name: Deploy Bot, Shared modules and .env to Beget FTP
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
         server: ${{ secrets.FTP_HOST }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: ./dist/bot/
+        local-dir: ./dist/
         server-dir: ${{ steps.bot-path.outputs.path }}/
         dangerous-clean-slate: false
         dry-run: false
+        include: |
+          bot/**
+          shared/**
         exclude: |
           **/.git*
           **/.git*/**
           **/.DS_Store
           **/Thumbs.db
+          web/**
         log-level: verbose
       
     - name: Deploy package files for bot
