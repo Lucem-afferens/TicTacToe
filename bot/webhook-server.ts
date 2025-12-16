@@ -56,8 +56,12 @@ export function createWebhookServer(bot: Bot, _port: number = 3001): http.Server
  * Запускает webhook сервер
  */
 export async function startWebhookServer(): Promise<void> {
+  // Используем createBot напрямую, так как startBotWebhook только подготавливает бота
   const bot = createBot();
   const port = parseInt(process.env.WEBHOOK_PORT || '3001', 10);
+  
+  // Удаляем старый webhook если есть
+  await bot.api.deleteWebhook({ drop_pending_updates: true });
 
   // eslint-disable-next-line no-console
   console.log('🚀 Запуск webhook сервера...');
