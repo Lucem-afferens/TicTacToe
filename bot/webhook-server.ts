@@ -49,15 +49,26 @@ export function createWebhookServer(bot: Bot, _port: number = 3001): http.Server
           // Парсим обновление от Telegram
           const update = JSON.parse(body);
 
+          // eslint-disable-next-line no-console
+          console.log('📨 Получено обновление от Telegram:', update.update_id);
+
           // Обрабатываем обновление через бота
           await bot.handleUpdate(update);
+
+          // eslint-disable-next-line no-console
+          console.log('✅ Обновление обработано успешно');
 
           // Отвечаем успешно
           res.writeHead(200, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ ok: true }));
         } catch (error) {
           // eslint-disable-next-line no-console
-          console.error('Error handling webhook update:', error);
+          console.error('❌ Ошибка обработки webhook обновления:', error);
+          // eslint-disable-next-line no-console
+          if (error instanceof Error) {
+            // eslint-disable-next-line no-console
+            console.error('Stack trace:', error.stack);
+          }
           res.writeHead(500, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ ok: false, error: 'Internal server error' }));
         }

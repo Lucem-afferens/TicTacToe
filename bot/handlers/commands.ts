@@ -12,12 +12,27 @@ import { config } from '../config.js';
 export function registerCommands(bot: Bot) {
   // Команда /start
   bot.command('start', async (ctx) => {
-    const keyboard = new InlineKeyboard().webApp('🎮 Играть', config.webAppUrl);
+    try {
+      // eslint-disable-next-line no-console
+      console.log('📨 Получена команда /start от пользователя:', ctx.from?.id);
+      
+      const keyboard = new InlineKeyboard().webApp('🎮 Играть', config.webAppUrl);
 
-    await ctx.reply(messages.welcome, {
-      reply_markup: keyboard,
-      parse_mode: 'Markdown',
-    });
+      await ctx.reply(messages.welcome, {
+        reply_markup: keyboard,
+        parse_mode: 'Markdown',
+      });
+      
+      // eslint-disable-next-line no-console
+      console.log('✅ Ответ на /start отправлен');
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('❌ Ошибка при обработке /start:', error);
+      await ctx.reply(messages.error).catch(() => {
+        // eslint-disable-next-line no-console
+        console.error('❌ Не удалось отправить сообщение об ошибке');
+      });
+    }
   });
 
   // Команда /help
