@@ -133,7 +133,7 @@ export async function handleAutoSetup(
     
     if (!depsInstalled) {
       steps.push('📦 Установка зависимостей...');
-      const installOutput = await installDependencies();
+      await installDependencies();
       steps.push(`✅ Зависимости установлены`);
     } else {
       steps.push('✅ Зависимости уже установлены');
@@ -145,7 +145,7 @@ export async function handleAutoSetup(
     
     if (!buildExists) {
       steps.push('🔨 Сборка проекта...');
-      const buildOutput = await buildProject();
+      await buildProject();
       steps.push(`✅ Проект собран`);
     } else {
       steps.push('✅ Проект уже собран');
@@ -158,7 +158,7 @@ export async function handleAutoSetup(
     
     if (!serverRunning) {
       steps.push('🚀 Запуск webhook сервера...');
-      const startOutput = await startServer();
+      await startServer();
       steps.push(`✅ Сервер запущен`);
       
       // Ждём немного чтобы сервер успел запуститься
