@@ -51,13 +51,13 @@ jobs:
         fi
 
   # ============================================
-  # Job 2: Deploy Web App
+  # Job 2: Deploy Web App to Beget
   # ============================================
   deploy-web:
-    name: Deploy Web App
+    name: Deploy Web App to Beget
     needs: build-and-test
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     
     steps:
     - name: Checkout code
@@ -75,6 +75,16 @@ jobs:
     - name: Build Web App
       run: npm run build:web
       
+    - name: Verify build output
+      run: |
+        echo "📦 Проверка файлов для деплоя..."
+        ls -la dist/web/
+        if [ ! -f "dist/web/index.html" ]; then
+          echo "❌ index.html не найден!"
+          exit 1
+        fi
+        echo "✅ Файлы готовы к деплою"
+      
     - name: Deploy Web App to Beget FTP
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
@@ -91,16 +101,23 @@ jobs:
           **/.DS_Store
           **/Thumbs.db
           **/*.map
+          **/.env*
         log-level: verbose
+      
+    - name: Deployment Success
+      run: |
+        echo "🎉 Web App успешно задеплоен на Beget!"
+        echo "🌐 URL: https://develonik.ru/"
+        echo "📅 Время: $(date)"
 
   # ============================================
-  # Job 3: Deploy Bot (if needed)
+  # Job 3: Deploy Bot to Beget (SSH)
   # ============================================
   deploy-bot:
-    name: Deploy Bot
+    name: Deploy Bot to Beget
     needs: build-and-test
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     
     steps:
     - name: Checkout code
@@ -118,31 +135,43 @@ jobs:
     - name: Build Bot
       run: npm run build:bot
       
-    - name: Deploy Bot to Server
-      # ⚠️ Настройте деплой бота согласно вашему хостингу
-      # Примеры: SSH, FTP, Docker, или другой метод
+    - name: Verify bot build
       run: |
-        echo "🤖 Деплой бота..."
-        echo "⚠️ Настройте деплой бота согласно вашему хостингу"
-        # Пример для SSH деплоя:
-        # ssh user@server "cd /path/to/bot && git pull && npm install --production && pm2 restart bot"
-      continue-on-error: true
-
-  # ============================================
-  # Job 4: Deployment Success Notification
-  # ============================================
-  notify:
-    name: Deployment Notification
-    needs: [deploy-web, deploy-bot]
-    runs-on: ubuntu-latest
-    if: success()
-    
-    steps:
-    - name: Deployment Success
+        echo "📦 Проверка сборки бота..."
+        if [ -d "dist/bot" ]; then
+          echo "✅ Bot build успешен"
+          ls -la dist/bot/ | head -5
+        else
+          echo "❌ dist/bot не найден!"
+          exit 1
+        fi
+      
+    - name: Deploy Bot to Beget via SSH
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: ${{ secrets.SSH_PORT || 22 }}
+        source: "dist/bot/*,package.json,package-lock.json"
+        target: ${{ secrets.SSH_BOT_PATH }}
+        strip_components: 0
+      
+    - name: Setup Bot on Server via SSH
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: ${{ secrets.SSH_PORT || 22 }}
+        script: |
+          cd ${{ secrets.SSH_BOT_PATH }}
+          npm install --production
+          pm2 restart tictactoe-bot || pm2 start dist/bot/index.js --name tictactoe-bot
+          pm2 save
+      
+    - name: Bot Deployment Success
       run: |
-        echo "🎉 Деплой успешно завершен!"
+        echo "🤖 Bot успешно задеплоен на Beget!"
         echo "📅 Время: $(date)"
-        echo "✅ Web App развёрнут"
-        echo "✅ Bot развёрнут"
-        echo "🌐 Проверьте работу приложения"
 
