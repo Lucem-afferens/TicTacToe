@@ -65,14 +65,81 @@ export async function handleWebhookSetup(
       throw new Error(`Webhook URL должен содержать /webhook. Текущий URL: ${webhookUrl}`);
     }
 
-    // Устанавливаем webhook
+    // 1. Удаляем старый webhook
+    // eslint-disable-next-line no-console
+    console.log('1️⃣ Удаление старого webhook...');
+    await bot.api.deleteWebhook({ drop_pending_updates: true });
+    // eslint-disable-next-line no-console
+    console.log('✅ Старый webhook удалён');
+
+    // 2. Устанавливаем новый webhook
+    // eslint-disable-next-line no-console
+    console.log('2️⃣ Установка нового webhook...');
     const result = await bot.api.setWebhook(webhookUrl, {
       drop_pending_updates: true,
       allowed_updates: ['message', 'callback_query'],
     });
 
     if (result) {
-      // Проверяем установку
+      // eslint-disable-next-line no-console
+      console.log('✅ Webhook установлен:', webhookUrl);
+
+      // 3. Удаляем старую кнопку меню (если есть)
+      // eslint-disable-next-line no-console
+      console.log('3️⃣ Удаление старой кнопки меню...');
+      try {
+        await bot.api.deleteBotCommands();
+        // eslint-disable-next-line no-console
+        console.log('✅ Старая кнопка меню удалена');
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.log('⚠️ Ошибка удаления кнопки меню (может не существовать):', error);
+      }
+
+      // 4. Устанавливаем новую кнопку меню (Web App)
+      // eslint-disable-next-line no-console
+      console.log('4️⃣ Установка новой кнопки меню...');
+      try {
+        await bot.api.setChatMenuButton({
+          menu_button: {
+            type: 'web_app',
+            text: '🎮 Играть',
+            web_app: {
+              url: config.webAppUrl,
+            },
+          },
+        });
+        // eslint-disable-next-line no-console
+        console.log('✅ Кнопка меню установлена: 🎮 Играть');
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('❌ Ошибка установки кнопки меню:', error);
+      }
+
+      // 5. Устанавливаем команды бота
+      // eslint-disable-next-line no-console
+      console.log('5️⃣ Установка команд бота...');
+      try {
+        await bot.api.setMyCommands([
+          { command: 'start', description: '🎮 Начать игру в крестики-нолики' },
+          { command: 'help', description: '💡 Получить помощь и справку' },
+          { command: 'game', description: '🎯 Быстрый старт игры' },
+        ]);
+        // eslint-disable-next-line no-console
+        console.log('✅ Команды бота установлены');
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('❌ Ошибка установки команд:', error);
+      }
+
+      // 6. Проверяем информацию о боте
+      // eslint-disable-next-line no-console
+      console.log('6️⃣ Проверка информации о боте...');
+      const botInfo = await bot.api.getMe();
+      // eslint-disable-next-line no-console
+      console.log('✅ Бот активен:', botInfo.first_name, `(@${botInfo.username})`);
+
+      // Проверяем установку webhook
       const newWebhookInfo = await bot.api.getWebhookInfo();
 
       // Перенаправляем на страницу успеха с информацией о webhook
@@ -162,20 +229,28 @@ export async function handleWebhookSetup(
         
         <div class="info">
             <div class="info-item">
-                <span class="info-label">URL Webhook:</span><br>
+                <span class="info-label">✅ URL Webhook:</span><br>
                 ${newWebhookInfo.url || webhookUrl}
             </div>
             <div class="info-item">
-                <span class="info-label">Ожидает обновлений:</span><br>
+                <span class="info-label">✅ Кнопка меню:</span><br>
+                🎮 Играть (Web App)
+            </div>
+            <div class="info-item">
+                <span class="info-label">✅ Команды:</span><br>
+                /start, /help, /game
+            </div>
+            <div class="info-item">
+                <span class="info-label">📊 Ожидает обновлений:</span><br>
                 ${newWebhookInfo.pending_update_count || 0}
             </div>
             <div class="info-item">
-                <span class="info-label">Последняя ошибка:</span><br>
-                ${newWebhookInfo.last_error_message || 'Нет ошибок'}
+                <span class="info-label">📱 Бот:</span><br>
+                ${config.botUsername}
             </div>
             <div class="info-item">
-                <span class="info-label">Бот:</span><br>
-                ${config.botUsername}
+                <span class="info-label">🌐 Web App URL:</span><br>
+                ${config.webAppUrl}
             </div>
         </div>
 
