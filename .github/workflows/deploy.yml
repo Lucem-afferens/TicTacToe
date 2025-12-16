@@ -160,23 +160,31 @@ jobs:
           **/Thumbs.db
         log-level: verbose
       
+    - name: Prepare package files for bot
+      run: |
+        echo "📦 Подготовка package.json для бота..."
+        mkdir -p deploy-bot
+        cp package.json deploy-bot/package.json
+        cp package-lock.json deploy-bot/package-lock.json 2>/dev/null || true
+        echo "✅ Файлы подготовлены"
+      
     - name: Deploy package files for bot
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
         server: ${{ secrets.FTP_HOST }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: ./
+        local-dir: ./deploy-bot/
         server-dir: ${{ steps.bot-path.outputs.path }}/
         dangerous-clean-slate: false
         dry-run: false
-        include: |
-          package.json
-          package-lock.json
         exclude: |
-          **/*
-          !package.json
-          !package-lock.json
+          **/.git*
+          **/.git*/**
+          **/.DS_Store
+          **/Thumbs.db
+          bot/**
+          shared/**
         log-level: verbose
       
     - name: Deployment Success
