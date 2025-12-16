@@ -100,22 +100,89 @@ function execCommand($command, $cwd = null) {
     ];
 }
 
+// Находим пути к Node.js и npm
+$nodePaths = [
+    'node',
+    '/usr/bin/node',
+    '/usr/local/bin/node',
+    '/opt/nodejs/bin/node',
+    '/home/n/nikolr4t/.local/bin/node',
+    exec('which node 2>/dev/null', $output, $return) ? trim(exec('which node 2>/dev/null')) : null,
+    exec('whereis -b node 2>/dev/null | cut -d" " -f2', $output, $return) ? trim(exec('whereis -b node 2>/dev/null | cut -d" " -f2')) : null,
+];
+
+$npmPaths = [
+    'npm',
+    '/usr/bin/npm',
+    '/usr/local/bin/npm',
+    '/opt/nodejs/bin/npm',
+    '/home/n/nikolr4t/.local/bin/npm',
+    exec('which npm 2>/dev/null', $output, $return) ? trim(exec('which npm 2>/dev/null')) : null,
+    exec('whereis -b npm 2>/dev/null | cut -d" " -f2', $output, $return) ? trim(exec('whereis -b npm 2>/dev/null | cut -d" " -f2')) : null,
+];
+
+$nodeCmd = null;
+$npmCmd = null;
+
+// Ищем Node.js
+foreach ($nodePaths as $path) {
+    if (!$path) continue;
+    $test = execCommand("$path --version 2>&1");
+    if ($test['success'] && !empty(trim($test['output']))) {
+        $nodeCmd = $path;
+        break;
+    }
+}
+
+// Ищем npm
+foreach ($npmPaths as $path) {
+    if (!$path) continue;
+    $test = execCommand("$path --version 2>&1");
+    if ($test['success'] && !empty(trim($test['output']))) {
+        $npmCmd = $path;
+        break;
+    }
+}
+
 // Шаг 1: Проверка Node.js
 $steps[] = '🔍 Проверка Node.js...';
-$nodeCheck = execCommand('node --version');
-if ($nodeCheck['success']) {
-    $steps[] = '✅ Node.js найден: ' . trim($nodeCheck['output']);
+if ($nodeCmd) {
+    $nodeCheck = execCommand("$nodeCmd --version");
+    if ($nodeCheck['success']) {
+        $steps[] = '✅ Node.js найден: ' . trim($nodeCheck['output']) . ' (путь: ' . $nodeCmd . ')';
+    } else {
+        $errors[] = 'Node.js найден, но не работает: ' . $nodeCmd;
+    }
 } else {
-    $errors[] = 'Node.js не найден! Установите Node.js 18+';
+    // Пробуем через полный PATH
+    $envPath = getenv('PATH') ?: '/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin';
+    putenv("PATH=$envPath:/opt/nodejs/bin:/home/n/nikolr4t/.local/bin");
+    $nodeCheck = execCommand('node --version 2>&1');
+    if ($nodeCheck['success'] && !empty(trim($nodeCheck['output']))) {
+        $nodeCmd = 'node';
+        $steps[] = '✅ Node.js найден: ' . trim($nodeCheck['output']);
+    } else {
+        $errors[] = 'Node.js не найден! Установите Node.js 18+. Проверенные пути: ' . implode(', ', array_filter($nodePaths));
+    }
 }
 
 // Шаг 2: Проверка npm
 $steps[] = '🔍 Проверка npm...';
-$npmCheck = execCommand('npm --version');
-if ($npmCheck['success']) {
-    $steps[] = '✅ npm найден: ' . trim($npmCheck['output']);
+if ($npmCmd) {
+    $npmCheck = execCommand("$npmCmd --version");
+    if ($npmCheck['success']) {
+        $steps[] = '✅ npm найден: ' . trim($npmCheck['output']) . ' (путь: ' . $npmCmd . ')';
+    } else {
+        $errors[] = 'npm найден, но не работает: ' . $npmCmd;
+    }
 } else {
-    $errors[] = 'npm не найден!';
+    $npmCheck = execCommand('npm --version 2>&1');
+    if ($npmCheck['success'] && !empty(trim($npmCheck['output']))) {
+        $npmCmd = 'npm';
+        $steps[] = '✅ npm найден: ' . trim($npmCheck['output']);
+    } else {
+        $errors[] = 'npm не найден! Проверенные пути: ' . implode(', ', array_filter($npmPaths));
+    }
 }
 
 // Шаг 3: Проверка .env файла
@@ -133,11 +200,12 @@ if (empty($errors)) {
     $nodeModules = $botDir . '/node_modules';
     if (!is_dir($nodeModules)) {
         $steps[] = '📦 Установка зависимостей...';
-        $install = execCommand('npm install --production', $botDir);
+        $npmCmdToUse = $npmCmd ?: 'npm';
+        $install = execCommand("$npmCmdToUse install --production", $botDir);
         if ($install['success']) {
             $steps[] = '✅ Зависимости установлены';
         } else {
-            $errors[] = 'Ошибка установки зависимостей: ' . $install['error'];
+            $errors[] = 'Ошибка установки зависимостей: ' . $install['error'] . ' (вывод: ' . substr($install['output'], 0, 200) . ')';
         }
     } else {
         $steps[] = '✅ Зависимости уже установлены';
@@ -150,11 +218,12 @@ if (empty($errors)) {
     $distBot = $botDir . '/dist/bot/index.js';
     if (!file_exists($distBot)) {
         $steps[] = '🔨 Сборка проекта...';
-        $build = execCommand('npm run build:bot', $botDir);
+        $npmCmdToUse = $npmCmd ?: 'npm';
+        $build = execCommand("$npmCmdToUse run build:bot", $botDir);
         if ($build['success']) {
             $steps[] = '✅ Проект собран';
         } else {
-            $errors[] = 'Ошибка сборки: ' . $build['error'];
+            $errors[] = 'Ошибка сборки: ' . $build['error'] . ' (вывод: ' . substr($build['output'], 0, 200) . ')';
         }
     } else {
         $steps[] = '✅ Проект уже собран';
@@ -174,28 +243,33 @@ if (empty($errors)) {
         $steps[] = '🚀 Запуск webhook сервера...';
         
         // Пробуем через PM2
-        $pm2Check = execCommand('which pm2');
+        $pm2Cmd = exec('which pm2 2>/dev/null', $pm2Output, $pm2Return);
+        $pm2Path = trim($pm2Cmd) ?: 'pm2';
+        $pm2Check = execCommand("$pm2Path --version 2>&1");
+        
         if ($pm2Check['success']) {
             // Останавливаем старый процесс если есть
-            execCommand('pm2 stop tictactoe-webhook 2>/dev/null', $botDir);
-            execCommand('pm2 delete tictactoe-webhook 2>/dev/null', $botDir);
+            execCommand("$pm2Path stop tictactoe-webhook 2>/dev/null", $botDir);
+            execCommand("$pm2Path delete tictactoe-webhook 2>/dev/null", $botDir);
             
             // Запускаем через PM2
+            $npmCmdToUse = $npmCmd ?: 'npm';
             $start = execCommand(
-                'USE_WEBHOOK=true pm2 start npm --name "tictactoe-webhook" -- run start:webhook',
+                "USE_WEBHOOK=true $pm2Path start $npmCmdToUse --name \"tictactoe-webhook\" -- run start:webhook",
                 $botDir
             );
             
             if ($start['success']) {
-                execCommand('pm2 save', $botDir);
+                execCommand("$pm2Path save", $botDir);
                 $steps[] = '✅ Сервер запущен через PM2';
             } else {
-                $errors[] = 'Ошибка запуска через PM2: ' . $start['error'];
+                $errors[] = 'Ошибка запуска через PM2: ' . $start['error'] . ' (вывод: ' . substr($start['output'], 0, 200) . ')';
             }
         } else {
             // Запускаем напрямую в фоне
+            $npmCmdToUse = $npmCmd ?: 'npm';
             $start = execCommand(
-                "cd " . escapeshellarg($botDir) . " && USE_WEBHOOK=true nohup npm run start:webhook > webhook.log 2>&1 &",
+                "cd " . escapeshellarg($botDir) . " && USE_WEBHOOK=true nohup $npmCmdToUse run start:webhook > webhook.log 2>&1 &",
                 null
             );
             
@@ -203,7 +277,7 @@ if (empty($errors)) {
                 $steps[] = '✅ Сервер запущен';
                 sleep(2); // Ждём запуска
             } else {
-                $errors[] = 'Ошибка запуска: ' . $start['error'];
+                $errors[] = 'Ошибка запуска: ' . $start['error'] . ' (вывод: ' . substr($start['output'], 0, 200) . ')';
             }
         }
     } else {
