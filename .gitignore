@@ -1,0 +1,218 @@
+# ============================================
+# TypeScript / Node.js Project
+# ============================================
+
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Build outputs
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# ============================================
+# Environment & Secrets - КРИТИЧЕСКИ ВАЖНО!
+# ============================================
+
+# Environment files - НИКОГДА не коммитьте!
+.env
+.env.local
+.env.development
+.env.production
+.env.staging
+.env.test
+.env*.local
+
+# Config files with secrets
+config.local.ts
+config.local.js
+*.secret.*
+secrets.json
+secrets.ts
+
+# ============================================
+# Telegram Bot Secrets
+# ============================================
+
+# ⚠️ КРИТИЧЕСКИ ВАЖНО: Токены и секреты
+# Эти файлы НИКОГДА не должны попадать в репозиторий!
+bot/.env
+bot/.env.*
+**/bot-token*
+**/telegram-token*
+**/*token*.txt
+**/*secret*.ts
+**/*secret*.js
+
+# ============================================
+# IDE & Editor
+# ============================================
+
+# VSCode
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# IntelliJ IDEA / WebStorm
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# ============================================
+# OS Files
+# ============================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# ============================================
+# Logs & Cache
+# ============================================
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Cache
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+*.cache
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# ============================================
+# Testing
+# ============================================
+
+# Coverage
+coverage/
+*.lcov
+.nyc_output/
+
+# Jest
+.jest/
+
+# ============================================
+# Archives & Backups
+# ============================================
+
+*.zip
+*.tar.gz
+*.rar
+*.7z
+*.backup
+*.bak
+*.old
+
+# ============================================
+# Database
+# ============================================
+
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+
+# ============================================
+# Build Tools
+# ============================================
+
+# TypeScript
+*.tsbuildinfo
+
+# Webpack
+.webpack/
+
+# Vite
+.vite/
+
+# ============================================
+# Project Specific
+# ============================================
+
+# User uploaded files (if any)
+uploads/
+user_files/
+
+# Session files
+sess_*
+
+# Rate limiting cache
+cache/rate_limits.json
+
+# ============================================
+# GitHub Actions Secrets
+# ============================================
+
+# ⚠️ Не коммитьте файлы с секретами для CI/CD
+# Используйте GitHub Secrets вместо этого!
+.github/secrets/
+.github/*.secret.*
+
+# ============================================
+# Дополнительные правила безопасности
+# ============================================
+
+# Любые файлы, содержащие токены или пароли
+**/*token*
+**/*password*
+**/*secret*
+**/*key*
+**/*credential*
+
+# Но разрешаем примеры (с суффиксом .example)
+!**/*.example
+!.env.example
