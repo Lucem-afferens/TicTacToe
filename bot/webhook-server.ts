@@ -9,6 +9,7 @@ import http from 'http';
 import { Bot } from 'grammy';
 import { createBot } from './bot.js';
 import { config } from './config.js';
+import { handleWebhookSetup } from './webhook-setup-handler.js';
 
 /**
  * Создаёт HTTP сервер для обработки webhook
@@ -16,8 +17,16 @@ import { config } from './config.js';
 export function createWebhookServer(bot: Bot, _port: number = 3001): http.Server {
   // Создаём HTTP сервер
   const server = http.createServer(async (req, res) => {
+    const url = req.url || '/';
+
+    // Обрабатываем GET запросы на /setup-webhook для автоматической настройки
+    if (req.method === 'GET' && url === '/setup-webhook') {
+      await handleWebhookSetup(req, res);
+      return;
+    }
+
     // Обрабатываем только POST запросы на /webhook
-    if (req.method === 'POST' && req.url === '/webhook') {
+    if (req.method === 'POST' && url === '/webhook') {
       let body = '';
 
       req.on('data', (chunk) => {
