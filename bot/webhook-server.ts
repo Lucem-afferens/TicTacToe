@@ -13,7 +13,7 @@ import { config } from './config.js';
 /**
  * Создаёт HTTP сервер для обработки webhook
  */
-export function createWebhookServer(bot: Bot, port: number = 3001): http.Server {
+export function createWebhookServer(bot: Bot, _port: number = 3001): http.Server {
   // Создаём HTTP сервер
   const server = http.createServer(async (req, res) => {
     // Обрабатываем только POST запросы на /webhook
