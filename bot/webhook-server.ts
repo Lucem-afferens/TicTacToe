@@ -100,7 +100,8 @@ export async function startWebhookServer(): Promise<void> {
 }
 
 // Запуск если файл выполняется напрямую
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Проверяем через process.argv вместо import.meta для совместимости
+if (process.argv[1] && process.argv[1].endsWith('webhook-server.js')) {
   startWebhookServer().catch((error) => {
     // eslint-disable-next-line no-console
     console.error('❌ Ошибка при запуске webhook сервера:', error);

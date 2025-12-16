@@ -42,8 +42,9 @@ export async function startBotPolling(): Promise<void> {
 
 /**
  * Запускает бота в режиме webhook (для продакшена)
+ * Возвращает экземпляр бота для использования в HTTP сервере
  */
-export async function startBotWebhook(port: number = 3001): Promise<void> {
+export async function startBotWebhook(_port: number = 3001): Promise<Bot> {
   const bot = createBot();
 
   // eslint-disable-next-line no-console
@@ -52,16 +53,12 @@ export async function startBotWebhook(port: number = 3001): Promise<void> {
   console.log(`📱 Имя бота: ${config.botUsername}`);
   // eslint-disable-next-line no-console
   console.log(`🌐 Web App URL: ${config.webAppUrl}`);
-  // eslint-disable-next-line no-console
-  console.log(`🔗 Webhook порт: ${port}`);
 
-  // Запускаем webhook сервер
+  // Удаляем старый webhook если есть
   await bot.api.deleteWebhook({ drop_pending_updates: true });
   
   // eslint-disable-next-line no-console
   console.log('✅ Бот готов принимать webhook обновления!');
-  // eslint-disable-next-line no-console
-  console.log(`📡 Ожидание обновлений на порту ${port}...`);
   
   // Возвращаем обработчик для использования в HTTP сервере
   return bot;
