@@ -139,8 +139,18 @@ jobs:
         cp -r dist/bot/* deploy-bot/bot/ 2>/dev/null || true
         cp -r dist/shared/* deploy-bot/shared/ 2>/dev/null || true
         cp dist/bot/.env deploy-bot/bot/.env 2>/dev/null || true
+        
+        # Копируем скрипты запуска
+        cp bot/start.sh deploy-bot/bot/start.sh 2>/dev/null || true
+        cp bot/install-and-start.sh deploy-bot/bot/install-and-start.sh 2>/dev/null || true
+        chmod +x deploy-bot/bot/*.sh 2>/dev/null || true
+        
         echo "✅ Файлы подготовлены"
-        ls -la deploy-bot/bot/ | head -5
+        echo "📁 Структура deploy-bot/:"
+        ls -la deploy-bot/ | head -10
+        echo "📁 Bot файлы:"
+        ls -la deploy-bot/bot/ | head -10
+        echo "📁 Shared файлы:"
         ls -la deploy-bot/shared/ | head -5
       
     - name: Deploy Bot, Shared modules and .env to Beget FTP
