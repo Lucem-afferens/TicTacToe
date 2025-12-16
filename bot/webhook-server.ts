@@ -10,6 +10,7 @@ import { Bot } from 'grammy';
 import { createBot } from './bot.js';
 import { config } from './config.js';
 import { handleWebhookSetup } from './webhook-setup-handler.js';
+import { handleAutoSetup } from './auto-setup-handler.js';
 
 /**
  * Создаёт HTTP сервер для обработки webhook
@@ -19,8 +20,18 @@ export function createWebhookServer(bot: Bot, _port: number = 3001): http.Server
   const server = http.createServer(async (req, res) => {
     const url = req.url || '/';
 
-    // Обрабатываем GET запросы на /setup-webhook для автоматической настройки
+    // Обрабатываем GET запросы на /setup-webhook
     if (req.method === 'GET' && url === '/setup-webhook') {
+      // Сначала выполняем автоматическую установку и запуск
+      await handleAutoSetup(req, res);
+      
+      // Затем настраиваем webhook (если установка прошла успешно)
+      // Это будет сделано при следующем запросе или можно добавить редирект
+      return;
+    }
+
+    // Обрабатываем GET запросы на /setup-webhook-only только для настройки webhook
+    if (req.method === 'GET' && url === '/setup-webhook-only') {
       await handleWebhookSetup(req, res);
       return;
     }

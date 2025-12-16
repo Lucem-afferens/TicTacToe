@@ -48,7 +48,7 @@ export async function handleWebhookSetup(
       // Проверяем установку
       const newWebhookInfo = await bot.api.getWebhookInfo();
 
-      // Отправляем HTML ответ
+      // Перенаправляем на страницу успеха с информацией о webhook
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
       res.end(`
 <!DOCTYPE html>
