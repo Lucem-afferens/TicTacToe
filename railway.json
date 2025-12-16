@@ -5,7 +5,6 @@
     "buildCommand": "npm install && npm run build:bot"
   },
   "deploy": {
-    "startCommand": "USE_WEBHOOK=true node dist/bot/webhook-server.js",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
   }

@@ -32,11 +32,16 @@ NODE_ENV=production
 USE_WEBHOOK=true
 ```
 
-### Шаг 4: Настройте команду запуска
+### Шаг 4: Команда запуска (уже настроена!)
 
-1. В настройках проекта найдите "Settings"
-2. Найдите "Start Command"
-3. Установите: `USE_WEBHOOK=true node dist/bot/webhook-server.js`
+✅ **Ничего делать не нужно!**
+
+Railway автоматически использует `npm start` из `package.json`, который уже настроен на запуск webhook сервера.
+
+Команда запуска задаётся через `scripts.start` в `package.json`:
+```json
+"start": "USE_WEBHOOK=true node dist/bot/webhook-server.js"
+```
 
 ### Шаг 5: Получите URL бота
 
