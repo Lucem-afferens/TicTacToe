@@ -84,16 +84,16 @@ export async function handleWebhookSetup(
       // eslint-disable-next-line no-console
       console.log('✅ Webhook установлен:', webhookUrl);
 
-      // 3. Удаляем старую кнопку меню (если есть)
+      // 3. Удаляем старые команды (если есть)
       // eslint-disable-next-line no-console
-      console.log('3️⃣ Удаление старой кнопки меню...');
+      console.log('3️⃣ Удаление старых команд...');
       try {
-        await bot.api.deleteBotCommands();
+        await bot.api.deleteMyCommands();
         // eslint-disable-next-line no-console
-        console.log('✅ Старая кнопка меню удалена');
+        console.log('✅ Старые команды удалены');
       } catch (error) {
         // eslint-disable-next-line no-console
-        console.log('⚠️ Ошибка удаления кнопки меню (может не существовать):', error);
+        console.log('⚠️ Ошибка удаления команд (может не существовать):', error);
       }
 
       // 4. Устанавливаем новую кнопку меню (Web App)
