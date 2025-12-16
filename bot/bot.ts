@@ -14,10 +14,21 @@ import { registerErrorHandler } from './handlers/errors.js';
 export function createBot(): Bot {
   const bot = new Bot(config.botToken);
 
+  // eslint-disable-next-line no-console
+  console.log('🤖 Создание бота...');
+  // eslint-disable-next-line no-console
+  console.log('📱 Имя бота:', config.botUsername);
+  // eslint-disable-next-line no-console
+  console.log('🔑 Токен (первые 10 символов):', config.botToken.substring(0, 10) + '...');
+
   // Регистрируем обработчики
+  // eslint-disable-next-line no-console
+  console.log('📝 Регистрация обработчиков...');
   registerCommands(bot);
   registerWebAppHandler(bot);
   registerErrorHandler(bot);
+  // eslint-disable-next-line no-console
+  console.log('✅ Обработчики зарегистрированы');
 
   return bot;
 }

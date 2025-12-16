@@ -10,28 +10,44 @@ import { config } from '../config.js';
  * Регистрация обработчиков команд
  */
 export function registerCommands(bot: Bot) {
+  // eslint-disable-next-line no-console
+  console.log('📝 Регистрация команд: /start, /help, /game');
+  
   // Команда /start
   bot.command('start', async (ctx) => {
     try {
       // eslint-disable-next-line no-console
-      console.log('📨 Получена команда /start от пользователя:', ctx.from?.id);
+      console.log('📨 Получена команда /start от пользователя:', {
+        id: ctx.from?.id,
+        username: ctx.from?.username,
+        first_name: ctx.from?.first_name
+      });
       
       const keyboard = new InlineKeyboard().webApp('🎮 Играть', config.webAppUrl);
 
+      // eslint-disable-next-line no-console
+      console.log('📤 Отправка ответа на /start...');
       await ctx.reply(messages.welcome, {
         reply_markup: keyboard,
         parse_mode: 'Markdown',
       });
       
       // eslint-disable-next-line no-console
-      console.log('✅ Ответ на /start отправлен');
+      console.log('✅ Ответ на /start отправлен успешно');
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('❌ Ошибка при обработке /start:', error);
-      await ctx.reply(messages.error).catch(() => {
+      // eslint-disable-next-line no-console
+      if (error instanceof Error) {
         // eslint-disable-next-line no-console
-        console.error('❌ Не удалось отправить сообщение об ошибке');
-      });
+        console.error('Stack trace:', error.stack);
+      }
+      try {
+        await ctx.reply(messages.error);
+      } catch (replyError) {
+        // eslint-disable-next-line no-console
+        console.error('❌ Не удалось отправить сообщение об ошибке:', replyError);
+      }
     }
   });
 

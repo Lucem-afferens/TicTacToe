@@ -28,10 +28,34 @@ export async function handleWebhookSetup(
     console.log('🔧 Автоматическая настройка webhook...');
 
     // Формируем URL для webhook
-    // Railway предоставляет RAILWAY_PUBLIC_DOMAIN
-    const webhookUrl = process.env.RAILWAY_PUBLIC_DOMAIN
-      ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}/webhook`
-      : process.env.WEBHOOK_URL || `${config.webAppUrl.replace(/\/$/, '')}/webhook`;
+    // Railway предоставляет RAILWAY_PUBLIC_DOMAIN или можно использовать PORT
+    // Также проверяем переменную RAILWAY_STATIC_URL
+    let webhookUrl = process.env.WEBHOOK_URL;
+    
+    if (!webhookUrl) {
+      // Пробуем разные варианты для Railway
+      if (process.env.RAILWAY_PUBLIC_DOMAIN) {
+        webhookUrl = `https://${process.env.RAILWAY_PUBLIC_DOMAIN}/webhook`;
+      } else if (process.env.RAILWAY_STATIC_URL) {
+        webhookUrl = `${process.env.RAILWAY_STATIC_URL}/webhook`;
+      } else {
+        // Используем WEB_APP_URL как fallback (но это может быть неправильно для Railway)
+        webhookUrl = `${config.webAppUrl.replace(/\/$/, '')}/webhook`;
+      }
+    }
+
+    // eslint-disable-next-line no-console
+    console.log('🔍 Определённый webhook URL:', webhookUrl);
+    // eslint-disable-next-line no-console
+    console.log('🔍 Доступные переменные окружения:');
+    // eslint-disable-next-line no-console
+    console.log('  - RAILWAY_PUBLIC_DOMAIN:', process.env.RAILWAY_PUBLIC_DOMAIN || 'не установлена');
+    // eslint-disable-next-line no-console
+    console.log('  - RAILWAY_STATIC_URL:', process.env.RAILWAY_STATIC_URL || 'не установлена');
+    // eslint-disable-next-line no-console
+    console.log('  - WEBHOOK_URL:', process.env.WEBHOOK_URL || 'не установлена');
+    // eslint-disable-next-line no-console
+    console.log('  - WEB_APP_URL:', config.webAppUrl);
 
     if (!webhookUrl.startsWith('https://')) {
       throw new Error(`Webhook URL должен начинаться с https://. Текущий URL: ${webhookUrl}`);

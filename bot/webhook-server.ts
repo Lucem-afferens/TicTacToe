@@ -38,6 +38,9 @@ export function createWebhookServer(bot: Bot, _port: number = 3001): http.Server
 
     // Обрабатываем только POST запросы на /webhook
     if (req.method === 'POST' && url === '/webhook') {
+      // eslint-disable-next-line no-console
+      console.log('📨 Получен POST запрос на /webhook');
+      
       let body = '';
 
       req.on('data', (chunk) => {
@@ -46,11 +49,22 @@ export function createWebhookServer(bot: Bot, _port: number = 3001): http.Server
 
       req.on('end', async () => {
         try {
+          // eslint-disable-next-line no-console
+          console.log('📦 Размер тела запроса:', body.length, 'байт');
+          
           // Парсим обновление от Telegram
           const update = JSON.parse(body);
 
           // eslint-disable-next-line no-console
-          console.log('📨 Получено обновление от Telegram:', update.update_id);
+          console.log('📨 Получено обновление от Telegram:', {
+            update_id: update.update_id,
+            message: update.message ? {
+              message_id: update.message.message_id,
+              text: update.message.text,
+              from: update.message.from?.id
+            } : 'нет сообщения',
+            callback_query: update.callback_query ? 'есть' : 'нет'
+          });
 
           // Обрабатываем обновление через бота
           await bot.handleUpdate(update);
@@ -69,12 +83,16 @@ export function createWebhookServer(bot: Bot, _port: number = 3001): http.Server
             // eslint-disable-next-line no-console
             console.error('Stack trace:', error.stack);
           }
+          // eslint-disable-next-line no-console
+          console.error('Тело запроса:', body.substring(0, 500));
           res.writeHead(500, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ ok: false, error: 'Internal server error' }));
         }
       });
     } else {
       // Для других запросов возвращаем 404
+      // eslint-disable-next-line no-console
+      console.log(`⚠️ Неподдерживаемый запрос: ${req.method} ${url}`);
       res.writeHead(404, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ ok: false, error: 'Not found' }));
     }
