@@ -41,13 +41,13 @@ jobs:
     - name: Verify build output
       run: |
         echo "📦 Проверка результата сборки..."
-        if [ -d "bot/dist" ]; then
+        if [ -d "dist/bot" ]; then
           echo "✅ Bot build успешен"
-          ls -la bot/dist/ | head -5
+          ls -la dist/bot/ | head -5
         fi
-        if [ -d "web/dist" ]; then
+        if [ -d "dist/web" ]; then
           echo "✅ Web App build успешен"
-          ls -la web/dist/ | head -5
+          ls -la dist/web/ | head -5
         fi
 
   # ============================================
@@ -75,13 +75,13 @@ jobs:
     - name: Build Web App
       run: npm run build:web
       
-    - name: Deploy Web App to FTP
+    - name: Deploy Web App to Beget FTP
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
         server: ${{ secrets.FTP_HOST }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: ./web/dist/
+        local-dir: ./dist/web/
         server-dir: ${{ secrets.FTP_WEB_PATH }}/
         dangerous-clean-slate: false
         dry-run: false
@@ -90,6 +90,7 @@ jobs:
           **/.git*/**
           **/.DS_Store
           **/Thumbs.db
+          **/*.map
         log-level: verbose
 
   # ============================================
