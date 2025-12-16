@@ -16,7 +16,8 @@
     "test:integration": "vitest run tests/integration",
     "lint": "eslint . --ext .ts",
     "type-check": "tsc --noEmit",
-    "start": "node dist/bot/index.js",
+    "start": "USE_WEBHOOK=true node dist/bot/webhook-server.js",
+    "start:polling": "node dist/bot/index.js",
     "start:webhook": "USE_WEBHOOK=true node dist/bot/webhook-server.js",
     "setup-webhook": "tsx bot/setup-webhook.ts"
   },
