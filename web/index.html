@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="Игра в крестики-нолики против бота">
+  <title>Крестики-Нолики 💕</title>
+  
+  <!-- Telegram Web App SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="./styles/variables.css">
+  <link rel="stylesheet" href="./styles/main.css">
+  <link rel="stylesheet" href="./styles/game.css">
+  <link rel="stylesheet" href="./styles/components.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Экран игры -->
+    <div id="game-screen" class="screen active">
+      <h1>Крестики-Нолики</h1>
+      <div id="game-board" class="game-board"></div>
+      <div id="game-status" class="game-status"></div>
+      <button id="reset-btn" class="button-secondary" style="display: none;">Начать заново</button>
+    </div>
+
+    <!-- Экран победы -->
+    <div id="win-screen" class="screen">
+      <div class="modal">
+        <h2>🎉 Победа!</h2>
+        <p>Твой промокод:</p>
+        <div id="promo-code" class="promo-code"></div>
+        <button id="play-again-win" class="button-primary">Сыграть ещё</button>
+      </div>
+    </div>
+
+    <!-- Экран проигрыша -->
+    <div id="lose-screen" class="screen">
+      <div class="modal">
+        <h2>Вы проиграли битву, но не войну! 💫</h2>
+        <button id="play-again-lose" class="button-primary">Попробовать ещё раз</button>
+      </div>
+    </div>
+
+    <!-- Экран ничьей -->
+    <div id="draw-screen" class="screen">
+      <div class="modal">
+        <h2>Ничья 💫</h2>
+        <button id="play-again-draw" class="button-primary">Сыграть ещё раз</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script type="module" src="./scripts/main.ts"></script>
+</body>
+</html>
+

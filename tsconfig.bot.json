@@ -1,0 +1,20 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist/bot",
+    "rootDir": "./bot",
+    "module": "CommonJS",
+    "target": "ES2022"
+  },
+  "include": [
+    "bot/**/*",
+    "shared/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "web",
+    "tests"
+  ]
+}
+

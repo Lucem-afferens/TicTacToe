@@ -1,0 +1,49 @@
+{
+  "name": "tic-tac-toe-telegram-bot",
+  "version": "1.0.0",
+  "description": "Telegram Bot Game «Крестики-Нолики» - игра против бота с промокодами",
+  "type": "module",
+  "main": "dist/bot/index.js",
+  "scripts": {
+    "dev:bot": "tsx watch bot/index.ts",
+    "dev:web": "vite",
+    "dev": "vite",
+    "build:bot": "tsc --project tsconfig.bot.json",
+    "build:web": "vite build",
+    "build": "npm run build:bot && npm run build:web",
+    "test": "vitest",
+    "test:unit": "vitest run tests/unit",
+    "test:integration": "vitest run tests/integration",
+    "lint": "eslint . --ext .ts",
+    "type-check": "tsc --noEmit",
+    "start": "node dist/bot/index.js"
+  },
+  "keywords": [
+    "telegram",
+    "bot",
+    "tic-tac-toe",
+    "game",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "grammy": "^1.21.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.6",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.1",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.8",
+    "vite-tsconfig-paths": "^6.0.1",
+    "vitest": "^1.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
