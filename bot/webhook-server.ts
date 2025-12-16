@@ -7,7 +7,7 @@
 
 import http from 'http';
 import { Bot } from 'grammy';
-import { createBot } from './bot.js';
+import { createBot, startBotWebhook } from './bot.js';
 import { config } from './config.js';
 import { handleWebhookSetup } from './webhook-setup-handler.js';
 import { handleAutoSetup } from './auto-setup-handler.js';
@@ -105,12 +105,16 @@ export function createWebhookServer(bot: Bot, _port: number = 3001): http.Server
  * Запускает webhook сервер
  */
 export async function startWebhookServer(): Promise<void> {
-  // Используем createBot напрямую, так как startBotWebhook только подготавливает бота
-  const bot = createBot();
+  // Используем startBotWebhook для правильной инициализации
   const port = parseInt(process.env.WEBHOOK_PORT || '3001', 10);
+  const bot = await startBotWebhook(port);
   
-  // Удаляем старый webhook если есть
-  await bot.api.deleteWebhook({ drop_pending_updates: true });
+  // Убеждаемся что бот инициализирован (startBotWebhook уже делает это, но на всякий случай)
+  if (!bot.botInfo) {
+    // eslint-disable-next-line no-console
+    console.log('🔧 Дополнительная инициализация бота...');
+    await bot.init();
+  }
 
   // eslint-disable-next-line no-console
   console.log('🚀 Запуск webhook сервера...');
