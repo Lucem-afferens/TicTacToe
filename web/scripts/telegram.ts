@@ -39,6 +39,7 @@ export function initTelegramWebApp(): void {
   // Развернуть на весь экран
   tg.expand();
 
+  // eslint-disable-next-line no-console
   console.log('Telegram Web App initialized');
 }
 
@@ -54,6 +55,7 @@ export function sendDataToBot(data: object): void {
   try {
     const dataStr = JSON.stringify(data);
     window.Telegram.WebApp.sendData(dataStr);
+    // eslint-disable-next-line no-console
     console.log('Data sent to bot:', data);
   } catch (error) {
     // eslint-disable-next-line no-console
