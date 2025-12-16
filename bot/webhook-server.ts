@@ -100,16 +100,26 @@ export async function startWebhookServer(): Promise<void> {
   console.log(`📱 Бот: ${config.botUsername}`);
   // eslint-disable-next-line no-console
   console.log(`🌐 Web App URL: ${config.webAppUrl}`);
+  
+  // Получаем URL из переменных окружения или формируем
+  const webhookUrl = process.env.RAILWAY_PUBLIC_DOMAIN 
+    ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}/webhook`
+    : process.env.WEBHOOK_URL || `${config.webAppUrl.replace(/\/$/, '')}/webhook`;
+  
   // eslint-disable-next-line no-console
-  console.log(`🔗 Webhook URL: http://localhost:${port}/webhook`);
+  console.log(`🔗 Webhook URL: ${webhookUrl}`);
+  // eslint-disable-next-line no-console
+  console.log(`📡 Порт: ${port}`);
 
   const server = createWebhookServer(bot, port);
 
-  server.listen(port, () => {
+  server.listen(port, '0.0.0.0', () => {
     // eslint-disable-next-line no-console
     console.log(`✅ Webhook сервер запущен на порту ${port}`);
     // eslint-disable-next-line no-console
     console.log(`📡 Ожидание обновлений от Telegram...`);
+    // eslint-disable-next-line no-console
+    console.log(`🌐 Для настройки webhook откройте: ${webhookUrl.replace('/webhook', '/setup-webhook')}`);
   });
 
   // Обработка завершения

@@ -28,7 +28,10 @@ export async function handleWebhookSetup(
     console.log('🔧 Автоматическая настройка webhook...');
 
     // Формируем URL для webhook
-    const webhookUrl = process.env.WEBHOOK_URL || `${config.webAppUrl.replace(/\/$/, '')}/webhook`;
+    // Railway предоставляет RAILWAY_PUBLIC_DOMAIN
+    const webhookUrl = process.env.RAILWAY_PUBLIC_DOMAIN
+      ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}/webhook`
+      : process.env.WEBHOOK_URL || `${config.webAppUrl.replace(/\/$/, '')}/webhook`;
 
     if (!webhookUrl.startsWith('https://')) {
       throw new Error(`Webhook URL должен начинаться с https://. Текущий URL: ${webhookUrl}`);
