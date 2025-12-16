@@ -7,17 +7,66 @@
 header('Content-Type: text/html; charset=utf-8');
 
 // Путь к директории бота (относительно этого файла)
-$botDir = __DIR__ . '/../bot';
-$botDir = realpath($botDir) ?: dirname(__DIR__) . '/bot';
+// PHP файл находится в public_html/, бот в public_html/bot/bot/
+$possiblePaths = [
+    __DIR__ . '/bot/bot',           // public_html/bot/bot/
+    __DIR__ . '/bot',                // public_html/bot/
+    dirname(__DIR__) . '/bot/bot',   // ../bot/bot/
+    dirname(__DIR__) . '/bot',       // ../bot/
+    '/home/n/nikolr4t/develonik.ru/public_html/bot/bot', // Абсолютный путь
+];
+
+$botDir = null;
+foreach ($possiblePaths as $path) {
+    $realPath = realpath($path);
+    if ($realPath && is_dir($realPath)) {
+        $botDir = $realPath;
+        break;
+    }
+}
+
+// Если не нашли, пробуем найти через поиск
+if (!$botDir) {
+    $searchPaths = [
+        dirname(__DIR__),
+        __DIR__,
+        '/home/n/nikolr4t/develonik.ru/public_html',
+    ];
+    
+    foreach ($searchPaths as $basePath) {
+        if (is_dir($basePath)) {
+            $iterator = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($basePath, RecursiveDirectoryIterator::SKIP_DOTS),
+                RecursiveIteratorIterator::SELF_FIRST
+            );
+            
+            foreach ($iterator as $file) {
+                if ($file->isDir() && 
+                    basename($file->getPathname()) === 'bot' && 
+                    file_exists($file->getPathname() . '/package.json')) {
+                    $botDir = $file->getPathname();
+                    break 2;
+                }
+            }
+        }
+    }
+}
 
 // Проверяем существование директории
-if (!is_dir($botDir)) {
+if (!$botDir || !is_dir($botDir)) {
     http_response_code(500);
-    die('Директория бота не найдена: ' . $botDir);
+    $errorMsg = 'Директория бота не найдена. Проверенные пути:<br>';
+    foreach ($possiblePaths as $path) {
+        $errorMsg .= '• ' . htmlspecialchars($path) . '<br>';
+    }
+    die($errorMsg);
 }
 
 $steps = [];
 $errors = [];
+
+// Добавляем информацию о найденной директории в шаги
+$steps[] = '📁 Найдена директория бота: ' . $botDir;
 
 // Функция для выполнения команд
 function execCommand($command, $cwd = null) {
