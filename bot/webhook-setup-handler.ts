@@ -27,9 +27,6 @@ export async function handleWebhookSetup(
     // eslint-disable-next-line no-console
     console.log('🔧 Автоматическая настройка webhook...');
 
-    // Получаем информацию о текущем webhook
-    const webhookInfo = await bot.api.getWebhookInfo();
-
     // Формируем URL для webhook
     const webhookUrl = process.env.WEBHOOK_URL || `${config.webAppUrl.replace(/\/$/, '')}/webhook`;
 
