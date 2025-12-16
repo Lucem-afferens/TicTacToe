@@ -2,9 +2,10 @@
  * Обработка данных от Web App
  */
 
-import { Bot, Context } from 'grammy';
+import { Bot, Context, InlineKeyboard } from 'grammy';
 import type { WebAppMessage } from '../types.js';
 import { messages } from '../messages.js';
+import { config } from '../config.js';
 
 /**
  * Регистрация обработчика Web App данных
@@ -28,21 +29,34 @@ export function registerWebAppHandler(bot: Bot) {
 
       // Обрабатываем в зависимости от типа
       switch (data.type) {
-        case 'win':
+        case 'win': {
           if (data.promoCode) {
-            await ctx.reply(messages.win(data.promoCode));
+            const keyboard = new InlineKeyboard().webApp('🎮 Сыграть ещё', config.webAppUrl);
+            await ctx.reply(messages.win(data.promoCode), {
+              reply_markup: keyboard,
+              parse_mode: 'Markdown',
+            });
           } else {
             await ctx.reply(messages.error);
           }
           break;
+        }
 
-        case 'lose':
-          await ctx.reply(messages.lose);
+        case 'lose': {
+          const keyboard = new InlineKeyboard().webApp('🔄 Попробовать ещё раз', config.webAppUrl);
+          await ctx.reply(messages.lose, {
+            reply_markup: keyboard,
+          });
           break;
+        }
 
-        case 'draw':
-          await ctx.reply(messages.draw);
+        case 'draw': {
+          const keyboard = new InlineKeyboard().webApp('🔄 Сыграть ещё раз', config.webAppUrl);
+          await ctx.reply(messages.draw, {
+            reply_markup: keyboard,
+          });
           break;
+        }
 
         default:
           await ctx.reply(messages.error);

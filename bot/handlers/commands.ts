@@ -12,16 +12,31 @@ import { config } from '../config.js';
 export function registerCommands(bot: Bot) {
   // Команда /start
   bot.command('start', async (ctx) => {
-    const keyboard = new InlineKeyboard().webApp('Играть', config.webAppUrl);
+    const keyboard = new InlineKeyboard().webApp('🎮 Играть', config.webAppUrl);
 
     await ctx.reply(messages.welcome, {
       reply_markup: keyboard,
+      parse_mode: 'Markdown',
     });
   });
 
   // Команда /help
   bot.command('help', async (ctx) => {
-    await ctx.reply(messages.help);
+    const keyboard = new InlineKeyboard().webApp('🎮 Играть', config.webAppUrl);
+    
+    await ctx.reply(messages.help, {
+      reply_markup: keyboard,
+      parse_mode: 'Markdown',
+    });
+  });
+
+  // Команда /game - быстрый старт игры
+  bot.command('game', async (ctx) => {
+    const keyboard = new InlineKeyboard().webApp('🎮 Играть', config.webAppUrl);
+    
+    await ctx.reply(messages.gameStarted, {
+      reply_markup: keyboard,
+    });
   });
 
   // Обработка неизвестных команд
@@ -32,8 +47,8 @@ export function registerCommands(bot: Bot) {
     }
 
     // Для остальных сообщений предлагаем начать игру
-    const keyboard = new InlineKeyboard().webApp('Играть', config.webAppUrl);
-    await ctx.reply('Нажмите кнопку "Играть" чтобы начать!', {
+    const keyboard = new InlineKeyboard().webApp('🎮 Играть', config.webAppUrl);
+    await ctx.reply('Нажмите кнопку "🎮 Играть" чтобы начать!', {
       reply_markup: keyboard,
     });
   });
