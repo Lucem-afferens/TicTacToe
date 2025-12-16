@@ -51,10 +51,13 @@ jobs:
         fi
 
   # ============================================
-  # Job 2: Deploy Web App and Bot to Beget
+  # Job 2: Deploy Web App to Beget
+  # ВАЖНО: Bot НЕ деплоится на Beget, так как там нет Node.js
+  # Bot нужно деплоить на отдельный сервер (Railway, Render, VPS)
+  # См. BOT_DEPLOYMENT.md для инструкций
   # ============================================
-  deploy:
-    name: Deploy to Beget
+  deploy-web:
+    name: Deploy Web App to Beget
     needs: build-and-test
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -85,24 +88,6 @@ jobs:
         if [ -d "dist/bot" ]; then
           echo "✅ Bot build успешен"
           ls -la dist/bot/ | head -5
-        fi
-      
-    - name: Create .env file for bot
-      run: |
-        echo "🔐 Создание .env файла для бота..."
-        mkdir -p dist/bot
-        cat > dist/bot/.env << EOF
-        BOT_TOKEN=${{ secrets.BOT_TOKEN }}
-        BOT_USERNAME=${{ secrets.BOT_USERNAME || 'TicTacToe_ru_bot' }}
-        WEB_APP_URL=${{ secrets.WEB_APP_URL || 'https://develonik.ru/' }}
-        NODE_ENV=production
-        EOF
-        echo "✅ .env файл создан (безопасно, не коммитится в Git)"
-        # Проверяем что токен есть (но не выводим его)
-        if [ -z "${{ secrets.BOT_TOKEN }}" ]; then
-          echo "⚠️ BOT_TOKEN не установлен в GitHub Secrets"
-        else
-          echo "✅ BOT_TOKEN установлен"
         fi
       
     - name: Prepare Web App files
