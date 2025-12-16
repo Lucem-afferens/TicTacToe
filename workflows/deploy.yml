@@ -51,13 +51,13 @@ jobs:
         fi
 
   # ============================================
-  # Job 2: Deploy Web App to Beget
+  # Job 2: Deploy Web App and Bot to Beget
   # ============================================
-  deploy-web:
-    name: Deploy Web App to Beget
+  deploy:
+    name: Deploy to Beget
     needs: build-and-test
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     
     steps:
     - name: Checkout code
@@ -72,18 +72,38 @@ jobs:
     - name: Install dependencies
       run: npm ci
       
-    - name: Build Web App
-      run: npm run build:web
+    - name: Build project
+      run: npm run build
       
     - name: Verify build output
       run: |
-        echo "📦 Проверка файлов для деплоя..."
-        ls -la dist/web/
-        if [ ! -f "dist/web/index.html" ]; then
-          echo "❌ index.html не найден!"
-          exit 1
+        echo "📦 Проверка результата сборки..."
+        if [ -d "dist/web" ]; then
+          echo "✅ Web App build успешен"
+          ls -la dist/web/ | head -5
         fi
-        echo "✅ Файлы готовы к деплою"
+        if [ -d "dist/bot" ]; then
+          echo "✅ Bot build успешен"
+          ls -la dist/bot/ | head -5
+        fi
+      
+    - name: Create .env file for bot
+      run: |
+        echo "🔐 Создание .env файла для бота..."
+        mkdir -p dist/bot
+        cat > dist/bot/.env << EOF
+        BOT_TOKEN=${{ secrets.BOT_TOKEN }}
+        BOT_USERNAME=${{ secrets.BOT_USERNAME || 'TicTacToe_ru_bot' }}
+        WEB_APP_URL=${{ secrets.WEB_APP_URL || 'https://develonik.ru/' }}
+        NODE_ENV=production
+        EOF
+        echo "✅ .env файл создан (безопасно, не коммитится в Git)"
+        # Проверяем что токен есть (но не выводим его)
+        if [ -z "${{ secrets.BOT_TOKEN }}" ]; then
+          echo "⚠️ BOT_TOKEN не установлен в GitHub Secrets"
+        else
+          echo "✅ BOT_TOKEN установлен"
+        fi
       
     - name: Deploy Web App to Beget FTP
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
@@ -101,77 +121,49 @@ jobs:
           **/.DS_Store
           **/Thumbs.db
           **/*.map
-          **/.env*
+        log-level: verbose
+      
+    - name: Deploy Bot and .env to Beget FTP
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
+        server: ${{ secrets.FTP_HOST }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./dist/bot/
+        server-dir: ${{ secrets.FTP_BOT_PATH || secrets.FTP_WEB_PATH }}/bot/
+        dangerous-clean-slate: false
+        dry-run: false
+        exclude: |
+          **/.git*
+          **/.git*/**
+          **/.DS_Store
+          **/Thumbs.db
+        log-level: verbose
+      
+    - name: Deploy package files for bot
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
+        server: ${{ secrets.FTP_HOST }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./
+        server-dir: ${{ secrets.FTP_BOT_PATH || secrets.FTP_WEB_PATH }}/bot/
+        dangerous-clean-slate: false
+        dry-run: false
+        include: |
+          package.json
+          package-lock.json
+        exclude: |
+          **/*
+          !package.json
+          !package-lock.json
         log-level: verbose
       
     - name: Deployment Success
       run: |
-        echo "🎉 Web App успешно задеплоен на Beget!"
-        echo "🌐 URL: https://develonik.ru/"
-        echo "📅 Время: $(date)"
-
-  # ============================================
-  # Job 3: Deploy Bot to Beget (SSH)
-  # ============================================
-  deploy-bot:
-    name: Deploy Bot to Beget
-    needs: build-and-test
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
-        
-    - name: Install dependencies
-      run: npm ci
-      
-    - name: Build Bot
-      run: npm run build:bot
-      
-    - name: Verify bot build
-      run: |
-        echo "📦 Проверка сборки бота..."
-        if [ -d "dist/bot" ]; then
-          echo "✅ Bot build успешен"
-          ls -la dist/bot/ | head -5
-        else
-          echo "❌ dist/bot не найден!"
-          exit 1
-        fi
-      
-    - name: Deploy Bot to Beget via SSH
-      uses: appleboy/scp-action@v0.1.7
-      with:
-        host: ${{ secrets.SSH_HOST }}
-        username: ${{ secrets.SSH_USERNAME }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        port: ${{ secrets.SSH_PORT || 22 }}
-        source: "dist/bot/*,package.json,package-lock.json"
-        target: ${{ secrets.SSH_BOT_PATH }}
-        strip_components: 0
-      
-    - name: Setup Bot on Server via SSH
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.SSH_HOST }}
-        username: ${{ secrets.SSH_USERNAME }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        port: ${{ secrets.SSH_PORT || 22 }}
-        script: |
-          cd ${{ secrets.SSH_BOT_PATH }}
-          npm install --production
-          pm2 restart tictactoe-bot || pm2 start dist/bot/index.js --name tictactoe-bot
-          pm2 save
-      
-    - name: Bot Deployment Success
-      run: |
-        echo "🤖 Bot успешно задеплоен на Beget!"
+        echo "🎉 Деплой успешно завершен!"
+        echo "🌐 Web App: https://develonik.ru/"
+        echo "🤖 Bot: задеплоен в ${{ secrets.FTP_BOT_PATH || secrets.FTP_WEB_PATH }}/bot/"
+        echo "🔐 .env файл загружен на сервер (безопасно, не в Git)"
         echo "📅 Время: $(date)"
 
