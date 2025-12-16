@@ -123,6 +123,15 @@ jobs:
           **/*.map
         log-level: verbose
       
+    - name: Set bot deployment path
+      id: bot-path
+      run: |
+        if [ -n "${{ secrets.FTP_BOT_PATH }}" ]; then
+          echo "path=${{ secrets.FTP_BOT_PATH }}" >> $GITHUB_OUTPUT
+        else
+          echo "path=${{ secrets.FTP_WEB_PATH }}/bot" >> $GITHUB_OUTPUT
+        fi
+      
     - name: Deploy Bot and .env to Beget FTP
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
@@ -130,7 +139,7 @@ jobs:
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./dist/bot/
-        server-dir: ${{ secrets.FTP_BOT_PATH || secrets.FTP_WEB_PATH }}/bot/
+        server-dir: ${{ steps.bot-path.outputs.path }}/
         dangerous-clean-slate: false
         dry-run: false
         exclude: |
@@ -147,7 +156,7 @@ jobs:
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./
-        server-dir: ${{ secrets.FTP_BOT_PATH || secrets.FTP_WEB_PATH }}/bot/
+        server-dir: ${{ steps.bot-path.outputs.path }}/
         dangerous-clean-slate: false
         dry-run: false
         include: |
@@ -163,7 +172,7 @@ jobs:
       run: |
         echo "🎉 Деплой успешно завершен!"
         echo "🌐 Web App: https://develonik.ru/"
-        echo "🤖 Bot: задеплоен в ${{ secrets.FTP_BOT_PATH || secrets.FTP_WEB_PATH }}/bot/"
+        echo "🤖 Bot: задеплоен в ${{ steps.bot-path.outputs.path }}/"
         echo "🔐 .env файл загружен на сервер (безопасно, не в Git)"
         echo "📅 Время: $(date)"
 
