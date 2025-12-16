@@ -1,10 +1,15 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "./dist/bot",
-    "rootDir": "./bot",
+    "outDir": "./dist",
+    "rootDir": "./",
     "module": "CommonJS",
-    "target": "ES2022"
+    "target": "ES2022",
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["shared/*"],
+      "@bot/*": ["bot/*"]
+    }
   },
   "include": [
     "bot/**/*",
