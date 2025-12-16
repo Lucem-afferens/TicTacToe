@@ -105,13 +105,22 @@ jobs:
           echo "✅ BOT_TOKEN установлен"
         fi
       
+    - name: Prepare Web App files
+      run: |
+        echo "📦 Подготовка Web App файлов..."
+        mkdir -p deploy-web
+        cp -r dist/web/* deploy-web/ 2>/dev/null || true
+        # Копируем PHP скрипт для автоматической настройки
+        cp web/setup-webhook.php deploy-web/setup-webhook.php 2>/dev/null || true
+        echo "✅ Файлы подготовлены"
+      
     - name: Deploy Web App to Beget FTP
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
         server: ${{ secrets.FTP_HOST }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: ./dist/web/
+        local-dir: ./deploy-web/
         server-dir: ${{ secrets.FTP_WEB_PATH }}/
         dangerous-clean-slate: false
         dry-run: false
