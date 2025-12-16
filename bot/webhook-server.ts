@@ -7,7 +7,7 @@
 
 import http from 'http';
 import { Bot } from 'grammy';
-import { createBot, startBotWebhook } from './bot.js';
+import { startBotWebhook } from './bot.js';
 import { config } from './config.js';
 import { handleWebhookSetup } from './webhook-setup-handler.js';
 import { handleAutoSetup } from './auto-setup-handler.js';
