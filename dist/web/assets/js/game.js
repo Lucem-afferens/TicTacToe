@@ -214,7 +214,14 @@ class TicTacToeGame {
      */
     updateBoardDisplay() {
         const cells = document.querySelectorAll('.game-cell');
-        const imagePath = window.location.pathname.includes('/web/') ? '../assets/images/' : 'assets/images/';
+        // Определяем путь к изображениям относительно текущей страницы
+        const currentPath = window.location.pathname;
+        let imagePath = 'assets/images/';
+        if (currentPath.includes('/web/')) {
+            imagePath = '../assets/images/';
+        } else if (currentPath.includes('/dist/web/')) {
+            imagePath = 'assets/images/';
+        }
         
         cells.forEach((cell, index) => {
             const symbol = this.board[index];
@@ -227,6 +234,10 @@ class TicTacToeGame {
                 img.src = imagePath + 'X.png';
                 img.alt = 'X';
                 img.className = 'cell-symbol-img';
+                img.onerror = function() {
+                    // Fallback на текст, если изображение не загрузилось
+                    cell.textContent = 'X';
+                };
                 cell.appendChild(img);
             } else if (symbol === 'O') {
                 cell.classList.add('o');
@@ -234,6 +245,10 @@ class TicTacToeGame {
                 img.src = imagePath + 'O.png';
                 img.alt = 'O';
                 img.className = 'cell-symbol-img';
+                img.onerror = function() {
+                    // Fallback на текст, если изображение не загрузилось
+                    cell.textContent = 'O';
+                };
                 cell.appendChild(img);
             }
             
