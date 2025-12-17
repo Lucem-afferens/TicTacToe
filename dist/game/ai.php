@@ -7,9 +7,9 @@
 require_once __DIR__ . '/game-logic.php';
 
 class GameAI {
-    private static $win_chance = 100;    // 10% - выигрышный ход
-    private static $block_chance = 0;   // 30% - блокировка игрока
-    private static $random_chance = 0;  // 60% - случайный ход
+    private static $win_chance = 80;    // 80% - выигрышный ход
+    private static $block_chance = 20;   // 20% - блокировка игрока
+    private static $random_chance = 0;  // 10% - случайный ход
     
     /**
      * Вычисляет ход бота на основе текущего состояния игры
