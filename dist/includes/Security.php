@@ -15,9 +15,9 @@ class Security {
         }
         
         $default_limits = [
-            'game' => defined('RATE_LIMIT_GAME') ? RATE_LIMIT_GAME : 20,
+            'game' => defined('RATE_LIMIT_GAME') ? RATE_LIMIT_GAME : 100,
             'webhook' => defined('RATE_LIMIT_WEBHOOK') ? RATE_LIMIT_WEBHOOK : 100,
-            'api' => 50
+            'api' => 200
         ];
         
         $limit = $limit ?: ($default_limits[$action] ?? 100);
