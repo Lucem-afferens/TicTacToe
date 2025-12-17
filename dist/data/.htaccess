@@ -1,0 +1,8 @@
+# Защита JSON файлов от прямого доступа через браузер
+# Разрешаем доступ только для PHP скриптов
+
+<FilesMatch "\.json$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+

@@ -1,136 +1,97 @@
-name: Deploy TicTacToe Bot & Web App
+name: Deploy to Beget
 
 on:
   push:
-    branches: [ main, master ]
+    branches:
+      - main
+      - master
   workflow_dispatch:
 
 jobs:
-  # ============================================
-  # Job 1: Build and Test
-  # ============================================
-  build-and-test:
-    name: Build and Test
+  deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
       
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
-        
-    - name: Install dependencies
-      run: npm ci
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
       
-    - name: Run linter
-      run: npm run lint || echo "Linter not configured yet"
-      continue-on-error: true
+      - name: Create deployment directory
+        run: |
+          mkdir -p deploy
+          # Копируем только файлы из dist
+          cp -r dist/* deploy/ 2>/dev/null || true
+          # Создаем необходимые директории (если их нет)
+          mkdir -p deploy/data deploy/logs deploy/cache
+          # НЕ создаем JSON файлы - они должны сохраняться на сервере
+          # При первом использовании они создадутся автоматически
       
-    - name: Run tests
-      run: npm test || echo "Tests not configured yet"
-      continue-on-error: true
+      - name: Create config.local.php from GitHub Secret
+        run: |
+          # Создаем локальный конфиг с токеном из GitHub Secrets
+          # Этот файл НЕ попадает в git и существует только на сервере
+          cat > deploy/config.local.php << 'EOF'
+          <?php
+          /**
+           * Локальная конфигурация (создается при деплое)
+           * Этот файл НЕ попадает в git и содержит секретные данные
+           * Создается автоматически из GitHub Secrets
+           */
+          if (!defined('LOCAL_BOT_TOKEN')) {
+              define('LOCAL_BOT_TOKEN', '${{ secrets.BOT_TOKEN }}');
+          }
+          EOF
+          echo "✅ config.local.php created (token from GitHub Secrets)"
       
-    - name: Build project
-      run: npm run build
+      - name: Deploy to Beget via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./deploy/
+          server-dir: ${{ secrets.FTP_PATH }}/
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/.env
+            **/.env.*
+            **/composer.json
+            **/composer.lock
+            **/package.json
+            **/package-lock.json
+            **/.DS_Store
+            **/README.md
+            **/DEPLOYMENT.md
+            **/PLAN.md
+            **/запрос.md
+            **/.cursor/**
+            **/.gitignore
+            **/.htaccess.bak
+            **/*.md
+            # НЕ исключаем config.local.php - он нужен на сервере
+            # НЕ исключаем данные пользователей - они должны сохраняться на сервере
+          dangerous-clean-slate: false
+          dry-run: false
       
-    - name: Verify build output
-      run: |
-        echo "📦 Проверка результата сборки..."
-        if [ -d "dist/bot" ]; then
-          echo "✅ Bot build успешен"
-          ls -la dist/bot/ | head -5
-        fi
-        if [ -d "dist/web" ]; then
-          echo "✅ Web App build успешен"
-          ls -la dist/web/ | head -5
-        fi
-
-  # ============================================
-  # Job 2: Deploy Web App to Beget
-  # ВАЖНО: Bot НЕ деплоится на Beget, так как там нет Node.js
-  # Bot нужно деплоить на отдельный сервер (Railway, Render, VPS)
-  # См. BOT_DEPLOYMENT.md для инструкций
-  # ============================================
-  deploy-web:
-    name: Deploy Web App to Beget
-    needs: build-and-test
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Setup webhook after deployment
+        run: |
+          echo "✅ Deployment completed!"
+          echo "📝 Next: Run https://develonik.ru/setup/setup-webhook.php to configure webhook"
       
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
-        
-    - name: Install dependencies
-      run: npm ci
-      
-    - name: Build project
-      run: npm run build
-      
-    - name: Verify build output
-      run: |
-        echo "📦 Проверка результата сборки..."
-        if [ -d "dist/web" ]; then
-          echo "✅ Web App build успешен"
-          ls -la dist/web/ | head -5
-        fi
-        if [ -d "dist/bot" ]; then
-          echo "✅ Bot build успешен"
-          ls -la dist/bot/ | head -5
-        fi
-      
-    - name: Prepare Web App files
-      run: |
-        echo "📦 Подготовка Web App файлов..."
-        mkdir -p deploy-web
-        cp -r dist/web/* deploy-web/ 2>/dev/null || true
-        echo "✅ Файлы подготовлены"
-      
-    - name: Deploy Web App to Beget FTP
-      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
-      with:
-        server: ${{ secrets.FTP_HOST }}
-        username: ${{ secrets.FTP_USERNAME }}
-        password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: ./deploy-web/
-        server-dir: ${{ secrets.FTP_WEB_PATH }}/
-        dangerous-clean-slate: false
-        dry-run: false
-        exclude: |
-          **/.git*
-          **/.git*/**
-          **/.DS_Store
-          **/Thumbs.db
-          **/*.map
-        log-level: verbose
-      
-    - name: Deployment Success
-      run: |
-        echo "🎉 Деплой Web App успешно завершен!"
-        echo "🌐 Web App: https://develonik.ru/"
-        echo ""
-        echo "⚠️ ВАЖНО: Telegram Bot НЕ деплоится на Beget!"
-        echo "   Beget не поддерживает Node.js и постоянные процессы."
-        echo ""
-        echo "📋 Что делать с ботом:"
-        echo "   1. Деплой бота на отдельный сервер с Node.js:"
-        echo "      • Railway.app (рекомендуется, бесплатно)"
-        echo "      • Render.com (бесплатно, может засыпать)"
-        echo "      • Fly.io (бесплатно)"
-        echo "      • VPS (DigitalOcean, Vultr и т.д.)"
-        echo ""
-        echo "   2. См. инструкции: BOT_DEPLOYMENT.md"
-        echo ""
-        echo "📅 Время: $(date)"
-
+      - name: Deployment summary
+        run: |
+          echo "✅ Deployment completed successfully!"
+          echo "📁 Files deployed to: ${{ secrets.FTP_PATH }}"
+          echo "🌐 Domain: develonik.ru"
+          echo "🤖 Bot: @TicTacToe_ru_bot"
+          echo ""
+          echo "⚠️  Next steps:"
+          echo "1. ✅ BOT_TOKEN automatically set from GitHub Secrets (config.local.php created)"
+          echo "2. Run https://develonik.ru/setup/setup-webhook.php to configure Telegram webhook"
+          echo "3. Test the bot: https://t.me/TicTacToe_ru_bot"

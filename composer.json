@@ -1,0 +1,19 @@
+{
+  "name": "tic-tac-toe/telegram-bot",
+  "description": "Telegram Bot Game - Крестики-Нолики",
+  "type": "project",
+  "require": {
+    "php": ">=7.4"
+  },
+  "autoload": {
+    "psr-4": {
+      "TicTacToe\\": "dist/"
+    }
+  },
+  "config": {
+    "optimize-autoloader": true
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}
+

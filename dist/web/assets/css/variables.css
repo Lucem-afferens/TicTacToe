@@ -1,0 +1,48 @@
+/**
+ * Дизайн-система для игры "Крестики-Нолики"
+ * Ориентация на женскую аудиторию 25–40 лет
+ */
+
+:root {
+  /* Цветовая палитра */
+  --color-bg: #FFF7F3;           /* Мягкий бежевый фон */
+  --color-primary: #E89CA9;     /* Розовый основной */
+  --color-secondary: #BFA2DB;   /* Сиреневый вторичный */
+  --color-accent: #FFD6A5;       /* Персиковый акцент */
+  --color-text-main: #4A4A4A;    /* Темно-серый текст */
+  --color-text-light: #8E8E8E;  /* Светло-серый текст */
+  --color-text-white: #FFFFFF;   /* Белый текст */
+  
+  /* Игровые символы */
+  --color-x: #E89CA9;            /* Розовый для ❌ */
+  --color-o: #BFA2DB;            /* Сиреневый для ⭕ */
+  
+  /* Состояния */
+  --color-success: #A8E6CF;      /* Зеленый для успеха */
+  --color-error: #FFB3BA;        /* Розовый для ошибки */
+  --color-warning: #FFD6A5;      /* Персиковый для предупреждения */
+  
+  /* Границы и тени */
+  --border-radius: 16px;
+  --border-radius-small: 8px;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.2);
+  
+  /* Переходы */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+  
+  /* Размеры */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  
+  /* Размеры игрового поля */
+  --board-size: 300px;
+  --cell-size: calc(var(--board-size) / 3);
+}
+
