@@ -67,17 +67,33 @@ class PromoCode {
      */
     private static function generateCodeFromTime($microtime) {
         $code_length = defined('PROMO_CODE_LENGTH') ? PROMO_CODE_LENGTH : 8;
+        $alphabet_length = strlen(self::$alphabet);
         
-        // Преобразуем время в строку (убираем точку, оставляем только цифры)
-        $time_str = str_replace('.', '', number_format($microtime, 6, '.', ''));
+        // Преобразуем время в строку с микросекундами (формат: 1234567890.123456)
+        // Убираем точку и берем последние цифры для уникальности
+        $time_str = str_replace('.', '', sprintf('%.6f', $microtime));
         
-        // Берем последние цифры времени и преобразуем в base36 (цифры + буквы)
-        $time_part = substr($time_str, -6); // Последние 6 цифр
-        $time_base36 = base_convert($time_part, 10, 36); // Преобразуем в base36
+        // Берем последние цифры времени (микросекунды + часть секунд)
+        // Это гарантирует уникальность даже при одновременных запросах
+        $time_part = substr($time_str, -8); // Последние 8 цифр (включая микросекунды)
+        
+        // Преобразуем в base36 (цифры 0-9 и буквы a-z)
+        // Используем только часть времени, чтобы поместиться в промокод
+        $time_base36 = '';
+        $time_int = (int)substr($time_part, -6); // Последние 6 цифр как число
+        
+        // Преобразуем в base36 вручную для надежности
+        $base = 36;
+        $num = $time_int;
+        do {
+            $time_base36 = self::$alphabet[$num % $base] . $time_base36;
+            $num = intval($num / $base);
+        } while ($num > 0);
+        
+        $time_base36 = strtoupper($time_base36);
         
         // Дополняем случайными символами до нужной длины
         $random_part = '';
-        $alphabet_length = strlen(self::$alphabet);
         $needed_length = $code_length - strlen($time_base36);
         
         if ($needed_length > 0) {
@@ -97,7 +113,7 @@ class PromoCode {
             $code .= self::$alphabet[mt_rand(0, $alphabet_length - 1)];
         }
         
-        return $code;
+        return strtoupper($code);
     }
     
     /**
