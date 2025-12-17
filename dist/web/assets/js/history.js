@@ -122,7 +122,7 @@ class HistoryManager {
                     statusText = 'Победа';
                     // Ищем промокод для этой игры
                     if (typeof game.promo_code !== 'undefined') {
-                        promoCode = `<div class="game-promo-code">💝 Промокод: <code>${game.promo_code}</code></div>`;
+                        promoCode = `<div class="game-promo-code"><span class="promo-label">💝 Промокод:</span><code>${game.promo_code}</code></div>`;
                     }
                     break;
                 case 'bot_win':
