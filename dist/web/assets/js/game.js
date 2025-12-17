@@ -19,6 +19,10 @@ class TicTacToeGame {
             this.apiUrl = '/api/game.php';
         }
         
+        // Определяем путь к изображениям - используем тот же подход
+        // game.php находится в /web/, assets/images/ находится в /web/assets/images/
+        this.imagesPath = 'assets/images/';
+        
         this.init();
     }
     
