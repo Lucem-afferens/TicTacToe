@@ -219,55 +219,52 @@ class TicTacToeGame {
     updateBoardDisplay() {
         const cells = document.querySelectorAll('.game-cell');
         
-        // Определяем путь к изображениям относительно текущей страницы
-        // game.php находится в /web/, поэтому путь к assets/images/ будет assets/images/
-        const currentPath = window.location.pathname;
-        let imagePath = 'assets/images/';
-        
-        // Если страница в поддиректории, корректируем путь
-        if (currentPath.includes('/web/')) {
-            // Если путь типа /dist/web/game.php, то assets/images/ правильный
-            imagePath = 'assets/images/';
-        } else if (currentPath.includes('/dist/')) {
-            imagePath = 'web/assets/images/';
-        }
-        
-        // Альтернативный способ: определяем путь относительно location
-        const basePath = window.location.origin + window.location.pathname.split('/').slice(0, -1).join('/');
-        const testPath = basePath + '/assets/images/';
-        
         cells.forEach((cell, index) => {
             const symbol = this.board[index];
             cell.className = 'game-cell';
-            cell.innerHTML = ''; // Очищаем содержимое
+            cell.innerHTML = ''; // Полностью очищаем содержимое
             
             if (symbol === 'X') {
                 cell.classList.add('x');
                 const img = document.createElement('img');
-                // Используем абсолютный путь для надежности
-                const imgPath = new URL('assets/images/X.png', window.location.href).href;
-                img.src = imgPath;
+                img.src = this.imagesPath + 'X.png';
                 img.alt = 'X';
                 img.className = 'cell-symbol-img';
-                img.onerror = function() {
-                    console.error('Failed to load X.png from:', imgPath);
-                    // Fallback на текст, если изображение не загрузилось
-                    cell.innerHTML = '<span style="font-size: 2rem; color: var(--color-x);">X</span>';
+                img.onload = function() {
+                    console.log('✅ X.png loaded from:', img.src);
                 };
+                img.onerror = function() {
+                    console.error('❌ Failed to load X.png from:', img.src);
+                    console.error('Full URL:', window.location.href);
+                    console.error('Images path:', this.imagesPath);
+                    // Fallback на стилизованный текст
+                    cell.innerHTML = '';
+                    const fallback = document.createElement('span');
+                    fallback.textContent = 'X';
+                    fallback.style.cssText = 'font-size: 2.5rem; font-weight: 700; color: var(--color-x); display: block;';
+                    cell.appendChild(fallback);
+                }.bind(this);
                 cell.appendChild(img);
             } else if (symbol === 'O') {
                 cell.classList.add('o');
                 const img = document.createElement('img');
-                // Используем абсолютный путь для надежности
-                const imgPath = new URL('assets/images/O.png', window.location.href).href;
-                img.src = imgPath;
+                img.src = this.imagesPath + 'O.png';
                 img.alt = 'O';
                 img.className = 'cell-symbol-img';
-                img.onerror = function() {
-                    console.error('Failed to load O.png from:', imgPath);
-                    // Fallback на текст, если изображение не загрузилось
-                    cell.innerHTML = '<span style="font-size: 2rem; color: var(--color-o);">O</span>';
+                img.onload = function() {
+                    console.log('✅ O.png loaded from:', img.src);
                 };
+                img.onerror = function() {
+                    console.error('❌ Failed to load O.png from:', img.src);
+                    console.error('Full URL:', window.location.href);
+                    console.error('Images path:', this.imagesPath);
+                    // Fallback на стилизованный текст
+                    cell.innerHTML = '';
+                    const fallback = document.createElement('span');
+                    fallback.textContent = 'O';
+                    fallback.style.cssText = 'font-size: 2.5rem; font-weight: 700; color: var(--color-o); display: block;';
+                    cell.appendChild(fallback);
+                }.bind(this);
                 cell.appendChild(img);
             }
             
