@@ -15,18 +15,26 @@ ob_clean();
 // Определяем базовый путь
 $base_path = dirname(__DIR__);
 
+// Подключаем функции ПЕРВЫМИ (нужны для других классов)
+require_once $base_path . '/includes/functions.php';
+
+// Подключаем конфигурацию
 require_once $base_path . '/config.php';
+
+// Подключаем игровые классы
 require_once $base_path . '/game/game-logic.php';
 require_once $base_path . '/game/ai.php';
 require_once $base_path . '/game/game-state.php';
 require_once $base_path . '/bot/promo.php';
 require_once $base_path . '/includes/GameStorage.php';
 
-// Логируем начало обработки запроса
-Logger::info('Game API request started', [
-    'method' => $_SERVER['REQUEST_METHOD'] ?? 'UNKNOWN',
-    'ip' => $_SERVER['REMOTE_ADDR'] ?? 'UNKNOWN'
-]);
+// Логируем начало обработки запроса (если Logger доступен)
+if (class_exists('Logger')) {
+    Logger::info('Game API request started', [
+        'method' => $_SERVER['REQUEST_METHOD'] ?? 'UNKNOWN',
+        'ip' => $_SERVER['REMOTE_ADDR'] ?? 'UNKNOWN'
+    ]);
+}
 
 // Проверка метода запроса
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -39,7 +47,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 if (class_exists('Security')) {
     $ip = Security::getRealIP();
     if (!Security::checkRateLimit($ip, 'game')) {
-        Logger::security("Rate limit exceeded for game API", ['ip' => $ip]);
+        if (class_exists('Logger')) {
+            Logger::security("Rate limit exceeded for game API", ['ip' => $ip]);
+        }
         http_response_code(429);
         echo json_encode(['error' => 'Rate limit exceeded']);
         exit;
@@ -51,7 +61,9 @@ $input = file_get_contents('php://input');
 $data = json_decode($input, true);
 
 if (!$data) {
-    Logger::error('Invalid JSON in game API request', ['input' => $input]);
+    if (class_exists('Logger')) {
+        Logger::error('Invalid JSON in game API request', ['input' => substr($input, 0, 200)]);
+    }
     http_response_code(400);
     echo json_encode(['error' => 'Invalid JSON']);
     exit;
@@ -61,7 +73,9 @@ $action = $data['action'] ?? '';
 $tg_id = $data['tg_id'] ?? '';
 
 if (empty($tg_id)) {
-    Logger::error('Missing tg_id in game API request');
+    if (class_exists('Logger')) {
+        Logger::error('Missing tg_id in game API request');
+    }
     http_response_code(400);
     echo json_encode(['error' => 'Missing tg_id']);
     exit;
@@ -79,7 +93,9 @@ switch ($action) {
             $_SESSION['tg_id'] = $tg_id;
         }
         
-        Logger::gameEvent('Game started', $game_data['game_id'], ['tg_id' => $tg_id]);
+        if (method_exists('Logger', 'gameEvent')) {
+            Logger::gameEvent('Game started', $game_data['game_id'], ['tg_id' => $tg_id]);
+        }
         
         echo json_encode([
             'success' => true,
@@ -92,18 +108,22 @@ switch ($action) {
         $game_id = $data['game_id'] ?? '';
         $position = $data['position'] ?? null;
         
-        Logger::info('Game move request', [
-            'tg_id' => $tg_id,
-            'game_id' => $game_id,
-            'position' => $position,
-            'position_type' => gettype($position)
-        ]);
+        if (class_exists('Logger')) {
+            Logger::info('Game move request', [
+                'tg_id' => $tg_id,
+                'game_id' => $game_id,
+                'position' => $position,
+                'position_type' => gettype($position)
+            ]);
+        }
         
         if (empty($game_id) || $position === null) {
-            Logger::error('Missing game_id or position', [
-                'game_id' => $game_id,
-                'position' => $position
-            ]);
+            if (class_exists('Logger')) {
+                Logger::error('Missing game_id or position', [
+                    'game_id' => $game_id,
+                    'position' => $position
+                ]);
+            }
             http_response_code(400);
             echo json_encode(['error' => 'Missing game_id or position']);
             exit;
@@ -116,7 +136,9 @@ switch ($action) {
         $game_data = $data['game'] ?? null;
         
         if (!$game_data) {
-            Logger::error('Game data not provided', ['game_id' => $game_id]);
+            if (class_exists('Logger')) {
+                Logger::error('Game data not provided', ['game_id' => $game_id]);
+            }
             http_response_code(400);
             echo json_encode(['error' => 'Game data not provided']);
             exit;
@@ -124,7 +146,9 @@ switch ($action) {
         
         // Проверяем наличие board
         if (!isset($game_data['board']) || !is_array($game_data['board'])) {
-            Logger::error('Invalid game board', ['game_data' => $game_data]);
+            if (class_exists('Logger')) {
+                Logger::error('Invalid game board', ['has_board' => isset($game_data['board'])]);
+            }
             http_response_code(400);
             echo json_encode(['error' => 'Invalid game board']);
             exit;
@@ -134,10 +158,12 @@ switch ($action) {
         
         // Валидация хода
         if (!GameLogic::validateMove($game_data['board'], $position)) {
-            Logger::error('Invalid move', [
-                'position' => $position,
-                'board' => $game_data['board']
-            ]);
+            if (class_exists('Logger')) {
+                Logger::error('Invalid move', [
+                    'position' => $position,
+                    'board_size' => count($game_data['board'])
+                ]);
+            }
             http_response_code(400);
             echo json_encode(['error' => 'Invalid move - cell already taken or out of range']);
             exit;
@@ -148,21 +174,33 @@ switch ($action) {
             $game_data = GameState::makeMove($game_data, $position, $player_symbol);
             
             if (!$game_data) {
-                Logger::error('Failed to make move', [
-                    'position' => $position,
-                    'game_data' => $game_data
-                ]);
+                if (class_exists('Logger')) {
+                    Logger::error('Failed to make move', [
+                        'position' => $position
+                    ]);
+                }
                 http_response_code(400);
                 echo json_encode(['error' => 'Failed to make move']);
                 exit;
             }
         } catch (Exception $e) {
-            Logger::error('Exception during move', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
+            if (class_exists('Logger')) {
+                Logger::error('Exception during move', [
+                    'message' => $e->getMessage()
+                ]);
+            }
             http_response_code(500);
             echo json_encode(['error' => 'Server error: ' . $e->getMessage()]);
+            exit;
+        } catch (Error $e) {
+            // Обработка фатальных ошибок PHP
+            if (class_exists('Logger')) {
+                Logger::error('Fatal error during move', [
+                    'message' => $e->getMessage()
+                ]);
+            }
+            http_response_code(500);
+            echo json_encode(['error' => 'Server error']);
             exit;
         }
         
@@ -190,19 +228,31 @@ switch ($action) {
         
         // Если игра закончена, сохраняем и генерируем промокод при победе
         if ($result !== 'in_progress') {
-            GameStorage::saveGame($game_data);
-            GameStorage::updateStatistics($game_data);
-            
-            if ($result === 'player_win') {
-                $promo_code = PromoCode::generate($tg_id, $game_data['game_id']);
-                $response['promo_code'] = $promo_code;
+            try {
+                GameStorage::saveGame($game_data);
+                GameStorage::updateStatistics($game_data);
+                
+                if ($result === 'player_win') {
+                    $promo_code = PromoCode::generate($tg_id, $game_data['game_id']);
+                    $response['promo_code'] = $promo_code;
+                }
+                
+                if (method_exists('Logger', 'gameEvent')) {
+                    Logger::gameEvent('Game finished', $game_data['game_id'], [
+                        'tg_id' => $tg_id,
+                        'result' => $result,
+                        'promo_code' => $response['promo_code'] ?? null
+                    ]);
+                }
+            } catch (Exception $e) {
+                // Логируем ошибку, но не прерываем выполнение
+                if (class_exists('Logger')) {
+                    Logger::error('Error saving game', [
+                        'message' => $e->getMessage(),
+                        'game_id' => $game_data['game_id'] ?? null
+                    ]);
+                }
             }
-            
-            Logger::gameEvent('Game finished', $game_data['game_id'], [
-                'tg_id' => $tg_id,
-                'result' => $result,
-                'promo_code' => $response['promo_code'] ?? null
-            ]);
         }
         
         echo json_encode($response);
