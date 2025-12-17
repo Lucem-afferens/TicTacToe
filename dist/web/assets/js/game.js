@@ -42,8 +42,7 @@ class TicTacToeGame {
         // Создаем игровое поле
         this.createBoard();
         
-        // Начинаем новую игру
-        this.startNewGame();
+        // НЕ начинаем игру автоматически - ждем нажатия кнопки "Играть"
     }
     
     /**
@@ -339,6 +338,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const promoValue = document.getElementById('promo-code-value');
             if (promoValue) {
                 PromoCodeDisplay.copyToClipboard(promoValue.textContent);
+            }
+        });
+    }
+    
+    // Обработчик кнопки "Играть" из меню
+    const playBtn = document.getElementById('play-btn');
+    if (playBtn) {
+        playBtn.addEventListener('click', () => {
+            if (game) {
+                game.startNewGame();
             }
         });
     }

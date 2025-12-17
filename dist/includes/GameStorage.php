@@ -17,7 +17,25 @@ class GameStorage {
      */
     public static function saveGame($game_data) {
         $games = loadJsonFile(self::$games_file, []);
-        $games[] = $game_data;
+        
+        // Проверяем, не существует ли уже игра с таким ID
+        $existing_index = null;
+        foreach ($games as $index => $game) {
+            if (isset($game['game_id']) && isset($game_data['game_id']) && 
+                $game['game_id'] === $game_data['game_id']) {
+                $existing_index = $index;
+                break;
+            }
+        }
+        
+        if ($existing_index !== null) {
+            // Обновляем существующую игру
+            $games[$existing_index] = $game_data;
+        } else {
+            // Добавляем новую игру
+            $games[] = $game_data;
+        }
+        
         return saveJsonFile(self::$games_file, $games);
     }
     

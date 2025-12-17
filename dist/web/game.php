@@ -53,25 +53,47 @@ if (empty($tg_id)) {
     <div class="game-container">
         <h1>🎮 Крестики-Нолики</h1>
         
-        <!-- Игровое поле -->
-        <div id="game-board" class="game-board"></div>
-        
-        <!-- Сообщения -->
-        <div id="message-container"></div>
-        
-        <!-- Промокод (скрыт по умолчанию) -->
-        <div id="promo-container" class="promo-code hidden">
-            <div class="promo-code-label">Твой промокод:</div>
-            <div id="promo-code-value" class="promo-code-value"></div>
-            <button id="copy-promo-btn" class="button button-secondary">📋 Копировать</button>
+        <!-- Главное меню (показывается по умолчанию) -->
+        <div id="main-menu" class="main-menu">
+            <button id="play-btn" class="button button-primary">
+                🎮 Играть
+            </button>
+            <button id="history-btn" class="button button-secondary">
+                📊 История игр
+            </button>
         </div>
         
-        <!-- Экран результатов (скрыт по умолчанию) -->
-        <div id="result-screen" class="result-screen hidden">
-            <div id="result-icon" class="result-icon"></div>
-            <h2 id="result-title" class="result-title"></h2>
-            <p class="result-message">Сыграем ещё раз?</p>
-            <button id="play-again-btn" class="button">🎮 Сыграть ещё раз</button>
+        <!-- Игровое поле (скрыто по умолчанию) -->
+        <div id="game-screen" class="game-screen hidden">
+            <div id="game-board" class="game-board"></div>
+            
+            <!-- Сообщения -->
+            <div id="message-container"></div>
+            
+            <!-- Промокод (скрыт по умолчанию) -->
+            <div id="promo-container" class="promo-code hidden">
+                <div class="promo-code-label">Твой промокод:</div>
+                <div id="promo-code-value" class="promo-code-value"></div>
+                <button id="copy-promo-btn" class="button button-secondary">📋 Копировать</button>
+            </div>
+            
+            <!-- Экран результатов (скрыт по умолчанию) -->
+            <div id="result-screen" class="result-screen hidden">
+                <div id="result-icon" class="result-icon"></div>
+                <h2 id="result-title" class="result-title"></h2>
+                <p class="result-message">Сыграем ещё раз?</p>
+                <button id="play-again-btn" class="button">🎮 Сыграть ещё раз</button>
+                <button id="back-to-menu-btn" class="button button-secondary mt-md">🏠 В меню</button>
+            </div>
+        </div>
+        
+        <!-- Экран истории (скрыт по умолчанию) -->
+        <div id="history-screen" class="history-screen hidden">
+            <h2>📊 История игр</h2>
+            <div id="history-content" class="history-content">
+                <div class="loading">Загрузка...</div>
+            </div>
+            <button id="back-to-menu-from-history-btn" class="button button-secondary mt-lg">🏠 В меню</button>
         </div>
     </div>
     
@@ -79,6 +101,7 @@ if (empty($tg_id)) {
     <script src="assets/js/telegram-api.js"></script>
     <script src="assets/js/promo.js"></script>
     <script src="assets/js/game.js"></script>
+    <script src="assets/js/history.js"></script>
+    <script src="assets/js/navigation.js"></script>
 </body>
 </html>
-

@@ -380,6 +380,49 @@ switch ($action) {
         }
         break;
         
+    case 'history':
+        // Получение истории игр пользователя
+        try {
+            $games = GameStorage::loadGames($tg_id);
+            $stats = GameStorage::getStatistics($tg_id);
+            
+            // Загружаем промокоды для победных игр
+            $promo_codes = loadJsonFile('data/promo-codes.json', []);
+            $promo_map = [];
+            foreach ($promo_codes as $promo) {
+                if (isset($promo['game_id']) && isset($promo['code'])) {
+                    $promo_map[$promo['game_id']] = $promo['code'];
+                }
+            }
+            
+            // Добавляем промокоды к играм
+            foreach ($games as &$game) {
+                if (isset($game['game_id']) && isset($promo_map[$game['game_id']])) {
+                    $game['promo_code'] = $promo_map[$game['game_id']];
+                }
+            }
+            
+            safeLog('info', 'History loaded', [
+                'tg_id' => $tg_id,
+                'games_count' => count($games)
+            ]);
+            
+            echo json_encode([
+                'success' => true,
+                'games' => $games,
+                'stats' => $stats
+            ]);
+        } catch (Exception $e) {
+            safeLog('error', 'Error loading history', [
+                'message' => $e->getMessage(),
+                'tg_id' => $tg_id
+            ]);
+            http_response_code(500);
+            echo json_encode(['error' => 'Failed to load history']);
+            exit;
+        }
+        break;
+        
     default:
         safeLog('error', 'Unknown action', ['action' => $action]);
         http_response_code(400);
