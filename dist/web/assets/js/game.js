@@ -117,18 +117,21 @@ class TicTacToeGame {
      */
     async makeMove(position, symbol) {
         try {
-            // Обновляем локальное состояние
+            // ВАЖНО: Сохраняем состояние доски ДО хода
+            const boardBeforeMove = [...this.board];
+            
+            // Визуально обновляем (оптимистичное обновление UI)
             this.board[position] = symbol;
             this.updateBoardDisplay();
             
-            // Отправляем ход на сервер
+            // Отправляем ход на сервер с состоянием ДО хода
             const response = await this.apiRequest('move', {
                 tg_id: this.tgId,
                 game_id: this.gameId,
                 position: position,
                 game: {
                     game_id: this.gameId,
-                    board: this.board,
+                    board: boardBeforeMove, // Отправляем состояние ДО хода!
                     status: 'in_progress'
                 }
             });
@@ -136,7 +139,7 @@ class TicTacToeGame {
             if (!response.success) {
                 this.showError(response.error || 'Ошибка при выполнении хода');
                 // Откатываем ход
-                this.board[position] = '';
+                this.board = boardBeforeMove;
                 this.updateBoardDisplay();
                 return;
             }
