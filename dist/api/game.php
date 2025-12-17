@@ -99,6 +99,11 @@ if (!$data) {
 $action = $data['action'] ?? '';
 $tg_id = $data['tg_id'] ?? '';
 
+// Нормализуем tg_id (может быть строкой или числом из JSON)
+if (!empty($tg_id)) {
+    $tg_id = (string)$tg_id;
+}
+
 if (empty($tg_id)) {
     safeLog('error', 'Missing tg_id in game API request', ['data_keys' => array_keys($data)]);
     http_response_code(400);
