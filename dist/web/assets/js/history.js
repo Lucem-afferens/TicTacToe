@@ -184,5 +184,7 @@ class HistoryManager {
 let historyManager;
 document.addEventListener('DOMContentLoaded', () => {
     historyManager = new HistoryManager();
+    // Делаем доступным глобально
+    window.historyManager = historyManager;
 });
 

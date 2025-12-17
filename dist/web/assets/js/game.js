@@ -322,6 +322,8 @@ class TicTacToeGame {
 let game;
 document.addEventListener('DOMContentLoaded', () => {
     game = new TicTacToeGame();
+    // Делаем доступным глобально
+    window.game = game;
     
     // Обработчик кнопки "Сыграть ещё раз"
     const playAgainBtn = document.getElementById('play-again-btn');
@@ -342,14 +344,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Обработчик кнопки "Играть" из меню
-    const playBtn = document.getElementById('play-btn');
-    if (playBtn) {
-        playBtn.addEventListener('click', () => {
-            if (game) {
-                game.startNewGame();
-            }
-        });
-    }
+    // Обработчик кнопки "Играть" удален - теперь управляется через navigation.js
 });
 

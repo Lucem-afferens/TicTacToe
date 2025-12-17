@@ -451,6 +451,7 @@ h2 {
 .game-screen,
 .history-screen {
   transition: opacity 0.2s ease;
+  opacity: 1;
 }
 
 .main-menu.hidden,

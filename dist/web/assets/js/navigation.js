@@ -5,10 +5,18 @@
 class Navigation {
     constructor() {
         this.currentScreen = 'menu';
-        this.init();
+        // Инициализируем после загрузки DOM
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => this.init());
+        } else {
+            this.init();
+        }
     }
     
     init() {
+        // Убеждаемся, что начальное состояние правильное
+        this.ensureInitialState();
+        
         // Кнопка "Играть"
         const playBtn = document.getElementById('play-btn');
         if (playBtn) {
@@ -34,8 +42,30 @@ class Navigation {
         }
     }
     
+    ensureInitialState() {
+        // Меню должно быть видимым
+        const menu = document.getElementById('main-menu');
+        if (menu) {
+            menu.classList.remove('hidden');
+            menu.style.opacity = '1';
+        }
+        
+        // Остальные экраны должны быть скрыты
+        const gameScreen = document.getElementById('game-screen');
+        if (gameScreen) {
+            gameScreen.classList.add('hidden');
+            gameScreen.style.opacity = '';
+        }
+        
+        const historyScreen = document.getElementById('history-screen');
+        if (historyScreen) {
+            historyScreen.classList.add('hidden');
+            historyScreen.style.opacity = '';
+        }
+    }
+    
     showMenu() {
-        this.hideAllScreens();
+        this.hideAllScreens('main-menu');
         const menu = document.getElementById('main-menu');
         if (menu) {
             menu.style.opacity = '0';
@@ -50,7 +80,7 @@ class Navigation {
     }
     
     showGame() {
-        this.hideAllScreens();
+        this.hideAllScreens('game-screen');
         const gameScreen = document.getElementById('game-screen');
         if (gameScreen) {
             gameScreen.style.opacity = '0';
@@ -64,13 +94,17 @@ class Navigation {
         this.currentScreen = 'game';
         
         // Если игра еще не инициализирована, запускаем её
-        if (typeof game !== 'undefined' && game) {
-            game.startNewGame();
-        }
+        // Используем setTimeout чтобы дать время экрану появиться
+        setTimeout(() => {
+            const gameInstance = window.game || game;
+            if (typeof gameInstance !== 'undefined' && gameInstance) {
+                gameInstance.startNewGame();
+            }
+        }, 200);
     }
     
     showHistory() {
-        this.hideAllScreens();
+        this.hideAllScreens('history-screen');
         const historyScreen = document.getElementById('history-screen');
         if (historyScreen) {
             historyScreen.style.opacity = '0';
@@ -85,24 +119,31 @@ class Navigation {
         
         // Загружаем историю с небольшой задержкой для плавности
         setTimeout(() => {
-            if (typeof historyManager !== 'undefined' && historyManager) {
-                historyManager.loadHistory();
+            const manager = window.historyManager || historyManager;
+            if (typeof manager !== 'undefined' && manager) {
+                manager.loadHistory();
             }
-        }, 50);
+        }, 200);
     }
     
-    hideAllScreens() {
-        const screens = ['main-menu', 'game-screen', 'history-screen'];
-        screens.forEach(screenId => {
-            const screen = document.getElementById(screenId);
-            if (screen) {
+    hideAllScreens(exceptScreenId = null) {
+        const screens = [
+            { id: 'main-menu', element: document.getElementById('main-menu') },
+            { id: 'game-screen', element: document.getElementById('game-screen') },
+            { id: 'history-screen', element: document.getElementById('history-screen') }
+        ];
+        
+        screens.forEach(({ id, element }) => {
+            if (element && id !== exceptScreenId) {
                 // Плавное скрытие
-                screen.style.transition = 'opacity 0.15s ease';
-                screen.style.opacity = '0';
+                element.style.transition = 'opacity 0.15s ease';
+                element.style.opacity = '0';
                 setTimeout(() => {
-                    screen.classList.add('hidden');
-                    screen.style.opacity = '';
-                    screen.style.transition = '';
+                    if (element.style.opacity === '0' || element.style.opacity === '') {
+                        element.classList.add('hidden');
+                        element.style.opacity = '';
+                        element.style.transition = '';
+                    }
                 }, 150);
             }
         });
