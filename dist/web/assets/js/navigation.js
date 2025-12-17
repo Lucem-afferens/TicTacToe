@@ -38,7 +38,13 @@ class Navigation {
         this.hideAllScreens();
         const menu = document.getElementById('main-menu');
         if (menu) {
+            menu.style.opacity = '0';
             menu.classList.remove('hidden');
+            // Плавное появление
+            requestAnimationFrame(() => {
+                menu.style.transition = 'opacity 0.2s ease';
+                menu.style.opacity = '1';
+            });
         }
         this.currentScreen = 'menu';
     }
@@ -47,7 +53,13 @@ class Navigation {
         this.hideAllScreens();
         const gameScreen = document.getElementById('game-screen');
         if (gameScreen) {
+            gameScreen.style.opacity = '0';
             gameScreen.classList.remove('hidden');
+            // Плавное появление
+            requestAnimationFrame(() => {
+                gameScreen.style.transition = 'opacity 0.2s ease';
+                gameScreen.style.opacity = '1';
+            });
         }
         this.currentScreen = 'game';
         
@@ -61,14 +73,22 @@ class Navigation {
         this.hideAllScreens();
         const historyScreen = document.getElementById('history-screen');
         if (historyScreen) {
+            historyScreen.style.opacity = '0';
             historyScreen.classList.remove('hidden');
+            // Плавное появление
+            requestAnimationFrame(() => {
+                historyScreen.style.transition = 'opacity 0.2s ease';
+                historyScreen.style.opacity = '1';
+            });
         }
         this.currentScreen = 'history';
         
-        // Загружаем историю
-        if (typeof historyManager !== 'undefined' && historyManager) {
-            historyManager.loadHistory();
-        }
+        // Загружаем историю с небольшой задержкой для плавности
+        setTimeout(() => {
+            if (typeof historyManager !== 'undefined' && historyManager) {
+                historyManager.loadHistory();
+            }
+        }, 50);
     }
     
     hideAllScreens() {
@@ -76,7 +96,14 @@ class Navigation {
         screens.forEach(screenId => {
             const screen = document.getElementById(screenId);
             if (screen) {
-                screen.classList.add('hidden');
+                // Плавное скрытие
+                screen.style.transition = 'opacity 0.15s ease';
+                screen.style.opacity = '0';
+                setTimeout(() => {
+                    screen.classList.add('hidden');
+                    screen.style.opacity = '';
+                    screen.style.transition = '';
+                }, 150);
             }
         });
     }

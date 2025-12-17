@@ -91,7 +91,7 @@ if (empty($tg_id)) {
         <div id="history-screen" class="history-screen hidden">
             <h2>📊 История игр</h2>
             <div id="history-content" class="history-content">
-                <div class="loading">Загрузка...</div>
+                <!-- Контент загружается динамически -->
             </div>
             <button id="back-to-menu-from-history-btn" class="button button-secondary mt-lg">🏠 В меню</button>
         </div>

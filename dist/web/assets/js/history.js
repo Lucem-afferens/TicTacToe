@@ -24,7 +24,8 @@ class HistoryManager {
             return;
         }
         
-        historyContent.innerHTML = '<div class="loading">Загрузка истории...</div>';
+        // Показываем минимальный индикатор загрузки без анимации
+        historyContent.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--color-text-light);">Загрузка...</div>';
         
         try {
             const response = await this.apiRequest('history', {
@@ -32,6 +33,7 @@ class HistoryManager {
             });
             
             if (response.success && response.games) {
+                // Плавное обновление контента
                 this.displayHistory(response.games, response.stats);
             } else {
                 historyContent.innerHTML = '<div class="message error">Не удалось загрузить историю</div>';

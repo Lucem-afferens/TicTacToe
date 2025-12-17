@@ -252,21 +252,12 @@ h2 {
   margin-bottom: var(--spacing-lg);
 }
 
-/* Загрузка */
+/* Загрузка (упрощенная версия без анимации) */
 .loading {
   display: inline-block;
-  width: 20px;
-  height: 20px;
-  border: 3px solid var(--color-bg);
-  border-top-color: var(--color-primary);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  text-align: center;
+  padding: var(--spacing-md);
+  color: var(--color-text-light);
 }
 
 /* Адаптивность */
@@ -453,6 +444,20 @@ h2 {
 /* Скрытие элементов */
 .hidden {
   display: none !important;
+}
+
+/* Плавные переходы между экранами */
+.main-menu,
+.game-screen,
+.history-screen {
+  transition: opacity 0.2s ease;
+}
+
+.main-menu.hidden,
+.game-screen.hidden,
+.history-screen.hidden {
+  display: none !important;
+  opacity: 0;
 }
 
 /* Утилиты */
