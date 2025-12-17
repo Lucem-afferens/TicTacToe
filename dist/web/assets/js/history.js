@@ -138,11 +138,8 @@ class HistoryManager {
                     statusText = 'В процессе';
             }
             
-            // Первые 5 игр видимы сразу, остальные скрыты (но доступны при скролле)
-            const isVisible = index < visibleGamesCount;
-            
             gamesHtml += `
-                <div class="history-game-item ${isVisible ? 'visible' : ''}">
+                <div class="history-game-item">
                     <div class="game-header">
                         <span class="game-number">#${index + 1}</span>
                         <span class="game-status ${status}">
