@@ -1,48 +1,69 @@
 /**
  * Дизайн-система для игры "Крестики-Нолики"
- * Ориентация на женскую аудиторию 25–40 лет
+ * Теплая, уютная пастельная палитра для женской аудитории 25–40 лет
+ * Спокойная визуальная среда без резких контрастов
  */
 
 :root {
-  /* Цветовая палитра */
-  --color-bg: #FFF7F3;           /* Мягкий бежевый фон */
-  --color-primary: #E89CA9;     /* Розовый основной */
-  --color-secondary: #BFA2DB;   /* Сиреневый вторичный */
-  --color-accent: #FFD6A5;       /* Персиковый акцент */
-  --color-text-main: #4A4A4A;    /* Темно-серый текст */
-  --color-text-light: #8E8E8E;  /* Светло-серый текст */
-  --color-text-white: #FFFFFF;   /* Белый текст */
+  /* Основная пастельная палитра */
+  --color-bg: #FDF8F4;           /* Молочный фон - теплый, уютный */
+  --color-bg-secondary: #FFF9F5;  /* Светлый молочный для карточек */
+  --color-primary: #E8B4B8;      /* Пудрово-розовый - мягкий, нежный */
+  --color-primary-light: #F5D7DA; /* Светлый пудрово-розовый */
+  --color-secondary: #D4B5A0;    /* Теплый беж - уютный, нейтральный */
+  --color-accent: #A8C5A0;       /* Шалфейный - спокойный, природный */
+  --color-accent-light: #C8DCC2; /* Светлый шалфейный */
+  --color-tertiary: #B8C5D8;     /* Серо-голубой - мягкий, воздушный */
   
-  /* Игровые символы */
-  --color-x: #E89CA9;            /* Розовый для ❌ */
-  --color-o: #BFA2DB;            /* Сиреневый для ⭕ */
+  /* Текст */
+  --color-text-main: #5A5A5A;    /* Мягкий темно-серый - читабельный */
+  --color-text-light: #9A9A9A;   /* Светло-серый для второстепенного текста */
+  --color-text-white: #FFFFFF;    /* Белый текст */
+  --color-text-accent: #7A8A7A;  /* Шалфейный для акцентов */
   
-  /* Состояния */
-  --color-success: #A8E6CF;      /* Зеленый для успеха */
-  --color-error: #FFB3BA;        /* Розовый для ошибки */
-  --color-warning: #FFD6A5;      /* Персиковый для предупреждения */
+  /* Игровые символы - мягкие пастельные */
+  --color-x: #E8B4B8;            /* Пудрово-розовый для ❌ */
+  --color-o: #B8C5D8;            /* Серо-голубой для ⭕ */
   
-  /* Границы и тени */
-  --border-radius: 16px;
-  --border-radius-small: 8px;
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.2);
+  /* Состояния - мягкие, не агрессивные */
+  --color-success: #A8C5A0;      /* Шалфейный для успеха */
+  --color-success-light: #D4E5D0; /* Светлый шалфейный */
+  --color-error: #E8B4B8;        /* Мягкий розовый для ошибки (не красный!) */
+  --color-error-light: #F5D7DA;   /* Светлый розовый */
+  --color-warning: #D4B5A0;      /* Теплый беж для предупреждения */
   
-  /* Переходы */
-  --transition-fast: 0.2s ease;
-  --transition-normal: 0.3s ease;
-  --transition-slow: 0.5s ease;
+  /* Границы - очень мягкие, скругленные */
+  --border-radius: 24px;          /* Больше скругление для мягкости */
+  --border-radius-medium: 20px;   /* Среднее скругление */
+  --border-radius-small: 12px;    /* Маленькое скругление */
+  --border-radius-large: 32px;    /* Большое скругление для карточек */
   
-  /* Размеры */
-  --spacing-xs: 4px;
-  --spacing-sm: 8px;
-  --spacing-md: 16px;
-  --spacing-lg: 24px;
-  --spacing-xl: 32px;
+  /* Тени - очень мягкие, едва заметные */
+  --shadow-sm: 0 2px 12px rgba(232, 180, 184, 0.08);
+  --shadow-md: 0 4px 20px rgba(232, 180, 184, 0.12);
+  --shadow-lg: 0 8px 32px rgba(232, 180, 184, 0.15);
+  --shadow-soft: 0 2px 16px rgba(168, 197, 160, 0.1); /* Мягкая тень */
+  
+  /* Переходы - плавные, медленные */
+  --transition-fast: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Размеры - больше пространства для дыхания */
+  --spacing-xs: 6px;
+  --spacing-sm: 12px;
+  --spacing-md: 20px;
+  --spacing-lg: 32px;
+  --spacing-xl: 48px;
+  --spacing-xxl: 64px;
   
   /* Размеры игрового поля */
-  --board-size: 300px;
+  --board-size: 320px;
   --cell-size: calc(var(--board-size) / 3);
+  
+  /* Градиенты для мягкости */
+  --gradient-soft: linear-gradient(135deg, #FDF8F4 0%, #FFF9F5 100%);
+  --gradient-primary: linear-gradient(135deg, #E8B4B8 0%, #F5D7DA 100%);
+  --gradient-accent: linear-gradient(135deg, #A8C5A0 0%, #C8DCC2 100%);
 }
 
