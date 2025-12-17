@@ -299,14 +299,32 @@ switch ($action) {
             // Если игра закончена, сохраняем и генерируем промокод при победе
             if ($result !== 'in_progress') {
                 try {
-                    GameStorage::saveGame($game_data);
-                    GameStorage::updateStatistics($game_data);
-                    
+                    // Генерируем промокод ПЕРЕД сохранением, чтобы добавить его в game_data
                     if ($result === 'player_win') {
                         $promo_code = PromoCode::generate($tg_id, $game_data['game_id']);
                         $response['promo_code'] = $promo_code;
-                        
-                        // Отправляем сообщение в бот с поздравлением и промокодом
+                        // Добавляем промокод в данные игры для истории
+                        $game_data['promo_code'] = $promo_code;
+                    }
+                    
+                    // Сохраняем игру (с промокодом если есть)
+                    $saved = GameStorage::saveGame($game_data);
+                    if (!$saved) {
+                        safeLog('error', 'Failed to save game to file', [
+                            'game_id' => $game_data['game_id'] ?? null
+                        ]);
+                    } else {
+                        safeLog('info', 'Game saved successfully', [
+                            'game_id' => $game_data['game_id'] ?? null,
+                            'result' => $result
+                        ]);
+                    }
+                    
+                    // Обновляем статистику
+                    GameStorage::updateStatistics($game_data);
+                    
+                    // Отправляем сообщение в бот при победе
+                    if ($result === 'player_win' && isset($promo_code)) {
                         try {
                             require_once $base_path . '/bot/messages.php';
                             require_once $base_path . '/bot/bot-handler.php';
@@ -336,15 +354,17 @@ switch ($action) {
                         }
                     }
                     
-                    safeLog('info', 'Game finished', [
+                    safeLog('info', 'Game finished and saved', [
                         'game_id' => $game_data['game_id'],
                         'tg_id' => $tg_id,
-                        'result' => $result
+                        'result' => $result,
+                        'has_promo' => isset($promo_code)
                     ]);
                 } catch (Exception $e) {
                     // Логируем ошибку, но не прерываем выполнение
                     safeLog('error', 'Error saving game', [
                         'message' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString(),
                         'game_id' => $game_data['game_id'] ?? null
                     ]);
                 }
@@ -386,7 +406,7 @@ switch ($action) {
             $games = GameStorage::loadGames($tg_id);
             $stats = GameStorage::getStatistics($tg_id);
             
-            // Загружаем промокоды для победных игр
+            // Загружаем промокоды для победных игр (если не были добавлены при сохранении)
             $promo_codes = loadJsonFile('data/promo-codes.json', []);
             $promo_map = [];
             foreach ($promo_codes as $promo) {
@@ -395,26 +415,39 @@ switch ($action) {
                 }
             }
             
-            // Добавляем промокоды к играм
+            // Добавляем промокоды к играм (если их еще нет)
             foreach ($games as &$game) {
-                if (isset($game['game_id']) && isset($promo_map[$game['game_id']])) {
+                // Если промокод уже есть в game_data, не перезаписываем
+                if (!isset($game['promo_code']) && isset($game['game_id']) && isset($promo_map[$game['game_id']])) {
                     $game['promo_code'] = $promo_map[$game['game_id']];
+                }
+            }
+            unset($game); // Важно для foreach по ссылке
+            
+            // Фильтруем только завершенные игры для истории
+            $finished_games = [];
+            foreach ($games as $game) {
+                $status = $game['status'] ?? 'in_progress';
+                if ($status !== 'in_progress') {
+                    $finished_games[] = $game;
                 }
             }
             
             safeLog('info', 'History loaded', [
                 'tg_id' => $tg_id,
-                'games_count' => count($games)
+                'total_games' => count($games),
+                'finished_games' => count($finished_games)
             ]);
             
             echo json_encode([
                 'success' => true,
-                'games' => $games,
+                'games' => $finished_games, // Только завершенные игры
                 'stats' => $stats
             ]);
         } catch (Exception $e) {
             safeLog('error', 'Error loading history', [
                 'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
                 'tg_id' => $tg_id
             ]);
             http_response_code(500);

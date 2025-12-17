@@ -16,6 +16,21 @@ class GameStorage {
      * @return bool true если успешно
      */
     public static function saveGame($game_data) {
+        // Валидация входных данных
+        if (!is_array($game_data)) {
+            if (class_exists('Logger')) {
+                Logger::error('Invalid game_data in saveGame', ['type' => gettype($game_data)]);
+            }
+            return false;
+        }
+        
+        if (!isset($game_data['game_id'])) {
+            if (class_exists('Logger')) {
+                Logger::error('Missing game_id in saveGame');
+            }
+            return false;
+        }
+        
         $games = loadJsonFile(self::$games_file, []);
         
         // Проверяем, не существует ли уже игра с таким ID
@@ -29,14 +44,23 @@ class GameStorage {
         }
         
         if ($existing_index !== null) {
-            // Обновляем существующую игру
-            $games[$existing_index] = $game_data;
+            // Обновляем существующую игру (объединяем данные)
+            $games[$existing_index] = array_merge($games[$existing_index], $game_data);
         } else {
             // Добавляем новую игру
             $games[] = $game_data;
         }
         
-        return saveJsonFile(self::$games_file, $games);
+        $saved = saveJsonFile(self::$games_file, $games);
+        
+        if (!$saved && class_exists('Logger')) {
+            Logger::error('Failed to save game', [
+                'game_id' => $game_data['game_id'] ?? null,
+                'file' => self::$games_file
+            ]);
+        }
+        
+        return $saved;
     }
     
     /**

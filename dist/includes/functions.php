@@ -42,17 +42,60 @@ function saveJsonFile($filename, $data) {
     $file_path = __DIR__ . '/../' . $filename;
     $dir = dirname($file_path);
     
+    // Создаем директорию если не существует
     if (!is_dir($dir)) {
-        mkdir($dir, 0755, true);
+        if (!mkdir($dir, 0755, true)) {
+            if (class_exists('Logger')) {
+                Logger::error("Failed to create directory", ['dir' => $dir]);
+            }
+            return false;
+        }
     }
     
-    $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-    $result = file_put_contents($file_path, $json, LOCK_EX);
+    // Проверяем права на запись
+    if (!is_writable($dir)) {
+        if (class_exists('Logger')) {
+            Logger::error("Directory is not writable", ['dir' => $dir]);
+        }
+        return false;
+    }
+    
+    // Кодируем в JSON
+    $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    
+    if ($json === false) {
+        if (class_exists('Logger')) {
+            Logger::error("JSON encode failed", [
+                'file' => $filename,
+                'error' => json_last_error_msg()
+            ]);
+        }
+        return false;
+    }
+    
+    // Сохраняем во временный файл, затем переименовываем (атомарная операция)
+    $temp_file = $file_path . '.tmp';
+    $result = file_put_contents($temp_file, $json, LOCK_EX);
     
     if ($result === false) {
         if (class_exists('Logger')) {
-            Logger::error("Failed to save file", ['file' => $filename]);
+            Logger::error("Failed to write temp file", [
+                'file' => $filename,
+                'temp_file' => $temp_file
+            ]);
         }
+        return false;
+    }
+    
+    // Атомарное переименование
+    if (!rename($temp_file, $file_path)) {
+        if (class_exists('Logger')) {
+            Logger::error("Failed to rename temp file", [
+                'file' => $filename,
+                'temp_file' => $temp_file
+            ]);
+        }
+        @unlink($temp_file); // Удаляем временный файл
         return false;
     }
     
