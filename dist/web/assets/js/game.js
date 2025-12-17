@@ -214,14 +214,23 @@ class TicTacToeGame {
      */
     updateBoardDisplay() {
         const cells = document.querySelectorAll('.game-cell');
+        
         // Определяем путь к изображениям относительно текущей страницы
+        // game.php находится в /web/, поэтому путь к assets/images/ будет assets/images/
         const currentPath = window.location.pathname;
         let imagePath = 'assets/images/';
+        
+        // Если страница в поддиректории, корректируем путь
         if (currentPath.includes('/web/')) {
-            imagePath = '../assets/images/';
-        } else if (currentPath.includes('/dist/web/')) {
+            // Если путь типа /dist/web/game.php, то assets/images/ правильный
             imagePath = 'assets/images/';
+        } else if (currentPath.includes('/dist/')) {
+            imagePath = 'web/assets/images/';
         }
+        
+        // Альтернативный способ: определяем путь относительно location
+        const basePath = window.location.origin + window.location.pathname.split('/').slice(0, -1).join('/');
+        const testPath = basePath + '/assets/images/';
         
         cells.forEach((cell, index) => {
             const symbol = this.board[index];
@@ -231,23 +240,29 @@ class TicTacToeGame {
             if (symbol === 'X') {
                 cell.classList.add('x');
                 const img = document.createElement('img');
-                img.src = imagePath + 'X.png';
+                // Используем абсолютный путь для надежности
+                const imgPath = new URL('assets/images/X.png', window.location.href).href;
+                img.src = imgPath;
                 img.alt = 'X';
                 img.className = 'cell-symbol-img';
                 img.onerror = function() {
+                    console.error('Failed to load X.png from:', imgPath);
                     // Fallback на текст, если изображение не загрузилось
-                    cell.textContent = 'X';
+                    cell.innerHTML = '<span style="font-size: 2rem; color: var(--color-x);">X</span>';
                 };
                 cell.appendChild(img);
             } else if (symbol === 'O') {
                 cell.classList.add('o');
                 const img = document.createElement('img');
-                img.src = imagePath + 'O.png';
+                // Используем абсолютный путь для надежности
+                const imgPath = new URL('assets/images/O.png', window.location.href).href;
+                img.src = imgPath;
                 img.alt = 'O';
                 img.className = 'cell-symbol-img';
                 img.onerror = function() {
+                    console.error('Failed to load O.png from:', imgPath);
                     // Fallback на текст, если изображение не загрузилось
-                    cell.textContent = 'O';
+                    cell.innerHTML = '<span style="font-size: 2rem; color: var(--color-o);">O</span>';
                 };
                 cell.appendChild(img);
             }
