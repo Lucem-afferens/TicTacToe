@@ -8,7 +8,7 @@ require_once __DIR__ . '/game-logic.php';
 
 class GameAI {
     private static $win_chance = 70;    // 80% - выигрышный ход
-    private static $block_chance = 10;   // 20% - блокировка игрока
+    private static $block_chance = 10;   // 10% - блокировка игрока
     private static $random_chance = 20;  // 20% - случайный ход
     
     /**
