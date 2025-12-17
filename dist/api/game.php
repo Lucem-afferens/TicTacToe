@@ -67,8 +67,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 if (class_exists('Security') && function_exists('isFeatureEnabled') && isFeatureEnabled('rate_limiting')) {
     try {
         $ip = Security::getRealIP();
-        // Используем более мягкий лимит для игровых действий (100 запросов в час)
-        if (!Security::checkRateLimit($ip, 'game', 100, 3600)) {
+        // Используем более мягкий лимит для игровых действий (500 запросов в час)
+        if (!Security::checkRateLimit($ip, 'game', 500, 3600)) {
             safeLog('security', "Rate limit exceeded for game API", ['ip' => $ip]);
             http_response_code(429);
             echo json_encode(['error' => 'Rate limit exceeded. Please wait a moment and try again.']);
