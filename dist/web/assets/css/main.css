@@ -714,6 +714,128 @@ h2 {
   color: var(--color-tertiary);
 }
 
+/* Новая статистика v2 - полностью пересозданная структура */
+.stats-container-v2 {
+  margin-bottom: var(--spacing-xl);
+  padding: var(--spacing-md);
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: var(--border-radius-large);
+  box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.stats-container-v2::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.8), 
+    transparent
+  );
+  pointer-events: none;
+}
+
+.stats-title-v2 {
+  margin: 0 0 var(--spacing-md) 0;
+  color: var(--color-text-main);
+  font-size: 1.2rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-align: center;
+  padding: 0;
+}
+
+.stats-grid-v2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.stat-card-v2 {
+  text-align: center;
+  padding: 12px 6px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: var(--border-radius-medium);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  transition: all var(--transition-normal);
+  backdrop-filter: blur(10px) saturate(150%);
+  -webkit-backdrop-filter: blur(10px) saturate(150%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 70px;
+  box-sizing: border-box;
+  overflow: hidden;
+  word-wrap: break-word;
+}
+
+.stat-card-v2:hover {
+  background: rgba(255, 255, 255, 0.6);
+  border-color: rgba(255, 255, 255, 0.8);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.stat-number-v2 {
+  font-size: 1.8rem;
+  font-weight: 500;
+  color: var(--color-text-main);
+  margin-bottom: 4px;
+  line-height: 1.1;
+  display: block;
+}
+
+.stat-text-v2 {
+  font-size: 0.75rem;
+  color: var(--color-text-light);
+  font-weight: 400;
+  line-height: 1.2;
+  display: block;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  padding: 0 2px;
+}
+
+.stat-card-win-v2 {
+  background: rgba(168, 197, 160, 0.15);
+}
+
+.stat-number-win-v2 {
+  color: var(--color-success);
+}
+
+.stat-card-lose-v2 {
+  background: rgba(232, 180, 184, 0.15);
+}
+
+.stat-number-lose-v2 {
+  color: var(--color-error);
+}
+
+.stat-card-draw-v2 {
+  background: rgba(184, 197, 216, 0.15);
+}
+
+.stat-number-draw-v2 {
+  color: var(--color-tertiary);
+}
+
 .history-games {
   margin-top: var(--spacing-xl);
 }
