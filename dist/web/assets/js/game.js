@@ -10,7 +10,14 @@ class TicTacToeGame {
         this.gameId = null;
         this.tgId = null;
         // Определяем путь к API относительно текущей страницы
-        this.apiUrl = '../api/game.php';
+        // Определяем путь к API относительно текущей страницы
+        // Если game.php находится в /web/, то API в /api/
+        const currentPath = window.location.pathname;
+        if (currentPath.includes('/web/')) {
+            this.apiUrl = '../api/game.php';
+        } else {
+            this.apiUrl = '/api/game.php';
+        }
         
         this.init();
     }
