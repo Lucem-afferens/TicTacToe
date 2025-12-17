@@ -214,15 +214,27 @@ class TicTacToeGame {
      */
     updateBoardDisplay() {
         const cells = document.querySelectorAll('.game-cell');
+        const imagePath = window.location.pathname.includes('/web/') ? '../assets/images/' : 'assets/images/';
+        
         cells.forEach((cell, index) => {
             const symbol = this.board[index];
-            cell.textContent = symbol;
             cell.className = 'game-cell';
+            cell.innerHTML = ''; // Очищаем содержимое
             
             if (symbol === 'X') {
                 cell.classList.add('x');
+                const img = document.createElement('img');
+                img.src = imagePath + 'X.png';
+                img.alt = 'X';
+                img.className = 'cell-symbol-img';
+                cell.appendChild(img);
             } else if (symbol === 'O') {
                 cell.classList.add('o');
+                const img = document.createElement('img');
+                img.src = imagePath + 'O.png';
+                img.alt = 'O';
+                img.className = 'cell-symbol-img';
+                cell.appendChild(img);
             }
             
             if (this.gameOver || symbol !== '') {
