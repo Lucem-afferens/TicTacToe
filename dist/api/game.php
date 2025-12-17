@@ -12,6 +12,11 @@ header('Content-Type: application/json; charset=utf-8');
 // Очищаем буфер
 ob_clean();
 
+// Включаем обработку ошибок
+error_reporting(E_ALL);
+ini_set('display_errors', 0); // Не показываем ошибки пользователю
+ini_set('log_errors', 1);
+
 // Определяем базовый путь
 $base_path = dirname(__DIR__);
 
@@ -28,13 +33,28 @@ require_once $base_path . '/game/game-state.php';
 require_once $base_path . '/bot/promo.php';
 require_once $base_path . '/includes/GameStorage.php';
 
-// Логируем начало обработки запроса (если Logger доступен)
-if (class_exists('Logger')) {
-    Logger::info('Game API request started', [
-        'method' => $_SERVER['REQUEST_METHOD'] ?? 'UNKNOWN',
-        'ip' => $_SERVER['REMOTE_ADDR'] ?? 'UNKNOWN'
-    ]);
+// Функция для безопасного логирования
+function safeLog($level, $message, $context = []) {
+    if (class_exists('Logger')) {
+        try {
+            if ($level === 'info' && method_exists('Logger', 'info')) {
+                Logger::info($message, $context);
+            } elseif ($level === 'error' && method_exists('Logger', 'error')) {
+                Logger::error($message, $context);
+            } elseif ($level === 'security' && method_exists('Logger', 'security')) {
+                Logger::security($message, $context);
+            }
+        } catch (Exception $e) {
+            // Игнорируем ошибки логирования
+        }
+    }
 }
+
+// Логируем начало обработки запроса
+safeLog('info', 'Game API request started', [
+    'method' => $_SERVER['REQUEST_METHOD'] ?? 'UNKNOWN',
+    'ip' => $_SERVER['REMOTE_ADDR'] ?? 'UNKNOWN'
+]);
 
 // Проверка метода запроса
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -45,15 +65,18 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 // Проверка rate limiting (более мягкий лимит для игровых запросов)
 if (class_exists('Security') && function_exists('isFeatureEnabled') && isFeatureEnabled('rate_limiting')) {
-    $ip = Security::getRealIP();
-    // Используем более мягкий лимит для игровых действий (100 запросов в час)
-    if (!Security::checkRateLimit($ip, 'game', 100, 3600)) {
-        if (class_exists('Logger')) {
-            Logger::security("Rate limit exceeded for game API", ['ip' => $ip]);
+    try {
+        $ip = Security::getRealIP();
+        // Используем более мягкий лимит для игровых действий (100 запросов в час)
+        if (!Security::checkRateLimit($ip, 'game', 100, 3600)) {
+            safeLog('security', "Rate limit exceeded for game API", ['ip' => $ip]);
+            http_response_code(429);
+            echo json_encode(['error' => 'Rate limit exceeded. Please wait a moment and try again.']);
+            exit;
         }
-        http_response_code(429);
-        echo json_encode(['error' => 'Rate limit exceeded. Please wait a moment and try again.']);
-        exit;
+    } catch (Exception $e) {
+        // Игнорируем ошибки rate limiting, продолжаем выполнение
+        safeLog('error', 'Rate limit check failed', ['error' => $e->getMessage()]);
     }
 }
 
@@ -62,11 +85,14 @@ $input = file_get_contents('php://input');
 $data = json_decode($input, true);
 
 if (!$data) {
-    if (class_exists('Logger')) {
-        Logger::error('Invalid JSON in game API request', ['input' => substr($input, 0, 200)]);
-    }
+    $json_error = json_last_error_msg();
+    safeLog('error', 'Invalid JSON in game API request', [
+        'input_length' => strlen($input),
+        'json_error' => $json_error,
+        'input_preview' => substr($input, 0, 200)
+    ]);
     http_response_code(400);
-    echo json_encode(['error' => 'Invalid JSON']);
+    echo json_encode(['error' => 'Invalid JSON: ' . $json_error]);
     exit;
 }
 
@@ -74,9 +100,7 @@ $action = $data['action'] ?? '';
 $tg_id = $data['tg_id'] ?? '';
 
 if (empty($tg_id)) {
-    if (class_exists('Logger')) {
-        Logger::error('Missing tg_id in game API request');
-    }
+    safeLog('error', 'Missing tg_id in game API request', ['data_keys' => array_keys($data)]);
     http_response_code(400);
     echo json_encode(['error' => 'Missing tg_id']);
     exit;
@@ -85,186 +109,254 @@ if (empty($tg_id)) {
 // Обработка действий
 switch ($action) {
     case 'start':
-        // Создание новой игры
-        $game_data = GameState::createGame($tg_id);
-        
-        // Сохраняем в сессию (если используется)
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            $_SESSION['game_id'] = $game_data['game_id'];
-            $_SESSION['tg_id'] = $tg_id;
+        try {
+            // Создание новой игры
+            $game_data = GameState::createGame($tg_id);
+            
+            if (!$game_data || !isset($game_data['game_id'])) {
+                safeLog('error', 'Failed to create game', ['tg_id' => $tg_id]);
+                http_response_code(500);
+                echo json_encode(['error' => 'Failed to create game']);
+                exit;
+            }
+            
+            // Сохраняем в сессию (если используется)
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                $_SESSION['game_id'] = $game_data['game_id'];
+                $_SESSION['tg_id'] = $tg_id;
+            }
+            
+            safeLog('info', 'Game started', [
+                'game_id' => $game_data['game_id'],
+                'tg_id' => $tg_id
+            ]);
+            
+            echo json_encode([
+                'success' => true,
+                'game' => $game_data
+            ]);
+        } catch (Exception $e) {
+            safeLog('error', 'Exception in start action', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            http_response_code(500);
+            echo json_encode(['error' => 'Server error']);
+            exit;
         }
-        
-        if (method_exists('Logger', 'gameEvent')) {
-            Logger::gameEvent('Game started', $game_data['game_id'], ['tg_id' => $tg_id]);
-        }
-        
-        echo json_encode([
-            'success' => true,
-            'game' => $game_data
-        ]);
         break;
         
     case 'move':
-        // Ход игрока
-        $game_id = $data['game_id'] ?? '';
-        $position = $data['position'] ?? null;
-        
-        if (class_exists('Logger')) {
-            Logger::info('Game move request', [
+        try {
+            // Ход игрока
+            $game_id = $data['game_id'] ?? '';
+            $position = $data['position'] ?? null;
+            
+            safeLog('info', 'Game move request', [
                 'tg_id' => $tg_id,
                 'game_id' => $game_id,
                 'position' => $position,
                 'position_type' => gettype($position)
             ]);
-        }
-        
-        if (empty($game_id) || $position === null) {
-            if (class_exists('Logger')) {
-                Logger::error('Missing game_id or position', [
-                    'game_id' => $game_id,
-                    'position' => $position
-                ]);
+            
+            // Валидация входных данных
+            if (empty($game_id)) {
+                safeLog('error', 'Missing game_id', ['data' => $data]);
+                http_response_code(400);
+                echo json_encode(['error' => 'Missing game_id']);
+                exit;
             }
-            http_response_code(400);
-            echo json_encode(['error' => 'Missing game_id or position']);
-            exit;
-        }
-        
-        // Преобразуем position в число
-        $position = (int)$position;
-        
-        // Загружаем игру из запроса
-        $game_data = $data['game'] ?? null;
-        
-        if (!$game_data) {
-            if (class_exists('Logger')) {
-                Logger::error('Game data not provided', ['game_id' => $game_id]);
-            }
-            http_response_code(400);
-            echo json_encode(['error' => 'Game data not provided']);
-            exit;
-        }
-        
-        // Проверяем наличие board
-        if (!isset($game_data['board']) || !is_array($game_data['board'])) {
-            if (class_exists('Logger')) {
-                Logger::error('Invalid game board', ['has_board' => isset($game_data['board'])]);
-            }
-            http_response_code(400);
-            echo json_encode(['error' => 'Invalid game board']);
-            exit;
-        }
-        
-        $player_symbol = defined('PLAYER_SYMBOL') ? PLAYER_SYMBOL : 'X';
-        
-        // Валидация хода
-        if (!GameLogic::validateMove($game_data['board'], $position)) {
-            if (class_exists('Logger')) {
-                Logger::error('Invalid move', [
+            
+            if ($position === null || $position === '') {
+                safeLog('error', 'Missing or invalid position', [
                     'position' => $position,
-                    'board_size' => count($game_data['board'])
+                    'position_type' => gettype($position)
                 ]);
+                http_response_code(400);
+                echo json_encode(['error' => 'Missing or invalid position']);
+                exit;
             }
-            http_response_code(400);
-            echo json_encode(['error' => 'Invalid move - cell already taken or out of range']);
-            exit;
-        }
-        
-        // Делаем ход игрока
-        try {
+            
+            // Преобразуем position в число
+            $position = (int)$position;
+            
+            // Проверяем диапазон
+            if ($position < 0 || $position > 8) {
+                safeLog('error', 'Position out of range', ['position' => $position]);
+                http_response_code(400);
+                echo json_encode(['error' => 'Position out of range (0-8)']);
+                exit;
+            }
+            
+            // Загружаем игру из запроса
+            $game_data = $data['game'] ?? null;
+            
+            if (!$game_data) {
+                safeLog('error', 'Game data not provided', [
+                    'game_id' => $game_id,
+                    'data_keys' => array_keys($data)
+                ]);
+                http_response_code(400);
+                echo json_encode(['error' => 'Game data not provided']);
+                exit;
+            }
+            
+            // Проверяем наличие board
+            if (!isset($game_data['board'])) {
+                safeLog('error', 'Board not found in game_data', [
+                    'game_data_keys' => array_keys($game_data)
+                ]);
+                http_response_code(400);
+                echo json_encode(['error' => 'Board not found in game data']);
+                exit;
+            }
+            
+            if (!is_array($game_data['board'])) {
+                safeLog('error', 'Board is not an array', [
+                    'board_type' => gettype($game_data['board'])
+                ]);
+                http_response_code(400);
+                echo json_encode(['error' => 'Board must be an array']);
+                exit;
+            }
+            
+            // Проверяем размер доски
+            if (count($game_data['board']) !== 9) {
+                safeLog('error', 'Invalid board size', [
+                    'board_size' => count($game_data['board']),
+                    'board' => $game_data['board']
+                ]);
+                http_response_code(400);
+                echo json_encode(['error' => 'Invalid board size']);
+                exit;
+            }
+            
+            $player_symbol = defined('PLAYER_SYMBOL') ? PLAYER_SYMBOL : 'X';
+            
+            // Валидация хода
+            if (!GameLogic::validateMove($game_data['board'], $position)) {
+                safeLog('error', 'Invalid move', [
+                    'position' => $position,
+                    'board' => $game_data['board'],
+                    'board_at_position' => $game_data['board'][$position] ?? 'NOT_SET'
+                ]);
+                http_response_code(400);
+                echo json_encode(['error' => 'Invalid move - cell already taken or out of range']);
+                exit;
+            }
+            
+            // Делаем ход игрока
             $game_data = GameState::makeMove($game_data, $position, $player_symbol);
             
             if (!$game_data) {
-                if (class_exists('Logger')) {
-                    Logger::error('Failed to make move', [
-                        'position' => $position
-                    ]);
-                }
+                safeLog('error', 'Failed to make move - GameState returned null', [
+                    'position' => $position,
+                    'symbol' => $player_symbol
+                ]);
                 http_response_code(400);
                 echo json_encode(['error' => 'Failed to make move']);
                 exit;
             }
-        } catch (Exception $e) {
-            if (class_exists('Logger')) {
-                Logger::error('Exception during move', [
-                    'message' => $e->getMessage()
-                ]);
-            }
-            http_response_code(500);
-            echo json_encode(['error' => 'Server error: ' . $e->getMessage()]);
-            exit;
-        } catch (Error $e) {
-            // Обработка фатальных ошибок PHP
-            if (class_exists('Logger')) {
-                Logger::error('Fatal error during move', [
-                    'message' => $e->getMessage()
-                ]);
-            }
-            http_response_code(500);
-            echo json_encode(['error' => 'Server error']);
-            exit;
-        }
-        
-        $result = GameState::getResult($game_data);
-        $response = [
-            'success' => true,
-            'game' => $game_data,
-            'result' => $result
-        ];
-        
-        // Если игра не закончена, делаем ход бота
-        if ($result === 'in_progress') {
-            $bot_symbol = defined('BOT_SYMBOL') ? BOT_SYMBOL : 'O';
-            $bot_position = GameAI::makeMove($game_data['board'], $bot_symbol, $player_symbol);
             
-            if ($bot_position !== null) {
-                $game_data = GameState::makeMove($game_data, $bot_position, $bot_symbol);
-                $result = GameState::getResult($game_data);
-                
-                $response['game'] = $game_data;
-                $response['result'] = $result;
-                $response['bot_move'] = $bot_position;
+            // Проверяем, что board обновлен
+            if (!isset($game_data['board']) || !is_array($game_data['board'])) {
+                safeLog('error', 'Board missing after move', ['game_data' => $game_data]);
+                http_response_code(500);
+                echo json_encode(['error' => 'Server error: board missing']);
+                exit;
             }
-        }
-        
-        // Если игра закончена, сохраняем и генерируем промокод при победе
-        if ($result !== 'in_progress') {
-            try {
-                GameStorage::saveGame($game_data);
-                GameStorage::updateStatistics($game_data);
-                
-                if ($result === 'player_win') {
-                    $promo_code = PromoCode::generate($tg_id, $game_data['game_id']);
-                    $response['promo_code'] = $promo_code;
+            
+            $result = GameState::getResult($game_data);
+            $response = [
+                'success' => true,
+                'game' => $game_data,
+                'result' => $result
+            ];
+            
+            // Если игра не закончена, делаем ход бота
+            if ($result === 'in_progress') {
+                try {
+                    $bot_symbol = defined('BOT_SYMBOL') ? BOT_SYMBOL : 'O';
+                    $bot_position = GameAI::makeMove($game_data['board'], $bot_symbol, $player_symbol);
+                    
+                    if ($bot_position !== null) {
+                        $game_data = GameState::makeMove($game_data, $bot_position, $bot_symbol);
+                        
+                        if ($game_data) {
+                            $result = GameState::getResult($game_data);
+                            
+                            $response['game'] = $game_data;
+                            $response['result'] = $result;
+                            $response['bot_move'] = $bot_position;
+                        }
+                    }
+                } catch (Exception $e) {
+                    safeLog('error', 'Error in bot move', ['error' => $e->getMessage()]);
+                    // Продолжаем выполнение даже если ход бота не удался
                 }
-                
-                if (method_exists('Logger', 'gameEvent')) {
-                    Logger::gameEvent('Game finished', $game_data['game_id'], [
+            }
+            
+            // Если игра закончена, сохраняем и генерируем промокод при победе
+            if ($result !== 'in_progress') {
+                try {
+                    GameStorage::saveGame($game_data);
+                    GameStorage::updateStatistics($game_data);
+                    
+                    if ($result === 'player_win') {
+                        $promo_code = PromoCode::generate($tg_id, $game_data['game_id']);
+                        $response['promo_code'] = $promo_code;
+                    }
+                    
+                    safeLog('info', 'Game finished', [
+                        'game_id' => $game_data['game_id'],
                         'tg_id' => $tg_id,
-                        'result' => $result,
-                        'promo_code' => $response['promo_code'] ?? null
+                        'result' => $result
                     ]);
-                }
-            } catch (Exception $e) {
-                // Логируем ошибку, но не прерываем выполнение
-                if (class_exists('Logger')) {
-                    Logger::error('Error saving game', [
+                } catch (Exception $e) {
+                    // Логируем ошибку, но не прерываем выполнение
+                    safeLog('error', 'Error saving game', [
                         'message' => $e->getMessage(),
                         'game_id' => $game_data['game_id'] ?? null
                     ]);
                 }
             }
+            
+            safeLog('info', 'Move completed successfully', [
+                'position' => $position,
+                'result' => $result
+            ]);
+            
+            echo json_encode($response);
+            
+        } catch (Exception $e) {
+            safeLog('error', 'Exception in move action', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            http_response_code(500);
+            echo json_encode(['error' => 'Server error: ' . $e->getMessage()]);
+            exit;
+        } catch (Error $e) {
+            // Обработка фатальных ошибок PHP
+            safeLog('error', 'Fatal error in move action', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+            http_response_code(500);
+            echo json_encode(['error' => 'Server error']);
+            exit;
         }
-        
-        echo json_encode($response);
         break;
         
     default:
+        safeLog('error', 'Unknown action', ['action' => $action]);
         http_response_code(400);
-        echo json_encode(['error' => 'Unknown action']);
+        echo json_encode(['error' => 'Unknown action: ' . $action]);
         break;
 }
 
 ob_end_flush();
 ?>
-

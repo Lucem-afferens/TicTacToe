@@ -104,18 +104,33 @@ class GameLogic {
      * @return bool true если ход валиден
      */
     public static function validateMove($board, $position) {
+        // Проверяем, что board - это массив
+        if (!is_array($board)) {
+            return false;
+        }
+        
         $board_size = defined('BOARD_SIZE') ? BOARD_SIZE : 3;
         $max_position = $board_size * $board_size - 1;
         
         // Проверка диапазона
-        if (!is_numeric($position) || $position < 0 || $position > $max_position) {
+        if (!is_numeric($position)) {
             return false;
         }
         
         $pos = (int)$position;
         
-        // Проверка, что ячейка свободна
-        return isset($board[$pos]) && empty($board[$pos]);
+        if ($pos < 0 || $pos > $max_position) {
+            return false;
+        }
+        
+        // Проверка, что индекс существует в массиве
+        if (!isset($board[$pos]) && !array_key_exists($pos, $board)) {
+            return false;
+        }
+        
+        // Проверка, что ячейка свободна (пустая строка или null)
+        $cell_value = $board[$pos];
+        return ($cell_value === '' || $cell_value === null || $cell_value === false);
     }
     
     /**

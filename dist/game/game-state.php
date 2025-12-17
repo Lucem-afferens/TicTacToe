@@ -11,7 +11,10 @@ class GameState {
      * @return array Данные игры
      */
     public static function createGame($tg_id) {
-        require_once __DIR__ . '/game-logic.php';
+        // game-logic.php уже должен быть подключен, но на всякий случай
+        if (!class_exists('GameLogic')) {
+            require_once __DIR__ . '/game-logic.php';
+        }
         
         $game_id = uniqid('game_') . '_' . mt_rand(1000, 9999);
         $board = GameLogic::createEmptyBoard();
@@ -39,16 +42,32 @@ class GameState {
      * @return array Обновленные данные игры
      */
     public static function makeMove($game_data, $position, $symbol) {
-        require_once __DIR__ . '/game-logic.php';
+        // game-logic.php уже должен быть подключен
+        if (!class_exists('GameLogic')) {
+            require_once __DIR__ . '/game-logic.php';
+        }
+        
+        // Проверяем входные данные
+        if (!isset($game_data['board']) || !is_array($game_data['board'])) {
+            return null;
+        }
         
         // Проверяем валидность хода
         if (!GameLogic::validateMove($game_data['board'], $position)) {
             return null;
         }
         
+        // Создаем копию массива для безопасности
+        $new_game_data = $game_data;
+        
         // Делаем ход
-        $game_data['board'][$position] = $symbol;
-        $game_data['moves'][] = [
+        $new_game_data['board'][$position] = $symbol;
+        // Инициализируем moves если его нет
+        if (!isset($new_game_data['moves']) || !is_array($new_game_data['moves'])) {
+            $new_game_data['moves'] = [];
+        }
+        
+        $new_game_data['moves'][] = [
             'position' => $position,
             'symbol' => $symbol,
             'timestamp' => time()
@@ -58,17 +77,20 @@ class GameState {
         $player_symbol = defined('PLAYER_SYMBOL') ? PLAYER_SYMBOL : 'X';
         $bot_symbol = defined('BOT_SYMBOL') ? BOT_SYMBOL : 'O';
         
-        if (GameLogic::checkWin($game_data['board'], $symbol)) {
-            $game_data['status'] = $symbol === $player_symbol ? 'player_win' : 'bot_win';
-            $game_data['finished_at'] = date('Y-m-d H:i:s');
-            $game_data['finished_at_timestamp'] = time();
-        } elseif (GameLogic::checkDraw($game_data['board'])) {
-            $game_data['status'] = 'draw';
-            $game_data['finished_at'] = date('Y-m-d H:i:s');
-            $game_data['finished_at_timestamp'] = time();
+        if (GameLogic::checkWin($new_game_data['board'], $symbol)) {
+            $new_game_data['status'] = $symbol === $player_symbol ? 'player_win' : 'bot_win';
+            $new_game_data['finished_at'] = date('Y-m-d H:i:s');
+            $new_game_data['finished_at_timestamp'] = time();
+        } elseif (GameLogic::checkDraw($new_game_data['board'])) {
+            $new_game_data['status'] = 'draw';
+            $new_game_data['finished_at'] = date('Y-m-d H:i:s');
+            $new_game_data['finished_at_timestamp'] = time();
+        } else {
+            // Убеждаемся, что статус установлен
+            $new_game_data['status'] = 'in_progress';
         }
         
-        return $game_data;
+        return $new_game_data;
     }
     
     /**
