@@ -77,7 +77,7 @@ if (isset($update['message'])) {
             break;
             
         default:
-            // Обработка данных из WebApp
+            // Обработка данных из WebApp (через sendData)
             if (isset($message['web_app_data'])) {
                 $webapp_data = json_decode($message['web_app_data']['data'], true);
                 
@@ -87,7 +87,7 @@ if (isset($update['message'])) {
                             if (isset($webapp_data['promo_code'])) {
                                 $promo_code = $webapp_data['promo_code'];
                                 sendMessage($chat_id, BotMessages::win($promo_code));
-                                Logger::userAction('Game won', $chat_id, [
+                                Logger::userAction('Game won (via WebApp sendData)', $chat_id, [
                                     'promo_code' => $promo_code,
                                     'game_id' => $webapp_data['game_id'] ?? null
                                 ]);
@@ -96,12 +96,12 @@ if (isset($update['message'])) {
                             
                         case 'lose':
                             sendMessage($chat_id, BotMessages::LOSE);
-                            Logger::userAction('Game lost', $chat_id);
+                            Logger::userAction('Game lost (via WebApp sendData)', $chat_id);
                             break;
                             
                         case 'draw':
                             sendMessage($chat_id, BotMessages::DRAW);
-                            Logger::userAction('Game draw', $chat_id);
+                            Logger::userAction('Game draw (via WebApp sendData)', $chat_id);
                             break;
                     }
                 }

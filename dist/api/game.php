@@ -305,6 +305,35 @@ switch ($action) {
                     if ($result === 'player_win') {
                         $promo_code = PromoCode::generate($tg_id, $game_data['game_id']);
                         $response['promo_code'] = $promo_code;
+                        
+                        // Отправляем сообщение в бот с поздравлением и промокодом
+                        try {
+                            require_once $base_path . '/bot/messages.php';
+                            require_once $base_path . '/bot/bot-handler.php';
+                            
+                            $win_message = BotMessages::win($promo_code);
+                            $chat_id = $tg_id; // В Telegram chat_id = user_id для личных сообщений
+                            
+                            if (function_exists('sendMessage')) {
+                                $sent = sendMessage($chat_id, $win_message);
+                                if ($sent) {
+                                    safeLog('info', 'Win message sent to bot', [
+                                        'tg_id' => $tg_id,
+                                        'promo_code' => $promo_code
+                                    ]);
+                                } else {
+                                    safeLog('error', 'Failed to send win message to bot', [
+                                        'tg_id' => $tg_id
+                                    ]);
+                                }
+                            }
+                        } catch (Exception $e) {
+                            // Логируем ошибку, но не прерываем выполнение
+                            safeLog('error', 'Error sending win message', [
+                                'message' => $e->getMessage(),
+                                'tg_id' => $tg_id
+                            ]);
+                        }
                     }
                     
                     safeLog('info', 'Game finished', [
