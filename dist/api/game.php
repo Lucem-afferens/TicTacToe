@@ -299,29 +299,62 @@ switch ($action) {
             // Если игра закончена, сохраняем и генерируем промокод при победе
             if ($result !== 'in_progress') {
                 try {
+                    // Убеждаемся, что tg_id есть в game_data
+                    if (!isset($game_data['tg_id'])) {
+                        $game_data['tg_id'] = $tg_id;
+                    }
+                    
+                    // Нормализуем tg_id
+                    $game_data['tg_id'] = (string)$game_data['tg_id'];
+                    
+                    safeLog('info', 'Game finished, preparing to save', [
+                        'game_id' => $game_data['game_id'] ?? null,
+                        'tg_id' => $game_data['tg_id'],
+                        'result' => $result,
+                        'has_tg_id' => isset($game_data['tg_id'])
+                    ]);
+                    
                     // Генерируем промокод ПЕРЕД сохранением, чтобы добавить его в game_data
                     if ($result === 'player_win') {
                         $promo_code = PromoCode::generate($tg_id, $game_data['game_id']);
                         $response['promo_code'] = $promo_code;
                         // Добавляем промокод в данные игры для истории
                         $game_data['promo_code'] = $promo_code;
+                        
+                        safeLog('info', 'Promo code generated and added to game_data', [
+                            'game_id' => $game_data['game_id'],
+                            'promo_code' => $promo_code
+                        ]);
                     }
                     
                     // Сохраняем игру (с промокодом если есть)
                     $saved = GameStorage::saveGame($game_data);
                     if (!$saved) {
                         safeLog('error', 'Failed to save game to file', [
-                            'game_id' => $game_data['game_id'] ?? null
+                            'game_id' => $game_data['game_id'] ?? null,
+                            'tg_id' => $game_data['tg_id'] ?? null,
+                            'result' => $result,
+                            'game_data_keys' => array_keys($game_data)
                         ]);
                     } else {
-                        safeLog('info', 'Game saved successfully', [
+                        safeLog('info', 'Game saved successfully to file', [
                             'game_id' => $game_data['game_id'] ?? null,
-                            'result' => $result
+                            'tg_id' => $game_data['tg_id'] ?? null,
+                            'result' => $result,
+                            'has_promo' => isset($game_data['promo_code'])
                         ]);
                     }
                     
                     // Обновляем статистику
-                    GameStorage::updateStatistics($game_data);
+                    try {
+                        GameStorage::updateStatistics($game_data);
+                        safeLog('info', 'Statistics updated', ['tg_id' => $game_data['tg_id']]);
+                    } catch (Exception $e) {
+                        safeLog('error', 'Error updating statistics', [
+                            'message' => $e->getMessage(),
+                            'tg_id' => $game_data['tg_id']
+                        ]);
+                    }
                     
                     // Отправляем сообщение в бот при победе
                     if ($result === 'player_win' && isset($promo_code)) {
@@ -403,8 +436,28 @@ switch ($action) {
     case 'history':
         // Получение истории игр пользователя
         try {
-            $games = GameStorage::loadGames($tg_id);
-            $stats = GameStorage::getStatistics($tg_id);
+            // Нормализуем tg_id
+            $tg_id_normalized = (string)$tg_id;
+            
+            safeLog('info', 'Loading history', [
+                'tg_id' => $tg_id,
+                'tg_id_normalized' => $tg_id_normalized
+            ]);
+            
+            $games = GameStorage::loadGames($tg_id_normalized);
+            $stats = GameStorage::getStatistics($tg_id_normalized);
+            
+            safeLog('info', 'Games loaded from storage', [
+                'tg_id' => $tg_id_normalized,
+                'games_count' => count($games),
+                'games_sample' => count($games) > 0 ? [
+                    'first_game' => [
+                        'game_id' => $games[0]['game_id'] ?? null,
+                        'tg_id' => $games[0]['tg_id'] ?? null,
+                        'status' => $games[0]['status'] ?? null
+                    ]
+                ] : []
+            ]);
             
             // Загружаем промокоды для победных игр (если не были добавлены при сохранении)
             $promo_codes = loadJsonFile('data/promo-codes.json', []);
@@ -414,6 +467,11 @@ switch ($action) {
                     $promo_map[$promo['game_id']] = $promo['code'];
                 }
             }
+            
+            safeLog('info', 'Promo codes loaded', [
+                'promo_codes_count' => count($promo_codes),
+                'promo_map_size' => count($promo_map)
+            ]);
             
             // Добавляем промокоды к играм (если их еще нет)
             foreach ($games as &$game) {
@@ -433,10 +491,11 @@ switch ($action) {
                 }
             }
             
-            safeLog('info', 'History loaded', [
-                'tg_id' => $tg_id,
+            safeLog('info', 'History processed', [
+                'tg_id' => $tg_id_normalized,
                 'total_games' => count($games),
-                'finished_games' => count($finished_games)
+                'finished_games' => count($finished_games),
+                'stats' => $stats
             ]);
             
             echo json_encode([
@@ -451,7 +510,7 @@ switch ($action) {
                 'tg_id' => $tg_id
             ]);
             http_response_code(500);
-            echo json_encode(['error' => 'Failed to load history']);
+            echo json_encode(['error' => 'Failed to load history: ' . $e->getMessage()]);
             exit;
         }
         break;

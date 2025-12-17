@@ -19,9 +19,12 @@ class GameState {
         $game_id = uniqid('game_') . '_' . mt_rand(1000, 9999);
         $board = GameLogic::createEmptyBoard();
         
+        // Нормализуем tg_id (сохраняем как строку)
+        $tg_id_normalized = (string)$tg_id;
+        
         $game_data = [
             'game_id' => $game_id,
-            'tg_id' => $tg_id,
+            'tg_id' => $tg_id_normalized,
             'board' => $board,
             'current_player' => defined('PLAYER_SYMBOL') ? PLAYER_SYMBOL : 'X',
             'status' => 'in_progress',
