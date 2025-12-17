@@ -63,28 +63,28 @@ class HistoryManager {
             return;
         }
         
-        // Статистика
+        // Статистика - новая структура v2
         let statsHtml = '';
         if (stats) {
             statsHtml = `
-                <div class="history-stats">
-                    <h3>📈 Статистика</h3>
-                    <div class="stats-grid">
-                        <div class="stat-item">
-                            <div class="stat-value">${stats.total_games || 0}</div>
-                            <div class="stat-label">Всего игр</div>
+                <div class="stats-container-v2">
+                    <h3 class="stats-title-v2">📈 Статистика</h3>
+                    <div class="stats-grid-v2">
+                        <div class="stat-card-v2">
+                            <div class="stat-number-v2">${stats.total_games || 0}</div>
+                            <div class="stat-text-v2">Всего игр</div>
                         </div>
-                        <div class="stat-item stat-win">
-                            <div class="stat-value">${stats.wins || 0}</div>
-                            <div class="stat-label">Побед</div>
+                        <div class="stat-card-v2 stat-card-win-v2">
+                            <div class="stat-number-v2 stat-number-win-v2">${stats.wins || 0}</div>
+                            <div class="stat-text-v2">Побед</div>
                         </div>
-                        <div class="stat-item stat-lose">
-                            <div class="stat-value">${stats.losses || 0}</div>
-                            <div class="stat-label">Проигрышей</div>
+                        <div class="stat-card-v2 stat-card-lose-v2">
+                            <div class="stat-number-v2 stat-number-lose-v2">${stats.losses || 0}</div>
+                            <div class="stat-text-v2">Проигрышей</div>
                         </div>
-                        <div class="stat-item stat-draw">
-                            <div class="stat-value">${stats.draws || 0}</div>
-                            <div class="stat-label">Ничьих</div>
+                        <div class="stat-card-v2 stat-card-draw-v2">
+                            <div class="stat-number-v2 stat-number-draw-v2">${stats.draws || 0}</div>
+                            <div class="stat-text-v2">Ничьих</div>
                         </div>
                     </div>
                 </div>
