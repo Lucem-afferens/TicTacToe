@@ -92,14 +92,21 @@ class HistoryManager {
         }
         
         // Список игр
-        let gamesHtml = '<div class="history-games"><h3>🎮 История игр</h3>';
-        
         // Сортируем игры по дате (новые сначала)
         const sortedGames = [...games].sort((a, b) => {
             const timeA = a.finished_at_timestamp || a.created_at_timestamp || 0;
             const timeB = b.finished_at_timestamp || b.created_at_timestamp || 0;
             return timeB - timeA;
         });
+        
+        const totalGames = sortedGames.length;
+        const visibleGamesCount = 5; // Показываем первые 5 игр
+        
+        let gamesHtml = `
+            <div class="history-games">
+                <h3>🎮 История игр ${totalGames > visibleGamesCount ? `(${totalGames})` : ''}</h3>
+                <div class="history-games-list">
+        `;
         
         sortedGames.forEach((game, index) => {
             const status = game.status || 'in_progress';
@@ -131,8 +138,11 @@ class HistoryManager {
                     statusText = 'В процессе';
             }
             
+            // Первые 5 игр видимы сразу, остальные скрыты (но доступны при скролле)
+            const isVisible = index < visibleGamesCount;
+            
             gamesHtml += `
-                <div class="history-game-item">
+                <div class="history-game-item ${isVisible ? 'visible' : ''}">
                     <div class="game-header">
                         <span class="game-number">#${index + 1}</span>
                         <span class="game-status ${status}">
@@ -145,7 +155,10 @@ class HistoryManager {
             `;
         });
         
-        gamesHtml += '</div>';
+        gamesHtml += `
+                </div>
+            </div>
+        `;
         
         historyContent.innerHTML = statsHtml + gamesHtml;
     }

@@ -366,6 +366,36 @@ h2 {
   font-size: 1.2rem;
 }
 
+.history-games-list {
+  max-height: 400px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: var(--spacing-xs);
+  /* Плавный скролл */
+  scroll-behavior: smooth;
+  /* Стилизация скроллбара для WebKit браузеров */
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-primary) var(--color-bg);
+}
+
+.history-games-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.history-games-list::-webkit-scrollbar-track {
+  background: var(--color-bg);
+  border-radius: var(--border-radius-small);
+}
+
+.history-games-list::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: var(--border-radius-small);
+}
+
+.history-games-list::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent);
+}
+
 .history-game-item {
   background: white;
   border-radius: var(--border-radius);
