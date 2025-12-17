@@ -52,19 +52,37 @@ h2 {
   line-height: 1.4;
 }
 
-/* Контейнер игры - мягкая карточка */
+/* Контейнер игры - эффект жидкого стекла */
 .game-container {
   width: 100%;
   max-width: 420px;
-  background: var(--color-bg-secondary);
+  background: rgba(255, 249, 245, 0.7); /* Полупрозрачный фон */
   border-radius: var(--border-radius-large);
   padding: var(--spacing-xl);
-  box-shadow: var(--shadow-soft);
-  border: 1px solid rgba(232, 180, 184, 0.1); /* Мягкая граница */
-  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-soft), 0 8px 32px rgba(232, 180, 184, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.5); /* Светлая граница */
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  position: relative;
+  overflow: hidden;
 }
 
-/* Игровое поле - очень мягкое */
+.game-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.8), 
+    transparent
+  );
+  pointer-events: none;
+}
+
+/* Игровое поле - эффект жидкого стекла */
 .game-board {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -73,17 +91,20 @@ h2 {
   width: var(--board-size);
   height: var(--board-size);
   margin: var(--spacing-lg) auto;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(253, 248, 244, 0.6) 100%);
+  background: rgba(255, 255, 255, 0.4); /* Полупрозрачный */
   padding: var(--spacing-md);
   border-radius: var(--border-radius-large);
-  box-shadow: var(--shadow-soft);
-  border: 1px solid rgba(232, 180, 184, 0.15);
+  box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(15px) saturate(150%);
+  -webkit-backdrop-filter: blur(15px) saturate(150%);
+  position: relative;
 }
 
-/* Ячейка игрового поля - мягкая, уютная */
+/* Ячейка игрового поля - эффект жидкого стекла */
 .game-cell {
-  background: rgba(255, 255, 255, 0.9);
-  border: 2px solid rgba(232, 180, 184, 0.3);
+  background: rgba(255, 255, 255, 0.6); /* Полупрозрачное стекло */
+  border: 1.5px solid rgba(255, 255, 255, 0.8);
   border-radius: var(--border-radius-medium);
   display: flex;
   align-items: center;
@@ -93,14 +114,36 @@ h2 {
   transition: all var(--transition-normal);
   position: relative;
   overflow: hidden;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px) saturate(120%);
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
+}
+
+.game-cell::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.3) 0%, 
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+  pointer-events: none;
 }
 
 .game-cell:hover:not(.disabled) {
-  background: rgba(255, 255, 255, 1);
-  border-color: rgba(232, 180, 184, 0.5);
-  transform: scale(1.02); /* Меньше масштаб для мягкости */
-  box-shadow: var(--shadow-md);
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(255, 255, 255, 0.9);
+  transform: scale(1.02);
+  box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.game-cell:hover:not(.disabled)::before {
+  opacity: 1;
 }
 
 .game-cell.disabled {
@@ -136,23 +179,25 @@ h2 {
   }
 }
 
-/* Кнопки - мягкие, приглашающие */
+/* Кнопки - эффект жидкого стекла */
 .button {
-  background: var(--gradient-primary);
+  background: rgba(232, 180, 184, 0.7); /* Полупрозрачный стеклянный фон */
   color: var(--color-text-white);
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: var(--border-radius-large);
   padding: var(--spacing-md) var(--spacing-xl);
   font-size: 1.05rem;
-  font-weight: 500; /* Мягче, не жирный */
+  font-weight: 500;
   cursor: pointer;
   transition: all var(--transition-normal);
   width: 100%;
   margin-top: var(--spacing-md);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.6);
   letter-spacing: 0.01em;
   position: relative;
   overflow: hidden;
+  backdrop-filter: blur(15px) saturate(150%);
+  -webkit-backdrop-filter: blur(15px) saturate(150%);
 }
 
 .button::before {
@@ -162,8 +207,27 @@ h2 {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.3), 
+    transparent
+  );
   transition: left var(--transition-slow);
+}
+
+.button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.8), 
+    transparent
+  );
+  pointer-events: none;
 }
 
 .button:hover:not(:disabled)::before {
@@ -171,10 +235,11 @@ h2 {
 }
 
 .button:hover:not(:disabled) {
-  background: var(--gradient-primary);
-  transform: translateY(-1px); /* Меньше движение */
-  box-shadow: var(--shadow-md);
-  filter: brightness(1.05);
+  background: rgba(232, 180, 184, 0.85);
+  border-color: rgba(255, 255, 255, 0.7);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  filter: brightness(1.08);
 }
 
 .button:active:not(:disabled) {
@@ -189,52 +254,58 @@ h2 {
 }
 
 .button-secondary {
-  background: linear-gradient(135deg, var(--color-tertiary) 0%, rgba(184, 197, 216, 0.8) 100%);
+  background: rgba(184, 197, 216, 0.6);
   color: var(--color-text-white);
+  border-color: rgba(255, 255, 255, 0.5);
 }
 
 .button-secondary:hover:not(:disabled) {
-  background: linear-gradient(135deg, var(--color-tertiary) 0%, rgba(184, 197, 216, 1) 100%);
+  background: rgba(184, 197, 216, 0.8);
+  border-color: rgba(255, 255, 255, 0.7);
 }
 
 .button-accent {
-  background: var(--gradient-accent);
+  background: rgba(168, 197, 160, 0.7);
   color: var(--color-text-white);
+  border-color: rgba(255, 255, 255, 0.5);
 }
 
 .button-accent:hover:not(:disabled) {
-  background: var(--gradient-accent);
-  filter: brightness(1.05);
+  background: rgba(168, 197, 160, 0.85);
+  border-color: rgba(255, 255, 255, 0.7);
 }
 
-/* Сообщения - мягкие, успокаивающие */
+/* Сообщения - эффект жидкого стекла */
 .message {
   text-align: center;
   padding: var(--spacing-md) var(--spacing-lg);
   border-radius: var(--border-radius-medium);
   margin: var(--spacing-md) 0;
   font-size: 1.05rem;
-  font-weight: 400; /* Мягче */
+  font-weight: 400;
   line-height: 1.6;
-  border: 1px solid transparent;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(15px) saturate(150%);
+  -webkit-backdrop-filter: blur(15px) saturate(150%);
+  box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 .message.success {
-  background: var(--color-success-light);
+  background: rgba(168, 197, 160, 0.3);
   color: var(--color-text-accent);
-  border-color: rgba(168, 197, 160, 0.3);
+  border-color: rgba(255, 255, 255, 0.6);
 }
 
 .message.error {
-  background: var(--color-error-light);
+  background: rgba(232, 180, 184, 0.3);
   color: var(--color-text-main);
-  border-color: rgba(232, 180, 184, 0.3);
+  border-color: rgba(255, 255, 255, 0.6);
 }
 
 .message.info {
-  background: rgba(184, 197, 216, 0.2);
+  background: rgba(184, 197, 216, 0.3);
   color: var(--color-text-main);
-  border-color: rgba(184, 197, 216, 0.3);
+  border-color: rgba(255, 255, 255, 0.6);
 }
 
 /* Промокод - элегантный, приятный */
@@ -253,17 +324,41 @@ h2 {
 
 .promo-code-value {
   font-size: 2.25rem;
-  font-weight: 500; /* Мягче */
+  font-weight: 500;
   color: var(--color-text-main);
   letter-spacing: 0.15em;
   padding: var(--spacing-lg) var(--spacing-xl);
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.5); /* Полупрозрачное стекло */
   border-radius: var(--border-radius-large);
-  border: 2px dashed rgba(232, 180, 184, 0.4);
+  border: 1.5px solid rgba(255, 255, 255, 0.7);
   margin: var(--spacing-md) 0;
   animation: promoAppear 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: var(--shadow-soft);
+  box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.8);
   font-family: 'Inter', monospace;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  position: relative;
+  overflow: hidden;
+}
+
+.promo-code-value::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.4), 
+    transparent
+  );
+  animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
 }
 
 @keyframes promoAppear {
@@ -387,10 +482,29 @@ h2 {
 .history-stats {
   margin-bottom: var(--spacing-xl);
   padding: var(--spacing-xl);
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.5); /* Полупрозрачное стекло */
   border-radius: var(--border-radius-large);
-  box-shadow: var(--shadow-soft);
-  border: 1px solid rgba(232, 180, 184, 0.1);
+  box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  position: relative;
+  overflow: hidden;
+}
+
+.history-stats::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.8), 
+    transparent
+  );
+  pointer-events: none;
 }
 
 .history-stats h3 {
@@ -410,16 +524,20 @@ h2 {
 .stat-item {
   text-align: center;
   padding: var(--spacing-lg);
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.4); /* Полупрозрачное стекло */
   border-radius: var(--border-radius-medium);
-  border: 1px solid rgba(232, 180, 184, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.6);
   transition: all var(--transition-normal);
+  backdrop-filter: blur(10px) saturate(150%);
+  -webkit-backdrop-filter: blur(10px) saturate(150%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
 .stat-item:hover {
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.7);
+  border-color: rgba(255, 255, 255, 0.8);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .stat-value {
@@ -490,20 +608,42 @@ h2 {
 }
 
 .history-game-item {
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.5); /* Полупрозрачное стекло */
   border-radius: var(--border-radius-medium);
   padding: var(--spacing-lg);
   margin-bottom: var(--spacing-md);
-  box-shadow: var(--shadow-soft);
+  box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.7);
   border-left: 3px solid rgba(232, 180, 184, 0.4);
+  border-top: 1px solid rgba(255, 255, 255, 0.6);
+  border-right: 1px solid rgba(255, 255, 255, 0.6);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.6);
   transition: all var(--transition-normal);
-  border: 1px solid rgba(232, 180, 184, 0.15);
+  backdrop-filter: blur(15px) saturate(160%);
+  -webkit-backdrop-filter: blur(15px) saturate(160%);
+  position: relative;
+  overflow: hidden;
+}
+
+.history-game-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.6), 
+    transparent
+  );
+  pointer-events: none;
 }
 
 .history-game-item:hover {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.75);
+  border-color: rgba(255, 255, 255, 0.8);
   transform: translateX(4px);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .history-game-item.player_win {
@@ -560,10 +700,13 @@ h2 {
 .game-promo-code {
   margin-top: var(--spacing-md);
   padding: var(--spacing-md);
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.4); /* Полупрозрачное стекло */
   border-radius: var(--border-radius-medium);
   font-size: 0.95rem;
-  border: 1px solid rgba(232, 180, 184, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(10px) saturate(150%);
+  -webkit-backdrop-filter: blur(10px) saturate(150%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
 .game-promo-code code {
@@ -571,11 +714,14 @@ h2 {
   font-weight: 500;
   color: var(--color-text-main);
   letter-spacing: 0.12em;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.6);
   padding: var(--spacing-sm) var(--spacing-md);
   border-radius: var(--border-radius-small);
   font-family: 'Inter', monospace;
-  border: 1px dashed rgba(232, 180, 184, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 /* Скрытие элементов */
