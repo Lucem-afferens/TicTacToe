@@ -92,19 +92,41 @@ switch ($action) {
         $game_id = $data['game_id'] ?? '';
         $position = $data['position'] ?? null;
         
+        Logger::info('Game move request', [
+            'tg_id' => $tg_id,
+            'game_id' => $game_id,
+            'position' => $position,
+            'position_type' => gettype($position)
+        ]);
+        
         if (empty($game_id) || $position === null) {
+            Logger::error('Missing game_id or position', [
+                'game_id' => $game_id,
+                'position' => $position
+            ]);
             http_response_code(400);
             echo json_encode(['error' => 'Missing game_id or position']);
             exit;
         }
         
-        // Загружаем игру (в реальности нужно загружать из хранилища)
-        // Пока используем данные из запроса
+        // Преобразуем position в число
+        $position = (int)$position;
+        
+        // Загружаем игру из запроса
         $game_data = $data['game'] ?? null;
         
         if (!$game_data) {
+            Logger::error('Game data not provided', ['game_id' => $game_id]);
             http_response_code(400);
             echo json_encode(['error' => 'Game data not provided']);
+            exit;
+        }
+        
+        // Проверяем наличие board
+        if (!isset($game_data['board']) || !is_array($game_data['board'])) {
+            Logger::error('Invalid game board', ['game_data' => $game_data]);
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid game board']);
             exit;
         }
         
@@ -112,17 +134,35 @@ switch ($action) {
         
         // Валидация хода
         if (!GameLogic::validateMove($game_data['board'], $position)) {
+            Logger::error('Invalid move', [
+                'position' => $position,
+                'board' => $game_data['board']
+            ]);
             http_response_code(400);
-            echo json_encode(['error' => 'Invalid move']);
+            echo json_encode(['error' => 'Invalid move - cell already taken or out of range']);
             exit;
         }
         
         // Делаем ход игрока
-        $game_data = GameState::makeMove($game_data, $position, $player_symbol);
-        
-        if (!$game_data) {
-            http_response_code(400);
-            echo json_encode(['error' => 'Failed to make move']);
+        try {
+            $game_data = GameState::makeMove($game_data, $position, $player_symbol);
+            
+            if (!$game_data) {
+                Logger::error('Failed to make move', [
+                    'position' => $position,
+                    'game_data' => $game_data
+                ]);
+                http_response_code(400);
+                echo json_encode(['error' => 'Failed to make move']);
+                exit;
+            }
+        } catch (Exception $e) {
+            Logger::error('Exception during move', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            http_response_code(500);
+            echo json_encode(['error' => 'Server error: ' . $e->getMessage()]);
             exit;
         }
         

@@ -271,22 +271,34 @@ class TicTacToeGame {
      * API запрос
      */
     async apiRequest(action, data) {
-        const response = await fetch(this.apiUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                action: action,
-                ...data
-            })
-        });
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        try {
+            const response = await fetch(this.apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: action,
+                    ...data
+                })
+            });
+            
+            const responseData = await response.json();
+            
+            if (!response.ok) {
+                console.error('API Error:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    data: responseData
+                });
+                throw new Error(responseData.error || `HTTP error! status: ${response.status}`);
+            }
+            
+            return responseData;
+        } catch (error) {
+            console.error('API Request Error:', error);
+            throw error;
         }
-        
-        return await response.json();
     }
     
     /**
