@@ -23,7 +23,31 @@ class TicTacToeGame {
         // game.php находится в /web/, assets/images/ находится в /web/assets/images/
         this.imagesPath = 'assets/images/';
         
+        // Предзагружаем изображения для плавного отображения
+        this.imageCache = {
+            X: null,
+            O: null
+        };
+        this.preloadImages();
+        
         this.init();
+    }
+    
+    /**
+     * Предзагрузка изображений символов
+     */
+    preloadImages() {
+        // Предзагружаем изображение X
+        this.imageCache.X = new Image();
+        this.imageCache.X.src = this.imagesPath + 'X.png';
+        this.imageCache.X.alt = 'X';
+        this.imageCache.X.className = 'cell-symbol-img';
+        
+        // Предзагружаем изображение O
+        this.imageCache.O = new Image();
+        this.imageCache.O.src = this.imagesPath + 'O.png';
+        this.imageCache.O.alt = 'O';
+        this.imageCache.O.className = 'cell-symbol-img';
     }
     
     /**
@@ -64,6 +88,7 @@ class TicTacToeGame {
             const cell = document.createElement('div');
             cell.className = 'game-cell';
             cell.dataset.index = i;
+            cell.dataset.symbol = ''; // Инициализируем пустым символом
             cell.addEventListener('click', () => this.handleCellClick(i));
             boardElement.appendChild(cell);
         }
@@ -77,6 +102,12 @@ class TicTacToeGame {
             this.gameOver = false;
             this.board = ['', '', '', '', '', '', '', '', ''];
             this.currentPlayer = 'X';
+            
+            // Сбрасываем кэш символов в ячейках
+            const cells = document.querySelectorAll('.game-cell');
+            cells.forEach(cell => {
+                cell.dataset.symbol = '';
+            });
             
             // Очищаем поле
             this.updateBoardDisplay();
@@ -123,9 +154,9 @@ class TicTacToeGame {
             // ВАЖНО: Сохраняем состояние доски ДО хода
             const boardBeforeMove = [...this.board];
             
-            // Визуально обновляем (оптимистичное обновление UI)
+            // Визуально обновляем только одну ячейку (оптимистичное обновление UI)
             this.board[position] = symbol;
-            this.updateBoardDisplay();
+            this.updateCellDisplay(position);
             
             // Отправляем ход на сервер с состоянием ДО хода
             const response = await this.apiRequest('move', {
@@ -143,14 +174,28 @@ class TicTacToeGame {
                 this.showError(response.error || 'Ошибка при выполнении хода');
                 // Откатываем ход
                 this.board = boardBeforeMove;
-                this.updateBoardDisplay();
+                this.updateCellDisplay(position);
                 return;
             }
             
             // Обновляем состояние игры
             if (response.game) {
+                // Обновляем только измененные ячейки
+                const oldBoard = [...this.board];
                 this.board = response.game.board;
-                this.updateBoardDisplay();
+                
+                // Находим измененные ячейки
+                const changedCells = [];
+                for (let i = 0; i < 9; i++) {
+                    if (oldBoard[i] !== this.board[i]) {
+                        changedCells.push(i);
+                    }
+                }
+                
+                // Обновляем только измененные ячейки
+                changedCells.forEach(index => {
+                    this.updateCellDisplay(index);
+                });
                 
                 // Если бот сделал ход
                 if (response.bot_move !== undefined) {
@@ -161,11 +206,65 @@ class TicTacToeGame {
             
             // Проверяем результат
             if (response.result && response.result !== 'in_progress') {
+                // При окончании игры обновляем все ячейки для disabled состояния
+                this.updateBoardDisplay();
                 this.handleGameEnd(response.result, response.promo_code);
             }
         } catch (error) {
             console.error('Error making move:', error);
             this.showError('Ошибка при выполнении хода');
+        }
+    }
+    
+    /**
+     * Обновление одной ячейки (оптимизированное)
+     */
+    updateCellDisplay(index) {
+        const cell = document.querySelector(`.game-cell[data-index="${index}"]`);
+        if (!cell) return;
+        
+        const symbol = this.board[index];
+        const currentSymbol = cell.dataset.symbol || '';
+        
+        // Если символ не изменился, обновляем только состояние disabled
+        if (currentSymbol === symbol) {
+            if (this.gameOver || symbol !== '') {
+                cell.classList.add('disabled');
+            } else {
+                cell.classList.remove('disabled');
+            }
+            return;
+        }
+        
+        // Символ изменился - обновляем ячейку
+        cell.dataset.symbol = symbol;
+        cell.className = 'game-cell';
+        cell.classList.remove('x', 'o', 'disabled');
+        
+        if (symbol === '') {
+            cell.innerHTML = '';
+        } else if (symbol === 'X') {
+            cell.classList.add('x');
+            // Создаем новое изображение на основе предзагруженного
+            const img = document.createElement('img');
+            img.src = this.imageCache.X.src; // Используем уже загруженный src
+            img.alt = 'X';
+            img.className = 'cell-symbol-img';
+            cell.innerHTML = '';
+            cell.appendChild(img);
+        } else if (symbol === 'O') {
+            cell.classList.add('o');
+            // Создаем новое изображение на основе предзагруженного
+            const img = document.createElement('img');
+            img.src = this.imageCache.O.src; // Используем уже загруженный src
+            img.alt = 'O';
+            img.className = 'cell-symbol-img';
+            cell.innerHTML = '';
+            cell.appendChild(img);
+        }
+        
+        if (this.gameOver || symbol !== '') {
+            cell.classList.add('disabled');
         }
     }
     
@@ -215,62 +314,28 @@ class TicTacToeGame {
     
     /**
      * Обновление отображения игрового поля
+     * Оптимизированная версия - обновляет только измененные ячейки
      */
     updateBoardDisplay() {
         const cells = document.querySelectorAll('.game-cell');
         
         cells.forEach((cell, index) => {
             const symbol = this.board[index];
-            cell.className = 'game-cell';
-            cell.innerHTML = ''; // Полностью очищаем содержимое
+            const currentSymbol = cell.dataset.symbol || ''; // Сохраняем текущий символ в data-атрибуте
             
-            if (symbol === 'X') {
-                cell.classList.add('x');
-                const img = document.createElement('img');
-                img.src = this.imagesPath + 'X.png';
-                img.alt = 'X';
-                img.className = 'cell-symbol-img';
-                img.onload = function() {
-                    console.log('✅ X.png loaded from:', img.src);
-                };
-                img.onerror = function() {
-                    console.error('❌ Failed to load X.png from:', img.src);
-                    console.error('Full URL:', window.location.href);
-                    console.error('Images path:', this.imagesPath);
-                    // Fallback на стилизованный текст
-                    cell.innerHTML = '';
-                    const fallback = document.createElement('span');
-                    fallback.textContent = 'X';
-                    fallback.style.cssText = 'font-size: 2.5rem; font-weight: 700; color: var(--color-x); display: block;';
-                    cell.appendChild(fallback);
-                }.bind(this);
-                cell.appendChild(img);
-            } else if (symbol === 'O') {
-                cell.classList.add('o');
-                const img = document.createElement('img');
-                img.src = this.imagesPath + 'O.png';
-                img.alt = 'O';
-                img.className = 'cell-symbol-img';
-                img.onload = function() {
-                    console.log('✅ O.png loaded from:', img.src);
-                };
-                img.onerror = function() {
-                    console.error('❌ Failed to load O.png from:', img.src);
-                    console.error('Full URL:', window.location.href);
-                    console.error('Images path:', this.imagesPath);
-                    // Fallback на стилизованный текст
-                    cell.innerHTML = '';
-                    const fallback = document.createElement('span');
-                    fallback.textContent = 'O';
-                    fallback.style.cssText = 'font-size: 2.5rem; font-weight: 700; color: var(--color-o); display: block;';
-                    cell.appendChild(fallback);
-                }.bind(this);
-                cell.appendChild(img);
+            // Обновляем только если символ изменился
+            if (currentSymbol === symbol) {
+                // Символ не изменился - обновляем только классы состояния
+                if (this.gameOver || symbol !== '') {
+                    cell.classList.add('disabled');
+                } else {
+                    cell.classList.remove('disabled');
+                }
+                return; // Пропускаем ячейку, которая не изменилась
             }
             
-            if (this.gameOver || symbol !== '') {
-                cell.classList.add('disabled');
-            }
+            // Символ изменился - используем оптимизированное обновление одной ячейки
+            this.updateCellDisplay(index);
         });
     }
     
