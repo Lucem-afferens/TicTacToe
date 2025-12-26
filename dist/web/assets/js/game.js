@@ -260,9 +260,21 @@ class TicTacToeGame {
     blockAllCells() {
         const cells = document.querySelectorAll('.game-cell');
         cells.forEach(cell => {
-            cell.classList.add('processing');
+            const index = parseInt(cell.dataset.index);
+            const isEmpty = this.board[index] === '';
+            
+            // Блокируем все ячейки функционально
             cell.style.pointerEvents = 'none';
             cell.style.cursor = 'wait';
+            
+            // Добавляем класс processing только для визуальной блокировки
+            // Но спиннер будет показываться только на заполненных ячейках (через CSS)
+            if (!isEmpty) {
+                cell.classList.add('processing');
+            } else {
+                // Для пустых ячеек просто блокируем, но без спиннера
+                cell.classList.add('processing');
+            }
         });
     }
     
@@ -278,6 +290,9 @@ class TicTacToeGame {
                 cell.classList.remove('processing');
                 cell.style.pointerEvents = '';
                 cell.style.cursor = '';
+            } else if (this.board[index] !== '') {
+                // Для заполненных ячеек убираем только processing класс (спиннер)
+                cell.classList.remove('processing');
             }
         });
     }

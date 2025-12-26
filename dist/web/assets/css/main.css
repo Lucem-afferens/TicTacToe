@@ -124,9 +124,9 @@ h2 {
 /* Ячейки с символами - убираем размытие для максимальной четкости */
 .game-cell.x,
 .game-cell.o {
-  backdrop-filter: blur(2px) saturate(140%); /* Минимальное размытие для символов */
-  -webkit-backdrop-filter: blur(2px) saturate(140%);
-  background: rgba(255, 255, 255, 0.85); /* Более непрозрачный фон */
+  backdrop-filter: none !important; /* Полностью убираем размытие для четкости символов */
+  -webkit-backdrop-filter: none !important;
+  background: rgba(255, 255, 255, 0.95) !important; /* Почти непрозрачный фон для яркости */
 }
 
 .game-cell::before {
@@ -167,12 +167,25 @@ h2 {
 .game-cell.processing {
   cursor: wait !important;
   pointer-events: none !important;
-  opacity: 0.7;
-  background: rgba(255, 255, 255, 0.5);
   position: relative;
 }
 
-.game-cell.processing::after {
+/* Для пустых ячеек - только блокировка без визуальных эффектов */
+.game-cell.processing:not(.x):not(.o) {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+/* Для заполненных ячеек - блокировка с визуальными эффектами */
+.game-cell.processing.x,
+.game-cell.processing.o {
+  opacity: 0.8;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+/* Спиннер загрузки показывается ТОЛЬКО на заполненных ячейках (X или O) */
+.game-cell.processing.x::after,
+.game-cell.processing.o::after {
   content: '';
   position: absolute;
   top: 50%;
@@ -187,6 +200,11 @@ h2 {
   z-index: 10;
 }
 
+/* Пустые ячейки НЕ показывают спиннер */
+.game-cell.processing:not(.x):not(.o)::after {
+  display: none !important;
+}
+
 @keyframes spin {
   to {
     transform: translate(-50%, -50%) rotate(360deg);
@@ -199,8 +217,10 @@ h2 {
 }
 
 .game-cell.x .cell-symbol-img {
-  filter: brightness(1.3) contrast(1.4) saturate(1.3) drop-shadow(0 2px 4px rgba(232, 180, 184, 0.4));
-  -webkit-filter: brightness(1.3) contrast(1.4) saturate(1.3) drop-shadow(0 2px 4px rgba(232, 180, 184, 0.4));
+  filter: brightness(1.5) contrast(1.6) saturate(1.4) drop-shadow(0 2px 6px rgba(232, 180, 184, 0.5)) !important;
+  -webkit-filter: brightness(1.5) contrast(1.6) saturate(1.4) drop-shadow(0 2px 6px rgba(232, 180, 184, 0.5)) !important;
+  opacity: 1 !important;
+  mix-blend-mode: normal !important;
 }
 
 .game-cell.o {
@@ -209,8 +229,10 @@ h2 {
 }
 
 .game-cell.o .cell-symbol-img {
-  filter: brightness(1.3) contrast(1.4) saturate(1.3) drop-shadow(0 2px 4px rgba(184, 197, 216, 0.4));
-  -webkit-filter: brightness(1.3) contrast(1.4) saturate(1.3) drop-shadow(0 2px 4px rgba(184, 197, 216, 0.4));
+  filter: brightness(1.5) contrast(1.6) saturate(1.4) drop-shadow(0 2px 6px rgba(184, 197, 216, 0.5)) !important;
+  -webkit-filter: brightness(1.5) contrast(1.6) saturate(1.4) drop-shadow(0 2px 6px rgba(184, 197, 216, 0.5)) !important;
+  opacity: 1 !important;
+  mix-blend-mode: normal !important;
 }
 
 /* Изображения символов */
@@ -226,13 +248,14 @@ h2 {
   -moz-user-select: none;
   -ms-user-select: none;
   position: relative;
-  z-index: 1; /* Изображения должны быть поверх ::before псевдоэлемента */
+  z-index: 2; /* Изображения должны быть поверх всех эффектов */
   will-change: transform, opacity; /* Оптимизация для GPU */
   backface-visibility: hidden; /* Предотвращает мерцание */
   -webkit-backface-visibility: hidden;
   opacity: 1 !important; /* Полная непрозрачность */
-  filter: brightness(1.2) contrast(1.3) saturate(1.2); /* Увеличиваем яркость, контраст и насыщенность */
-  -webkit-filter: brightness(1.2) contrast(1.3) saturate(1.2);
+  filter: brightness(1.4) contrast(1.5) saturate(1.3) !important; /* Максимальная яркость, контраст и насыщенность */
+  -webkit-filter: brightness(1.4) contrast(1.5) saturate(1.3) !important;
+  mix-blend-mode: normal !important; /* Убираем любые эффекты смешивания */
 }
 
 /* Анимация появления символа */
