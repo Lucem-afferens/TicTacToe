@@ -7,6 +7,12 @@
 // Получаем Telegram ID из параметров
 $tg_id = $_GET['tg_id'] ?? '';
 
+// Версия для кэш-бастинга (обновляется при каждом деплое)
+// Используем время последнего изменения файла или фиксированную версию
+$assets_version = '1.0.0';
+$css_version = file_exists(__DIR__ . '/assets/css/main.css') ? filemtime(__DIR__ . '/assets/css/main.css') : time();
+$js_version = file_exists(__DIR__ . '/assets/js/game.js') ? filemtime(__DIR__ . '/assets/js/game.js') : time();
+
 // Если нет Telegram ID, показываем сообщение
 if (empty($tg_id)) {
     echo '<!DOCTYPE html>
@@ -15,8 +21,13 @@ if (empty($tg_id)) {
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Крестики-Нолики</title>
-        <link rel="stylesheet" href="assets/css/variables.css">
-        <link rel="stylesheet" href="assets/css/main.css">
+        <link rel="stylesheet" href="assets/css/variables.css?v=<?php echo $css_version; ?>">
+        <link rel="stylesheet" href="assets/css/main.css?v=<?php echo $css_version; ?>">
+        
+        <!-- Prevent caching -->
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+        <meta http-equiv="Pragma" content="no-cache">
+        <meta http-equiv="Expires" content="0">
     </head>
     <body>
         <div class="game-container">
@@ -46,8 +57,13 @@ if (empty($tg_id)) {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     
     <!-- Styles -->
-    <link rel="stylesheet" href="assets/css/variables.css">
-    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/variables.css?v=<?php echo $css_version; ?>">
+    <link rel="stylesheet" href="assets/css/main.css?v=<?php echo $css_version; ?>">
+    
+    <!-- Prevent caching -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
 </head>
 <body>
     <div class="game-container">
@@ -98,10 +114,49 @@ if (empty($tg_id)) {
     </div>
     
     <!-- Scripts -->
-    <script src="assets/js/telegram-api.js"></script>
-    <script src="assets/js/promo.js"></script>
-    <script src="assets/js/game.js"></script>
-    <script src="assets/js/history.js"></script>
-    <script src="assets/js/navigation.js"></script>
+    <script src="assets/js/telegram-api.js?v=<?php echo $js_version; ?>"></script>
+    <script src="assets/js/promo.js?v=<?php echo $js_version; ?>"></script>
+    <script src="assets/js/game.js?v=<?php echo $js_version; ?>"></script>
+    <script src="assets/js/history.js?v=<?php echo $js_version; ?>"></script>
+    <script src="assets/js/navigation.js?v=<?php echo $js_version; ?>"></script>
+    
+    <!-- Force reload styles and scripts on page load -->
+    <script>
+        // Принудительное обновление стилей при загрузке
+        (function() {
+            // Обновляем CSS файлы
+            const links = document.querySelectorAll('link[rel="stylesheet"]');
+            links.forEach(function(link) {
+                const href = link.getAttribute('href');
+                if (href && !href.includes('fonts.googleapis.com') && !href.includes('fonts.gstatic.com')) {
+                    const baseHref = href.split('?')[0];
+                    link.href = baseHref + '?v=' + Date.now();
+                }
+            });
+            
+            // Принудительное обновление скриптов
+            const scripts = document.querySelectorAll('script[src]');
+            scripts.forEach(function(script) {
+                const src = script.getAttribute('src');
+                if (src && !src.includes('telegram.org') && !src.includes('?')) {
+                    script.src = src + '?v=' + Date.now();
+                }
+            });
+            
+            // Принудительное обновление стилей после загрузки
+            window.addEventListener('load', function() {
+                // Принудительный reflow для применения всех стилей
+                document.body.offsetHeight;
+                
+                // Обновляем computed styles для всех элементов
+                const allElements = document.querySelectorAll('*');
+                allElements.forEach(function(el) {
+                    if (window.getComputedStyle) {
+                        window.getComputedStyle(el);
+                    }
+                });
+            });
+        })();
+    </script>
 </body>
 </html>

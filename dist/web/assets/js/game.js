@@ -233,6 +233,8 @@ class TicTacToeGame {
             } else {
                 cell.classList.remove('disabled');
             }
+            // Принудительное обновление стилей
+            this.forceStyleUpdate(cell);
             return;
         }
         
@@ -265,6 +267,24 @@ class TicTacToeGame {
         
         if (this.gameOver || symbol !== '') {
             cell.classList.add('disabled');
+        }
+        
+        // Принудительное обновление стилей
+        this.forceStyleUpdate(cell);
+    }
+    
+    /**
+     * Принудительное обновление стилей элемента
+     */
+    forceStyleUpdate(element) {
+        if (!element) return;
+        
+        // Принудительный reflow для применения стилей
+        void element.offsetHeight;
+        
+        // Обновляем computed styles
+        if (window.getComputedStyle) {
+            window.getComputedStyle(element);
         }
     }
     
@@ -331,12 +351,20 @@ class TicTacToeGame {
                 } else {
                     cell.classList.remove('disabled');
                 }
+                // Принудительное обновление стилей
+                this.forceStyleUpdate(cell);
                 return; // Пропускаем ячейку, которая не изменилась
             }
             
             // Символ изменился - используем оптимизированное обновление одной ячейки
             this.updateCellDisplay(index);
         });
+        
+        // Принудительное обновление всего поля
+        const boardElement = document.getElementById('game-board');
+        if (boardElement) {
+            this.forceStyleUpdate(boardElement);
+        }
     }
     
     /**
