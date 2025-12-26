@@ -93,16 +93,17 @@ if (empty($tg_id)) {
                 <button id="copy-promo-btn" class="button button-secondary">📋 Копировать</button>
             </div>
             
-            <!-- Экран результатов (скрыт по умолчанию) -->
-            <div id="result-screen" class="result-screen hidden">
-                <div id="result-icon" class="result-icon" style="display: none;"></div>
-                <div class="result-content">
-                    <button id="play-again-btn" class="button button-primary button-compact">✨ Сыграть ещё</button>
-                    <div class="result-center">
-                        <h2 id="result-title" class="result-title"></h2>
-                        <p class="result-message">Сыграем ещё раз?</p>
+            <!-- Модальное окно результатов (поверх игрового поля) -->
+            <div id="result-modal" class="result-modal hidden">
+                <div class="result-modal-backdrop"></div>
+                <div class="result-modal-content">
+                    <div id="result-icon" class="result-icon" style="display: none;"></div>
+                    <h2 id="result-title" class="result-title"></h2>
+                    <p class="result-message">Сыграем ещё раз?</p>
+                    <div class="result-buttons">
+                        <button id="play-again-btn" class="button button-primary button-compact">✨ Сыграть ещё</button>
+                        <button id="back-to-menu-btn" class="button button-secondary button-compact">🏠 В меню</button>
                     </div>
-                    <button id="back-to-menu-btn" class="button button-secondary button-compact">🏠 В меню</button>
                 </div>
             </div>
         </div>

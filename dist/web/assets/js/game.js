@@ -449,14 +449,14 @@ class TicTacToeGame {
     }
     
     /**
-     * Показ экрана результатов
+     * Показ экрана результатов (модальное окно)
      */
     showResultScreen(message, icon) {
-        const resultScreen = document.getElementById('result-screen');
+        const resultModal = document.getElementById('result-modal');
         const resultIcon = document.getElementById('result-icon');
         const resultTitle = document.getElementById('result-title');
         
-        if (resultScreen) {
+        if (resultModal) {
             // Иконка скрыта, не показываем смайлы
             if (resultIcon) {
                 resultIcon.style.display = 'none';
@@ -464,8 +464,7 @@ class TicTacToeGame {
             if (resultTitle) {
                 resultTitle.textContent = message;
             }
-            resultScreen.classList.remove('hidden');
-            resultScreen.style.display = 'flex'; // Используем flex для лучшего позиционирования
+            resultModal.classList.remove('hidden');
         }
     }
     
@@ -473,10 +472,9 @@ class TicTacToeGame {
      * Скрытие экрана результатов
      */
     hideResultScreen() {
-        const resultScreen = document.getElementById('result-screen');
-        if (resultScreen) {
-            resultScreen.classList.add('hidden');
-            resultScreen.style.display = 'none';
+        const resultModal = document.getElementById('result-modal');
+        if (resultModal) {
+            resultModal.classList.add('hidden');
         }
     }
     

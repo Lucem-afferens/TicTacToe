@@ -438,38 +438,73 @@ h2 {
   }
 }
 
-/* Экран результатов - компактный, с кнопками по бокам */
-.result-screen {
-  padding: var(--spacing-md);
+/* Модальное окно результатов - поверх игрового поля */
+.result-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
   display: flex;
-  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  min-height: 100%;
+  pointer-events: none;
+}
+
+.result-modal.hidden {
+  display: none;
+}
+
+/* Фон модального окна - эффект размытия */
+.result-modal-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(253, 248, 244, 0.3); /* Полупрозрачный фон */
+  backdrop-filter: blur(8px) saturate(150%);
+  -webkit-backdrop-filter: blur(8px) saturate(150%);
+  pointer-events: all;
+}
+
+/* Контент модального окна - эффект жидкого стекла */
+.result-modal-content {
+  position: relative;
+  z-index: 1001;
+  background: rgba(255, 249, 245, 0.85); /* Полупрозрачный фон */
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: var(--border-radius-large);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-lg), 0 8px 32px rgba(232, 180, 184, 0.15);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  text-align: center;
+  max-width: 320px;
+  width: 90%;
+  pointer-events: all;
+  animation: modalAppear 0.3s ease-out;
+}
+
+@keyframes modalAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .result-icon {
   display: none; /* Скрываем иконку со смайлами */
 }
 
-/* Контейнер с результатом по центру и кнопками по бокам */
-.result-content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-md);
-  width: 100%;
-}
-
-/* Центральный блок с результатом */
-.result-center {
-  flex: 1;
-  text-align: center;
-  padding: 0 var(--spacing-sm);
-}
-
 .result-title {
-  font-size: 1.5rem;
-  margin-bottom: var(--spacing-xs);
+  font-size: 1.6rem;
+  margin-bottom: var(--spacing-sm);
   font-weight: 600;
   color: var(--color-text-main);
   line-height: 1.3;
@@ -478,21 +513,26 @@ h2 {
 .result-message {
   font-size: 0.95rem;
   color: var(--color-text-light);
-  margin: 0;
+  margin-bottom: var(--spacing-md);
   line-height: 1.5;
   font-weight: 400;
 }
 
-/* Компактные кнопки по бокам */
+/* Контейнер для кнопок - вертикальное расположение */
+.result-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+}
+
+/* Компактные кнопки друг под другом */
 .button-compact {
-  flex-shrink: 0;
-  width: auto !important;
-  min-width: 100px;
+  width: 100% !important;
   padding: var(--spacing-sm) var(--spacing-md) !important;
   font-size: 0.9rem !important;
   font-weight: 500 !important;
   margin: 0 !important;
-  white-space: nowrap;
 }
 
 .button-compact:hover:not(:disabled) {
