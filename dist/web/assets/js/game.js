@@ -9,6 +9,7 @@ class TicTacToeGame {
         this.gameOver = false;
         this.gameId = null;
         this.tgId = null;
+        this.isProcessingMove = false; // Флаг блокировки во время обработки хода
         // Определяем путь к API относительно текущей страницы
         // Определяем путь к API относительно текущей страницы
         // Если game.php находится в /web/, то API в /api/
@@ -100,6 +101,7 @@ class TicTacToeGame {
     async startNewGame() {
         try {
             this.gameOver = false;
+            this.isProcessingMove = false; // Сбрасываем флаг обработки
             this.board = ['', '', '', '', '', '', '', '', ''];
             this.currentPlayer = 'X';
             
@@ -107,6 +109,9 @@ class TicTacToeGame {
             const cells = document.querySelectorAll('.game-cell');
             cells.forEach(cell => {
                 cell.dataset.symbol = '';
+                cell.classList.remove('processing', 'disabled');
+                cell.style.pointerEvents = '';
+                cell.style.cursor = '';
             });
             
             // Очищаем поле
@@ -125,6 +130,8 @@ class TicTacToeGame {
                 this.gameId = response.game.game_id;
                 this.board = response.game.board;
                 this.updateBoardDisplay();
+                // Разблокируем ячейки после начала игры
+                this.unblockAllCells();
             } else {
                 this.showError('Не удалось начать игру');
             }
@@ -138,6 +145,12 @@ class TicTacToeGame {
      * Обработка клика по ячейке
      */
     async handleCellClick(position) {
+        // Блокируем клики во время обработки хода
+        if (this.isProcessingMove) {
+            return;
+        }
+        
+        // Блокируем клики если игра окончена или ячейка занята
         if (this.gameOver || this.board[position] !== '') {
             return;
         }
@@ -150,7 +163,18 @@ class TicTacToeGame {
      * Выполнение хода
      */
     async makeMove(position, symbol) {
+        // Блокируем повторные клики
+        if (this.isProcessingMove) {
+            return;
+        }
+        
         try {
+            // Устанавливаем флаг обработки хода
+            this.isProcessingMove = true;
+            
+            // Блокируем все ячейки визуально
+            this.blockAllCells();
+            
             // ВАЖНО: Сохраняем состояние доски ДО хода
             const boardBeforeMove = [...this.board];
             
@@ -175,6 +199,9 @@ class TicTacToeGame {
                 // Откатываем ход
                 this.board = boardBeforeMove;
                 this.updateCellDisplay(position);
+                // Разблокируем ячейки
+                this.isProcessingMove = false;
+                this.unblockAllCells();
                 return;
             }
             
@@ -209,11 +236,50 @@ class TicTacToeGame {
                 // При окончании игры обновляем все ячейки для disabled состояния
                 this.updateBoardDisplay();
                 this.handleGameEnd(response.result, response.promo_code);
+                // Игра окончена - не разблокируем ячейки
+                this.isProcessingMove = false;
+                return;
             }
+            
+            // Разблокируем ячейки после завершения хода бота
+            this.isProcessingMove = false;
+            this.unblockAllCells();
+            
         } catch (error) {
             console.error('Error making move:', error);
             this.showError('Ошибка при выполнении хода');
+            // Разблокируем ячейки при ошибке
+            this.isProcessingMove = false;
+            this.unblockAllCells();
         }
+    }
+    
+    /**
+     * Блокировка всех ячеек во время обработки хода
+     */
+    blockAllCells() {
+        const cells = document.querySelectorAll('.game-cell');
+        cells.forEach(cell => {
+            cell.classList.add('processing');
+            cell.style.pointerEvents = 'none';
+            cell.style.cursor = 'wait';
+        });
+    }
+    
+    /**
+     * Разблокировка всех ячеек после обработки хода
+     */
+    unblockAllCells() {
+        const cells = document.querySelectorAll('.game-cell');
+        cells.forEach(cell => {
+            // Убираем блокировку только если ячейка пустая и игра не окончена
+            const index = parseInt(cell.dataset.index);
+            if (!this.gameOver && this.board[index] === '') {
+                cell.classList.remove('processing');
+                cell.style.pointerEvents = '';
+                cell.style.cursor = '';
+            }
+        });
     }
     
     /**
