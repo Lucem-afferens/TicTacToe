@@ -460,6 +460,7 @@ class TicTacToeGame {
             if (resultIcon) resultIcon.textContent = icon;
             if (resultTitle) resultTitle.textContent = message;
             resultScreen.classList.remove('hidden');
+            resultScreen.style.display = 'block';
         }
     }
     
@@ -471,22 +472,6 @@ class TicTacToeGame {
         if (resultScreen) {
             resultScreen.classList.add('hidden');
             resultScreen.style.display = 'none';
-        }
-    }
-    
-    /**
-     * Показ экрана результатов
-     */
-    showResultScreen(message, icon) {
-        const resultScreen = document.getElementById('result-screen');
-        const resultIcon = document.getElementById('result-icon');
-        const resultTitle = document.getElementById('result-title');
-        
-        if (resultScreen) {
-            if (resultIcon) resultIcon.textContent = icon;
-            if (resultTitle) resultTitle.textContent = message;
-            resultScreen.classList.remove('hidden');
-            resultScreen.style.display = 'block';
         }
     }
     
