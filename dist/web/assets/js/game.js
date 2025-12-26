@@ -380,8 +380,8 @@ class TicTacToeGame {
         
         switch (result) {
             case 'player_win':
-                message = '🎉 Победа!';
-                icon = '🎉';
+                message = 'Победа!';
+                icon = '';
                 if (promoCode) {
                     PromoCodeDisplay.show(promoCode);
                     // Отправляем данные в бот
@@ -393,16 +393,16 @@ class TicTacToeGame {
                 }
                 break;
             case 'bot_win':
-                message = 'Проигрыш 💫';
-                icon = '😔';
+                message = 'Проигрыш';
+                icon = '';
                 telegramAPI.sendData({
                     action: 'lose',
                     game_id: this.gameId
                 });
                 break;
             case 'draw':
-                message = 'Ничья 💫';
-                icon = '🤝';
+                message = 'Ничья';
+                icon = '';
                 telegramAPI.sendData({
                     action: 'draw',
                     game_id: this.gameId

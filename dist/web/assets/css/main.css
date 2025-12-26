@@ -246,23 +246,24 @@ h2 {
 
 /* Кнопки - эффект жидкого стекла */
 .button {
-  background: rgba(232, 180, 184, 0.7); /* Полупрозрачный стеклянный фон */
+  background: rgba(232, 180, 184, 0.85); /* Более непрозрачный фон для лучшей видимости */
   color: var(--color-text-white);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  border: 2px solid rgba(255, 255, 255, 0.7); /* Более заметная граница */
   border-radius: var(--border-radius-large);
   padding: var(--spacing-md) var(--spacing-xl);
-  font-size: 1.05rem;
-  font-weight: 500;
+  font-size: 1.1rem;
+  font-weight: 600; /* Более жирный шрифт */
   cursor: pointer;
   transition: all var(--transition-normal);
   width: 100%;
   margin-top: var(--spacing-md);
-  box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.7); /* Более заметная тень */
   letter-spacing: 0.01em;
   position: relative;
   overflow: hidden;
   backdrop-filter: blur(15px) saturate(150%);
   -webkit-backdrop-filter: blur(15px) saturate(150%);
+  text-transform: none; /* Убираем автоматическое преобразование текста */
 }
 
 .button::before {
@@ -441,28 +442,20 @@ h2 {
 .result-screen {
   text-align: center;
   padding: var(--spacing-xl);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100%;
 }
 
 .result-icon {
-  font-size: 4.5rem;
-  margin-bottom: var(--spacing-lg);
-  animation: gentleBounce 1s cubic-bezier(0.4, 0, 0.2, 1);
-  filter: drop-shadow(0 4px 12px rgba(232, 180, 184, 0.2));
-}
-
-@keyframes gentleBounce {
-  0%, 100% {
-    transform: translateY(0) scale(1);
-  }
-  50% {
-    transform: translateY(-10px) scale(1.05);
-  }
+  display: none; /* Скрываем иконку со смайлами */
 }
 
 .result-title {
-  font-size: 1.9rem;
+  font-size: 2rem;
   margin-bottom: var(--spacing-md);
-  font-weight: 500;
+  font-weight: 600;
   color: var(--color-text-main);
   line-height: 1.4;
 }
@@ -470,9 +463,41 @@ h2 {
 .result-message {
   font-size: 1.1rem;
   color: var(--color-text-light);
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: var(--spacing-lg);
   line-height: 1.7;
   font-weight: 400;
+}
+
+/* Контейнер для кнопок результатов - поднимаем выше и делаем заметнее */
+.result-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid rgba(232, 180, 184, 0.2);
+}
+
+.result-buttons .button {
+  width: 100%;
+  max-width: 280px;
+  margin: 0 auto;
+  padding: var(--spacing-md) var(--spacing-xl);
+  font-size: 1.1rem;
+  font-weight: 600;
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-normal);
+  position: relative;
+  z-index: 1;
+}
+
+.result-buttons .button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.result-buttons .button:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 /* Загрузка (упрощенная версия без анимации) */

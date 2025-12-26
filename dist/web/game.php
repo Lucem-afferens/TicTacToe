@@ -95,11 +95,13 @@ if (empty($tg_id)) {
             
             <!-- Экран результатов (скрыт по умолчанию) -->
             <div id="result-screen" class="result-screen hidden">
-                <div id="result-icon" class="result-icon"></div>
+                <div id="result-icon" class="result-icon" style="display: none;"></div>
                 <h2 id="result-title" class="result-title"></h2>
                 <p class="result-message">Сыграем ещё раз?</p>
-                <button id="play-again-btn" class="button">🎮 Сыграть ещё раз</button>
-                <button id="back-to-menu-btn" class="button button-secondary mt-md">🏠 В меню</button>
+                <div class="result-buttons">
+                    <button id="play-again-btn" class="button button-primary">Сыграть ещё раз</button>
+                    <button id="back-to-menu-btn" class="button button-secondary">В меню</button>
+                </div>
             </div>
         </div>
         
