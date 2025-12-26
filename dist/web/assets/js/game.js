@@ -100,26 +100,39 @@ class TicTacToeGame {
      */
     async startNewGame() {
         try {
+            // Сбрасываем все флаги
             this.gameOver = false;
-            this.isProcessingMove = false; // Сбрасываем флаг обработки
+            this.isProcessingMove = false;
             this.board = ['', '', '', '', '', '', '', '', ''];
             this.currentPlayer = 'X';
+            this.gameId = null;
             
-            // Сбрасываем кэш символов в ячейках
+            // Сбрасываем кэш символов в ячейках и убираем все классы
             const cells = document.querySelectorAll('.game-cell');
             cells.forEach(cell => {
                 cell.dataset.symbol = '';
-                cell.classList.remove('processing', 'disabled');
+                cell.classList.remove('processing', 'disabled', 'x', 'o');
                 cell.style.pointerEvents = '';
                 cell.style.cursor = '';
+                cell.innerHTML = ''; // Полностью очищаем содержимое
             });
             
-            // Очищаем поле
-            this.updateBoardDisplay();
-            
-            // Скрываем результаты
+            // Скрываем экран результатов
             this.hideResultScreen();
             PromoCodeDisplay.hide();
+            
+            // Убеждаемся, что игровой экран виден
+            const gameScreen = document.getElementById('game-screen');
+            const resultScreen = document.getElementById('result-screen');
+            if (gameScreen) {
+                gameScreen.classList.remove('hidden');
+            }
+            if (resultScreen) {
+                resultScreen.classList.add('hidden');
+            }
+            
+            // Очищаем поле визуально
+            this.updateBoardDisplay();
             
             // Отправляем запрос на сервер
             const response = await this.apiRequest('start', {
@@ -260,21 +273,10 @@ class TicTacToeGame {
     blockAllCells() {
         const cells = document.querySelectorAll('.game-cell');
         cells.forEach(cell => {
-            const index = parseInt(cell.dataset.index);
-            const isEmpty = this.board[index] === '';
-            
-            // Блокируем все ячейки функционально
+            // Блокируем все ячейки функционально, но БЕЗ визуальных эффектов
             cell.style.pointerEvents = 'none';
             cell.style.cursor = 'wait';
-            
-            // Добавляем класс processing только для визуальной блокировки
-            // Но спиннер будет показываться только на заполненных ячейках (через CSS)
-            if (!isEmpty) {
-                cell.classList.add('processing');
-            } else {
-                // Для пустых ячеек просто блокируем, но без спиннера
-                cell.classList.add('processing');
-            }
+            // НЕ добавляем класс processing - никаких спиннеров!
         });
     }
     
@@ -287,13 +289,11 @@ class TicTacToeGame {
             // Убираем блокировку только если ячейка пустая и игра не окончена
             const index = parseInt(cell.dataset.index);
             if (!this.gameOver && this.board[index] === '') {
-                cell.classList.remove('processing');
                 cell.style.pointerEvents = '';
                 cell.style.cursor = '';
-            } else if (this.board[index] !== '') {
-                // Для заполненных ячеек убираем только processing класс (спиннер)
-                cell.classList.remove('processing');
             }
+            // Убираем все классы processing на всякий случай
+            cell.classList.remove('processing');
         });
     }
     
@@ -470,6 +470,23 @@ class TicTacToeGame {
         const resultScreen = document.getElementById('result-screen');
         if (resultScreen) {
             resultScreen.classList.add('hidden');
+            resultScreen.style.display = 'none';
+        }
+    }
+    
+    /**
+     * Показ экрана результатов
+     */
+    showResultScreen(message, icon) {
+        const resultScreen = document.getElementById('result-screen');
+        const resultIcon = document.getElementById('result-icon');
+        const resultTitle = document.getElementById('result-title');
+        
+        if (resultScreen) {
+            if (resultIcon) resultIcon.textContent = icon;
+            if (resultTitle) resultTitle.textContent = message;
+            resultScreen.classList.remove('hidden');
+            resultScreen.style.display = 'block';
         }
     }
     
