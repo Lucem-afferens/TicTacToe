@@ -457,10 +457,15 @@ class TicTacToeGame {
         const resultTitle = document.getElementById('result-title');
         
         if (resultScreen) {
-            if (resultIcon) resultIcon.textContent = icon;
-            if (resultTitle) resultTitle.textContent = message;
+            // Иконка скрыта, не показываем смайлы
+            if (resultIcon) {
+                resultIcon.style.display = 'none';
+            }
+            if (resultTitle) {
+                resultTitle.textContent = message;
+            }
             resultScreen.classList.remove('hidden');
-            resultScreen.style.display = 'block';
+            resultScreen.style.display = 'flex'; // Используем flex для лучшего позиционирования
         }
     }
     
