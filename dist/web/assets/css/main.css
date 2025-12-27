@@ -180,10 +180,14 @@ h2 {
 }
 
 .game-cell.x .cell-symbol-img {
-  filter: brightness(1.5) contrast(1.6) saturate(1.4) drop-shadow(0 2px 6px rgba(232, 180, 184, 0.5)) !important;
-  -webkit-filter: brightness(1.5) contrast(1.6) saturate(1.4) drop-shadow(0 2px 6px rgba(232, 180, 184, 0.5)) !important;
+  color: var(--color-x) !important;
+  filter: drop-shadow(0 2px 6px rgba(232, 180, 184, 0.5)) !important;
   opacity: 1 !important;
-  mix-blend-mode: normal !important;
+}
+
+/* SVG элементы внутри */
+.game-cell.x .cell-symbol-img line {
+  stroke: currentColor;
 }
 
 .game-cell.o {
@@ -192,10 +196,14 @@ h2 {
 }
 
 .game-cell.o .cell-symbol-img {
-  filter: brightness(1.5) contrast(1.6) saturate(1.4) drop-shadow(0 2px 6px rgba(184, 197, 216, 0.5)) !important;
-  -webkit-filter: brightness(1.5) contrast(1.6) saturate(1.4) drop-shadow(0 2px 6px rgba(184, 197, 216, 0.5)) !important;
+  color: var(--color-o) !important;
+  filter: drop-shadow(0 2px 6px rgba(184, 197, 216, 0.5)) !important;
   opacity: 1 !important;
-  mix-blend-mode: normal !important;
+}
+
+/* SVG элементы внутри */
+.game-cell.o .cell-symbol-img circle {
+  stroke: currentColor;
 }
 
 /* Изображения символов */
