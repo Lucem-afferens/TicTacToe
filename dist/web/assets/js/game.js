@@ -208,6 +208,8 @@ class TicTacToeGame {
      */
     async startNewGame() {
         try {
+            console.log('startNewGame called, tg_id:', this.tgId);
+            
             // Сбрасываем все флаги
             this.gameOver = false;
             this.isProcessingMove = false;
@@ -228,7 +230,9 @@ class TicTacToeGame {
             // Скрываем экран результатов и промокод
             this.hideResultScreen();
             this.hidePromoInModal();
-            PromoCodeDisplay.hide();
+            if (typeof PromoCodeDisplay !== 'undefined') {
+                PromoCodeDisplay.hide();
+            }
             
             // Убеждаемся, что игровой экран виден
             const gameScreen = document.getElementById('game-screen');
@@ -243,10 +247,27 @@ class TicTacToeGame {
             // Очищаем поле визуально
             this.updateBoardDisplay();
             
+            // Проверяем наличие tg_id перед отправкой запроса
+            if (!this.tgId) {
+                console.warn('tg_id not available, trying to get it again...');
+                const urlParams = new URLSearchParams(window.location.search);
+                const tgIdFromUrl = urlParams.get('tg_id');
+                const tgIdFromAPI = telegramAPI.getUserId();
+                this.tgId = tgIdFromUrl || tgIdFromAPI;
+                
+                if (!this.tgId) {
+                    console.error('tg_id still not available');
+                    this.showError('Не удалось определить пользователя. Пожалуйста, откройте игру через Telegram бота.');
+                    return;
+                }
+            }
+            
             // Отправляем запрос на сервер
             const response = await this.apiRequest('start', {
                 tg_id: this.tgId
             });
+            
+            console.log('Start game response:', response);
             
             if (response.success && response.game) {
                 this.gameId = response.game.game_id;
@@ -254,7 +275,9 @@ class TicTacToeGame {
                 this.updateBoardDisplay();
                 // Разблокируем ячейки после начала игры
                 this.unblockAllCells();
+                console.log('Game started successfully, game_id:', this.gameId);
             } else {
+                console.error('Failed to start game:', response);
                 this.showError('Не удалось начать игру');
             }
         } catch (error) {

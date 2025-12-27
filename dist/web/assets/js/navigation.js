@@ -96,9 +96,24 @@ class Navigation {
         // Если игра еще не инициализирована, запускаем её
         // Используем setTimeout чтобы дать время экрану появиться
         setTimeout(() => {
-            const gameInstance = window.game || game;
-            if (typeof gameInstance !== 'undefined' && gameInstance) {
+            // Пробуем несколько способов получить объект игры
+            const gameInstance = window.game || (typeof game !== 'undefined' ? game : null);
+            
+            if (gameInstance && typeof gameInstance.startNewGame === 'function') {
+                console.log('Starting new game from navigation');
                 gameInstance.startNewGame();
+            } else {
+                console.warn('Game instance not found, retrying...');
+                // Повторная попытка через еще одну задержку
+                setTimeout(() => {
+                    const retryInstance = window.game || (typeof game !== 'undefined' ? game : null);
+                    if (retryInstance && typeof retryInstance.startNewGame === 'function') {
+                        console.log('Starting new game from navigation (retry)');
+                        retryInstance.startNewGame();
+                    } else {
+                        console.error('Game instance still not found after retry');
+                    }
+                }, 300);
             }
         }, 200);
     }
