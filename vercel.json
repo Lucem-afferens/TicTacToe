@@ -1,5 +1,10 @@
 {
   "version": 2,
+  "functions": {
+    "api/**/*.php": {
+      "runtime": "@vercel/php"
+    }
+  },
   "rewrites": [
     {
       "source": "/webhook.php",
@@ -11,6 +16,10 @@
     },
     {
       "source": "/setup/setup-webhook.php",
+      "destination": "/api/setup-webhook.php"
+    },
+    {
+      "source": "/api/setup-webhook.php",
       "destination": "/api/setup-webhook.php"
     },
     {

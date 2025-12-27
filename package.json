@@ -1,0 +1,9 @@
+{
+  "name": "tic-tac-toe-telegram-bot",
+  "version": "1.0.0",
+  "description": "TicTacToe Telegram Bot",
+  "dependencies": {
+    "@vercel/php": "^2.0.0"
+  }
+}
+
