@@ -367,7 +367,7 @@ class TicTacToeGame {
                     console.log('Bot made move at position:', response.bot_move);
                     
                     // Задержка перед ходом бота (800-1000мс для естественности)
-                    await this.delay(800);
+                    await this.delay(2000);
                     
                     // Теперь обновляем доску с ходом бота
                     this.board = [...response.game.board];
