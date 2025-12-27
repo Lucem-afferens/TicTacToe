@@ -358,20 +358,32 @@ class TicTacToeGame {
             cell.innerHTML = '';
         } else if (symbol === 'X') {
             cell.classList.add('x');
-            // Создаем новое изображение на основе предзагруженного
             const img = document.createElement('img');
-            img.src = this.imageCache.X.src; // Используем уже загруженный src
+            // Используем абсолютный путь для надежности
+            const imageSrc = this.imageCache.X ? this.imageCache.X.src : (this.imagesPath + 'X.png');
+            img.src = imageSrc;
             img.alt = 'X';
             img.className = 'cell-symbol-img';
+            // Обработчик ошибок загрузки
+            img.onerror = () => {
+                // Fallback: используем текст если изображение не загрузилось
+                cell.innerHTML = '<span style="font-size: 48px; font-weight: bold; color: var(--color-primary);">X</span>';
+            };
             cell.innerHTML = '';
             cell.appendChild(img);
         } else if (symbol === 'O') {
             cell.classList.add('o');
-            // Создаем новое изображение на основе предзагруженного
             const img = document.createElement('img');
-            img.src = this.imageCache.O.src; // Используем уже загруженный src
+            // Используем абсолютный путь для надежности
+            const imageSrc = this.imageCache.O ? this.imageCache.O.src : (this.imagesPath + 'O.png');
+            img.src = imageSrc;
             img.alt = 'O';
             img.className = 'cell-symbol-img';
+            // Обработчик ошибок загрузки
+            img.onerror = () => {
+                // Fallback: используем текст если изображение не загрузилось
+                cell.innerHTML = '<span style="font-size: 48px; font-weight: bold; color: var(--color-secondary);">O</span>';
+            };
             cell.innerHTML = '';
             cell.appendChild(img);
         }
