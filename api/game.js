@@ -3,6 +3,10 @@
  * Node.js версия для Vercel
  */
 
+// Простое хранилище игр в памяти (для демонстрации)
+// В продакшене лучше использовать базу данных
+const gameStorage = new Map(); // tg_id -> array of games
+
 // Игровая логика
 const GameLogic = {
   // Проверка победы
@@ -349,24 +353,52 @@ module.exports = async (req, res) => {
         if (response.result === 'player_win') {
           const promoCode = generatePromoCode(tgId, gameId);
           response.promo_code = promoCode;
+          updatedGameData.promo_code = promoCode;
+        }
+        
+        // Сохраняем завершенную игру в историю
+        if (response.result !== 'in_progress') {
+          if (!gameStorage.has(tgId)) {
+            gameStorage.set(tgId, []);
+          }
+          const userGames = gameStorage.get(tgId);
+          userGames.push({
+            ...updatedGameData,
+            saved_at: new Date().toISOString()
+          });
+          // Ограничиваем историю последними 50 играми
+          if (userGames.length > 50) {
+            userGames.shift();
+          }
         }
         
         return res.status(200).json(response);
       }
       
       case 'history': {
-        // История игр - упрощенная версия (без сохранения в файл)
-        // В продакшене можно добавить сохранение в базу данных
+        // Получаем историю игр из хранилища
+        const userGames = gameStorage.get(tgId) || [];
+        
+        // Фильтруем только завершенные игры
+        const finishedGames = userGames.filter(game => 
+          game.status !== 'in_progress'
+        );
+        
+        // Подсчитываем статистику
+        const stats = {
+          total_games: finishedGames.length,
+          wins: finishedGames.filter(g => g.status === 'player_win').length,
+          losses: finishedGames.filter(g => g.status === 'bot_win').length,
+          draws: finishedGames.filter(g => g.status === 'draw').length,
+          win_rate: finishedGames.length > 0 
+            ? Math.round((finishedGames.filter(g => g.status === 'player_win').length / finishedGames.length) * 100)
+            : 0
+        };
+        
         return res.status(200).json({
           success: true,
-          games: [], // Пока возвращаем пустую историю
-          stats: {
-            total_games: 0,
-            wins: 0,
-            losses: 0,
-            draws: 0,
-            win_rate: 0
-          }
+          games: finishedGames.reverse(), // Новые игры первыми
+          stats: stats
         });
       }
       

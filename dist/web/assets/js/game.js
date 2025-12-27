@@ -15,14 +15,8 @@ class TicTacToeGame {
         this.apiUrl = '/api/game.js';
         
         // Определяем путь к изображениям
-        // На Vercel game.html находится в /web/, assets/images/ находится в /web/assets/images/
-        // Используем относительный путь от текущей страницы
-        const currentPath = window.location.pathname;
-        if (currentPath.includes('/web/')) {
-            this.imagesPath = 'assets/images/';
-        } else {
-            this.imagesPath = '/web/assets/images/';
-        }
+        // На Vercel используем абсолютный путь от корня
+        this.imagesPath = '/web/assets/images/';
         
         // Предзагружаем изображения для плавного отображения
         this.imageCache = {
