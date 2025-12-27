@@ -100,6 +100,14 @@ if (empty($tg_id)) {
                     <div id="result-icon" class="result-icon" style="display: none;"></div>
                     <h2 id="result-title" class="result-title"></h2>
                     <p class="result-message">Сыграем ещё раз?</p>
+                    
+                    <!-- Промокод в модальном окне (скрыт по умолчанию) -->
+                    <div id="result-promo-container" class="result-promo hidden">
+                        <div class="result-promo-label">Твой промокод:</div>
+                        <div id="result-promo-value" class="result-promo-value"></div>
+                        <button id="result-copy-promo-btn" class="button button-secondary button-compact">📋 Копировать</button>
+                    </div>
+                    
                     <div class="result-buttons">
                         <button id="play-again-btn" class="button button-primary button-compact">✨ Сыграть ещё</button>
                         <button id="back-to-menu-btn" class="button button-secondary button-compact">🏠 В меню</button>

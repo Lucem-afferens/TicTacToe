@@ -549,6 +549,32 @@ h2 {
   font-weight: 400;
 }
 
+/* Промокод в модальном окне */
+.result-promo {
+  margin: var(--spacing-md) 0;
+  padding: var(--spacing-md);
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: var(--border-radius-medium);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.result-promo-label {
+  font-size: 0.85rem;
+  color: var(--color-text-light);
+  margin-bottom: var(--spacing-xs);
+  font-weight: 500;
+}
+
+.result-promo-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  letter-spacing: 0.1em;
+  margin-bottom: var(--spacing-sm);
+  font-family: 'Courier New', monospace;
+  text-transform: uppercase;
+}
+
 /* Контейнер для кнопок - вертикальное расположение */
 .result-buttons {
   display: flex;

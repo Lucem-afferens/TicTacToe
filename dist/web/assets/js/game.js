@@ -117,8 +117,9 @@ class TicTacToeGame {
                 cell.innerHTML = ''; // Полностью очищаем содержимое
             });
             
-            // Скрываем экран результатов
+            // Скрываем экран результатов и промокод
             this.hideResultScreen();
+            this.hidePromoInModal();
             PromoCodeDisplay.hide();
             
             // Убеждаемся, что игровой экран виден
@@ -383,18 +384,23 @@ class TicTacToeGame {
                 message = 'Победа!';
                 icon = '';
                 if (promoCode) {
-                    PromoCodeDisplay.show(promoCode);
+                    // Показываем промокод в модальном окне
+                    this.showPromoInModal(promoCode);
                     // Отправляем данные в бот
                     telegramAPI.sendData({
                         action: 'win',
                         promo_code: promoCode,
                         game_id: this.gameId
                     });
+                } else {
+                    // Скрываем промокод если его нет
+                    this.hidePromoInModal();
                 }
                 break;
             case 'bot_win':
                 message = 'Проигрыш';
                 icon = '';
+                this.hidePromoInModal();
                 telegramAPI.sendData({
                     action: 'lose',
                     game_id: this.gameId
@@ -403,6 +409,7 @@ class TicTacToeGame {
             case 'draw':
                 message = 'Ничья';
                 icon = '';
+                this.hidePromoInModal();
                 telegramAPI.sendData({
                     action: 'draw',
                     game_id: this.gameId
@@ -411,6 +418,29 @@ class TicTacToeGame {
         }
         
         this.showResultScreen(message, icon);
+    }
+    
+    /**
+     * Показ промокода в модальном окне
+     */
+    showPromoInModal(promoCode) {
+        const promoContainer = document.getElementById('result-promo-container');
+        const promoValue = document.getElementById('result-promo-value');
+        
+        if (promoContainer && promoValue) {
+            promoValue.textContent = promoCode;
+            promoContainer.classList.remove('hidden');
+        }
+    }
+    
+    /**
+     * Скрытие промокода в модальном окне
+     */
+    hidePromoInModal() {
+        const promoContainer = document.getElementById('result-promo-container');
+        if (promoContainer) {
+            promoContainer.classList.add('hidden');
+        }
     }
     
     /**
