@@ -5,7 +5,8 @@
 class HistoryManager {
     constructor() {
         this.tgId = null;
-        this.apiUrl = '../api/game.php';
+        // На Vercel API находится в /api/game.js (Node.js версия)
+        this.apiUrl = '/api/game.js';
         this.init();
     }
     
