@@ -471,10 +471,10 @@ h2 {
 .result-modal-content {
   position: relative;
   z-index: 1001;
-  /* Полупрозрачный фон - используем CSS переменную для поддержки темной темы */
-  background: var(--glass-bg, rgba(255, 255, 255, 0.18));
+  /* Полупрозрачный фон для светлой темы */
+  background: rgba(255, 255, 255, 0.18);
   /* Тонкая полупрозрачная граница */
-  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.25));
+  border: 1px solid rgba(255, 255, 255, 0.25);
   /* Скругление как в iOS */
   border-radius: 22px;
   padding: var(--spacing-lg);
