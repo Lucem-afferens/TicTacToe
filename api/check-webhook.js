@@ -82,9 +82,10 @@ async function checkSettings() {
       }
       if (button.web_app) {
         results.push(`<p><strong>Web App URL:</strong> <code>${button.web_app.url}</code></p>`);
-        results.push(`<p><strong>Expected URL:</strong> <code>${FULL_URL}/web/game.php</code></p>`);
-        if (button.web_app.url !== `${FULL_URL}/web/game.php`) {
-          results.push(`<p class="warning">⚠️ URL mismatch! Menu button URL doesn't match expected URL.</p>`);
+        results.push(`<p><strong>Expected URL:</strong> <code>${FULL_URL}/web/game.html</code></p>`);
+        if (button.web_app.url !== `${FULL_URL}/web/game.html`) {
+          results.push(`<p class="warning">⚠️ URL mismatch! Menu button URL should be <code>${FULL_URL}/web/game.html</code> (not .php)</p>`);
+          results.push(`<p class="warning">⚠️ Click <a href="/api/setup-webhook.js">here</a> to update the menu button URL.</p>`);
         }
       }
     } else {
