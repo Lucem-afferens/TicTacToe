@@ -456,35 +456,66 @@ h2 {
   display: none;
 }
 
-/* Фон модального окна - эффект размытия */
+/* Фон модального окна - полностью прозрачный, без размытия */
 .result-modal-backdrop {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(253, 248, 244, 0.3); /* Полупрозрачный фон */
-  backdrop-filter: blur(8px) saturate(150%);
-  -webkit-backdrop-filter: blur(8px) saturate(150%);
+  background: transparent; /* Полностью прозрачный фон */
   pointer-events: all;
 }
 
-/* Контент модального окна - эффект жидкого стекла */
+/* Контент модального окна - эффект глоссморфизма (жидкое стекло) */
 .result-modal-content {
   position: relative;
   z-index: 1001;
-  background: rgba(255, 249, 245, 0.85); /* Полупрозрачный фон */
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  border-radius: var(--border-radius-large);
+  /* Полупрозрачный фон - используем CSS переменную для поддержки темной темы */
+  background: var(--glass-bg, rgba(255, 255, 255, 0.18));
+  /* Тонкая полупрозрачная граница */
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.25));
+  /* Скругление как в iOS */
+  border-radius: 22px;
   padding: var(--spacing-lg);
-  box-shadow: var(--shadow-lg), 0 8px 32px rgba(232, 180, 184, 0.15);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  /* Легкая тень для глубины */
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 
+              inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  /* Эффект размытия фона под элементом (глоссморфизм) */
+  backdrop-filter: blur(24px) saturate(170%);
+  -webkit-backdrop-filter: blur(24px) saturate(170%);
   text-align: center;
   max-width: 320px;
   width: 90%;
   pointer-events: all;
   animation: modalAppear 0.3s ease-out;
+  overflow: hidden; /* Для внутреннего блика */
+}
+
+/* Внутренний блик для эффекта "жидкости" */
+.result-modal-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  /* Вертикальный градиент от почти белого сверху к прозрачному */
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.35) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 0;
+  border-radius: 22px 22px 0 0;
+}
+
+/* Контент поверх блика */
+.result-modal-content > * {
+  position: relative;
+  z-index: 1;
 }
 
 @keyframes modalAppear {

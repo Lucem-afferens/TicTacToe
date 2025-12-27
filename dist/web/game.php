@@ -60,6 +60,35 @@ if (empty($tg_id)) {
     <link rel="stylesheet" href="assets/css/variables.css?v=<?php echo $css_version; ?>">
     <link rel="stylesheet" href="assets/css/main.css?v=<?php echo $css_version; ?>">
     
+    <!-- Telegram Theme Colors -->
+    <script>
+        // Настройка цветов для глоссморфизма на основе темы Telegram
+        (function() {
+            if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
+                const tg = window.Telegram.WebApp;
+                const themeParams = tg.themeParams || {};
+                const isDark = tg.colorScheme === 'dark';
+                
+                // Определяем цвета для стекла
+                let glassBg, glassBorder;
+                
+                if (isDark) {
+                    // Темная тема - более плотный темный фон
+                    glassBg = 'rgba(30, 30, 30, 0.35)';
+                    glassBorder = 'rgba(255, 255, 255, 0.15)';
+                } else {
+                    // Светлая тема - более светлый фон
+                    glassBg = 'rgba(255, 255, 255, 0.18)';
+                    glassBorder = 'rgba(255, 255, 255, 0.25)';
+                }
+                
+                // Применяем через CSS переменные
+                document.documentElement.style.setProperty('--glass-bg', glassBg);
+                document.documentElement.style.setProperty('--glass-border', glassBorder);
+            }
+        })();
+    </script>
+    
     <!-- Prevent caching -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
