@@ -28,12 +28,12 @@ class TemplateConfig {
     /**
      * Домен сайта (без https://)
      */
-    const DOMAIN = 'develonik.ru';
+    const DOMAIN = 'tic-tac-toe-virid-two.vercel.app';
     
     /**
      * Полный URL сайта
      */
-    const FULL_URL = 'https://develonik.ru';
+    const FULL_URL = 'https://tic-tac-toe-virid-two.vercel.app';
     
     // ========================================
     // НАСТРОЙКИ TELEGRAM БОТА

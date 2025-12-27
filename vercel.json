@@ -1,0 +1,77 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "dist/**/*.php",
+      "use": "@vercel/php"
+    },
+    {
+      "src": "dist/web/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/webhook.php",
+      "dest": "/dist/webhook.php"
+    },
+    {
+      "src": "/api/game.php",
+      "dest": "/dist/api/game.php"
+    },
+    {
+      "src": "/setup/setup-webhook.php",
+      "dest": "/dist/setup/setup-webhook.php"
+    },
+    {
+      "src": "/web/(.*)",
+      "dest": "/dist/web/$1"
+    },
+    {
+      "src": "/web",
+      "dest": "/dist/web/game.php"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/dist/$1"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/webhook.php",
+      "destination": "/dist/webhook.php"
+    },
+    {
+      "source": "/api/game.php",
+      "destination": "/dist/api/game.php"
+    },
+    {
+      "source": "/setup/setup-webhook.php",
+      "destination": "/dist/setup/setup-webhook.php"
+    },
+    {
+      "source": "/web/:path*",
+      "destination": "/dist/web/:path*"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        }
+      ]
+    }
+  ]
+}
+
