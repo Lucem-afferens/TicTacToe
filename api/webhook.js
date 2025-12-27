@@ -9,16 +9,6 @@ const https = require('https');
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const FULL_URL = process.env.FULL_URL || 'https://tic-tac-toe-virid-two.vercel.app';
 
-if (!BOT_TOKEN) {
-  return {
-    statusCode: 500,
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ error: 'BOT_TOKEN not configured' })
-  };
-}
-
-const API_URL = `https://api.telegram.org/bot${BOT_TOKEN}`;
-
 // Сообщения бота
 const BotMessages = {
   WELCOME: "Добро пожаловать 💕\nСыграем в крестики-нолики?",
@@ -74,7 +64,7 @@ function makeRequest(url, options = {}) {
 }
 
 // Отправка сообщения в Telegram
-async function sendMessage(chatId, text, replyMarkup = null) {
+async function sendMessage(chatId, text, replyMarkup = null, apiUrl) {
   const data = {
     chat_id: chatId,
     text: text,
@@ -86,7 +76,7 @@ async function sendMessage(chatId, text, replyMarkup = null) {
   }
   
   try {
-    const result = await makeRequest(`${API_URL}/sendMessage`, {
+    const result = await makeRequest(`${apiUrl}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: data
@@ -99,7 +89,7 @@ async function sendMessage(chatId, text, replyMarkup = null) {
 }
 
 // Ответ на callback query
-async function answerCallbackQuery(callbackQueryId, text = null) {
+async function answerCallbackQuery(callbackQueryId, text = null, apiUrl) {
   const data = {
     callback_query_id: callbackQueryId
   };
@@ -109,7 +99,7 @@ async function answerCallbackQuery(callbackQueryId, text = null) {
   }
   
   try {
-    await makeRequest(`${API_URL}/answerCallbackQuery`, {
+    await makeRequest(`${apiUrl}/answerCallbackQuery`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: data
@@ -132,7 +122,7 @@ function createWebAppKeyboard(webappUrl) {
 }
 
 // Обработка обновления
-async function handleUpdate(update) {
+async function handleUpdate(update, apiUrl) {
   // Обрабатываем сообщения
   if (update.message) {
     const message = update.message;
@@ -149,11 +139,11 @@ async function handleUpdate(update) {
         const welcomeMessage = BotMessages.WELCOME;
         const webappUrl = `${FULL_URL}/web/game.php?tg_id=${chatId}`;
         const keyboard = createWebAppKeyboard(webappUrl);
-        await sendMessage(chatId, welcomeMessage, keyboard);
+        await sendMessage(chatId, welcomeMessage, keyboard, apiUrl);
         break;
         
       case '/help':
-        await sendMessage(chatId, BotMessages.HELP);
+        await sendMessage(chatId, BotMessages.HELP, null, apiUrl);
         break;
         
       default:
@@ -166,18 +156,18 @@ async function handleUpdate(update) {
               switch (webappData.action) {
                 case 'win':
                   if (webappData.promo_code) {
-                    await sendMessage(chatId, BotMessages.win(webappData.promo_code));
+                    await sendMessage(chatId, BotMessages.win(webappData.promo_code), null, apiUrl);
                     console.log('Game won (via WebApp sendData)', { chatId, promoCode: webappData.promo_code });
                   }
                   break;
                   
                 case 'lose':
-                  await sendMessage(chatId, BotMessages.LOSE);
+                  await sendMessage(chatId, BotMessages.LOSE, null, apiUrl);
                   console.log('Game lost (via WebApp sendData)', { chatId });
                   break;
                   
                 case 'draw':
-                  await sendMessage(chatId, BotMessages.DRAW);
+                  await sendMessage(chatId, BotMessages.DRAW, null, apiUrl);
                   console.log('Game draw (via WebApp sendData)', { chatId });
                   break;
               }
@@ -188,7 +178,7 @@ async function handleUpdate(update) {
         } else {
           // Неизвестная команда
           const unknownMessage = `🤔 Неизвестная команда: ${text}\n\nИспользуйте /start для начала игры или /help для справки.`;
-          await sendMessage(chatId, unknownMessage);
+          await sendMessage(chatId, unknownMessage, null, apiUrl);
         }
         break;
     }
@@ -204,7 +194,7 @@ async function handleUpdate(update) {
     console.log('Processing callback:', { chatId, callbackData });
     
     // Отвечаем на callback query
-    await answerCallbackQuery(callbackQueryId);
+    await answerCallbackQuery(callbackQueryId, null, apiUrl);
     
     // Обработка callback данных (если понадобится)
     // Пока нет callback обработчиков
@@ -216,40 +206,68 @@ module.exports = async (req, res) => {
   // Устанавливаем заголовки
   res.setHeader('Content-Type', 'application/json');
   
+  // Проверяем BOT_TOKEN
+  if (!BOT_TOKEN) {
+    console.error('WEBHOOK: BOT_TOKEN not configured');
+    return res.status(500).json({ error: 'BOT_TOKEN not configured' });
+  }
+  
+  const API_URL = `https://api.telegram.org/bot${BOT_TOKEN}`;
+  
   try {
-    // Получаем данные
+    // Получаем данные из тела запроса
+    // В Vercel тело может быть уже прочитано или нужно читать через stream
     let body = '';
-    req.on('data', chunk => { body += chunk.toString(); });
     
-    await new Promise((resolve) => {
-      req.on('end', async () => {
-        try {
-          const update = JSON.parse(body);
-          console.log('WEBHOOK: Received update', { update });
-          
-          // Проверяем JSON
-          if (!update) {
-            console.error('WEBHOOK: Invalid JSON', { body });
-            res.status(400).json({ error: 'Invalid JSON' });
-            return;
-          }
-          
-          // Обрабатываем обновление
-          await handleUpdate(update);
-          
-          // Отвечаем OK
-          res.status(200).json({ status: 'ok' });
-          resolve();
-        } catch (error) {
-          console.error('WEBHOOK: Error processing update', error);
-          res.status(500).json({ error: 'Server error' });
-          resolve();
-        }
+    // Если тело уже есть (например, через middleware)
+    if (req.body) {
+      body = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
+    } else {
+      // Читаем из stream
+      await new Promise((resolve, reject) => {
+        req.on('data', chunk => { body += chunk.toString(); });
+        req.on('end', resolve);
+        req.on('error', reject);
       });
+    }
+    
+    if (!body) {
+      console.error('WEBHOOK: Empty body');
+      return res.status(400).json({ error: 'Empty request body' });
+    }
+    
+    // Парсим JSON
+    let update;
+    try {
+      update = JSON.parse(body);
+    } catch (error) {
+      console.error('WEBHOOK: Invalid JSON', { body, error: error.message });
+      return res.status(400).json({ error: 'Invalid JSON' });
+    }
+    
+    console.log('WEBHOOK: Received update', { 
+      updateId: update.update_id,
+      hasMessage: !!update.message,
+      hasCallbackQuery: !!update.callback_query
     });
+    
+    // Проверяем наличие обновления
+    if (!update) {
+      console.error('WEBHOOK: Empty update');
+      return res.status(400).json({ error: 'Empty update' });
+    }
+    
+    // Обрабатываем обновление
+    await handleUpdate(update, API_URL);
+    
+    // Отвечаем OK
+    res.status(200).json({ status: 'ok' });
   } catch (error) {
-    console.error('WEBHOOK: Fatal error', error);
-    res.status(500).json({ error: 'Server error' });
+    console.error('WEBHOOK: Fatal error', { 
+      message: error.message, 
+      stack: error.stack 
+    });
+    res.status(500).json({ error: 'Server error', message: error.message });
   }
 };
 
