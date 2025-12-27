@@ -362,11 +362,14 @@ class TicTacToeGame {
                 this.board = playerMoveBoard;
                 this.updateCellDisplay(position);
                 
+                // Даем браузеру время отрисовать ход игрока
+                await this.delay(100);
+                
                 // Если бот сделал ход, ждем перед отображением его хода
                 if (response.bot_move !== undefined && response.bot_move !== null) {
                     console.log('Bot made move at position:', response.bot_move);
                     
-                    // Задержка перед ходом бота (800-1000мс для естественности)
+                    // Задержка перед ходом бота (2000мс для естественности)
                     await this.delay(2000);
                     
                     // Теперь обновляем доску с ходом бота
