@@ -500,24 +500,9 @@ h2 {
   overflow: hidden; /* Для внутреннего блика */
 }
 
-/* Внутренний блик для эффекта "жидкости" */
+/* Внутренний блик для эффекта "жидкости" - убран по запросу */
 .result-modal-content::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 50%;
-  /* Вертикальный градиент от почти белого сверху к прозрачному */
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.35) 0%,
-    rgba(255, 255, 255, 0.1) 50%,
-    transparent 100%
-  );
-  pointer-events: none;
-  z-index: 0;
-  border-radius: 22px 22px 0 0;
+  display: none; /* Убираем белую полупрозрачную обертку */
 }
 
 /* Контент поверх блика */
