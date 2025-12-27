@@ -1,5 +1,11 @@
 {
   "version": 2,
+  "builds": [
+    {
+      "src": "dist/web/**",
+      "use": "@vercel/static"
+    }
+  ],
   "rewrites": [
     {
       "source": "/webhook.php",
@@ -16,10 +22,6 @@
     {
       "source": "/api/check-webhook",
       "destination": "/api/check-webhook.js"
-    },
-    {
-      "source": "/web/assets/images/:path*",
-      "destination": "/dist/web/assets/images/:path*"
     },
     {
       "source": "/web/:path*",
