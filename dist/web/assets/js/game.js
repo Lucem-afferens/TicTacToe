@@ -332,6 +332,13 @@ class TicTacToeGame {
                 // Сохраняем старое состояние доски для сравнения
                 const oldBoard = [...this.board];
                 
+                console.log('Updating board from server response:', {
+                    oldBoard: oldBoard,
+                    newBoard: response.game.board,
+                    botMove: response.bot_move,
+                    result: response.result
+                });
+                
                 // Обновляем доску из ответа сервера
                 this.board = [...response.game.board];
                 
@@ -343,6 +350,8 @@ class TicTacToeGame {
                     }
                 }
                 
+                console.log('Changed cells:', changedCells);
+                
                 // Обновляем только измененные ячейки
                 changedCells.forEach(index => {
                     this.updateCellDisplay(index);
@@ -350,8 +359,11 @@ class TicTacToeGame {
                 
                 // Если бот сделал ход, добавляем небольшую задержку для визуализации
                 if (response.bot_move !== undefined && response.bot_move !== null) {
+                    console.log('Bot made move at position:', response.bot_move);
                     // Небольшая задержка для визуализации хода бота
                     await this.delay(500);
+                } else {
+                    console.log('No bot move in response');
                 }
             } else {
                 console.error('Invalid response from server:', response);

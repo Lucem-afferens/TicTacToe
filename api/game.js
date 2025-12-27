@@ -334,6 +334,12 @@ module.exports = async (req, res) => {
             const botSymbol = 'O';
             const botPosition = GameAI.makeMove(updatedGameData.board, botSymbol, playerSymbol);
             
+            console.log('Bot move attempt:', {
+              board: updatedGameData.board,
+              botPosition: botPosition,
+              availableMoves: GameLogic.getAvailableMoves(updatedGameData.board)
+            });
+            
             if (botPosition !== null && botPosition !== undefined) {
               const botMoveResult = GameState.makeMove(updatedGameData, botPosition, botSymbol);
               
@@ -343,6 +349,11 @@ module.exports = async (req, res) => {
                 response.game = updatedGameData;
                 response.result = finalResult;
                 response.bot_move = botPosition;
+                console.log('Bot move successful:', {
+                  botPosition: botPosition,
+                  newBoard: updatedGameData.board,
+                  result: finalResult
+                });
               } else {
                 console.error('Failed to make bot move - GameState.makeMove returned null');
               }
