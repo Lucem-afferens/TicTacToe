@@ -371,15 +371,18 @@ class TicTacToeGame {
                 if (response.bot_move !== undefined && response.bot_move !== null) {
                     console.log('Bot made move at position:', response.bot_move);
                     
+                    // Сохраняем позицию хода бота ДО задержки
+                    const botMovePosition = response.bot_move;
+                    
                     // Задержка перед ходом бота (2000мс для естественности)
                     await this.delay(2000);
                     
-                    // Теперь обновляем доску с ходом бота
+                    // ТОЛЬКО ПОСЛЕ ЗАДЕРЖКИ обновляем доску с ходом бота
                     // ВАЖНО: обновляем только ход бота, не трогая ход игрока
                     const botMoveBoard = [...this.board];
-                    botMoveBoard[response.bot_move] = 'O';
+                    botMoveBoard[botMovePosition] = 'O';
                     this.board = botMoveBoard;
-                    this.updateCellDisplay(response.bot_move);
+                    this.updateCellDisplay(botMovePosition);
                 } else {
                     // Если бот не сделал ход (игра окончена), обновляем доску полностью
                     this.board = [...response.game.board];
