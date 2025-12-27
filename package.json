@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "TicTacToe Telegram Bot",
   "engines": {
-    "node": "18.x"
+    "node": "24.x"
   }
 }
 
