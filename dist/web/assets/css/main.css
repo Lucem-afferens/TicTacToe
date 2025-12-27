@@ -586,22 +586,55 @@ h2 {
   border-top: 1px solid rgba(255, 255, 255, 0.15);
 }
 
-/* Компактные кнопки друг под другом */
+/* Компактные кнопки друг под другом - единый стиль с модальным окном */
 .button-compact {
   width: 100% !important;
   padding: var(--spacing-sm) var(--spacing-md) !important;
   font-size: 0.9rem !important;
   font-weight: 500 !important;
   margin: 0 !important;
+  /* Единый стиль глоссморфизма */
+  background: rgba(255, 255, 255, 0.12) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: blur(10px) saturate(150%);
+  -webkit-backdrop-filter: blur(10px) saturate(150%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05), 
+              inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .button-compact:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  background: rgba(255, 255, 255, 0.18) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 
+              inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .button-compact:active:not(:disabled) {
   transform: translateY(0);
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Специальные цвета для кнопок в модальном окне */
+.result-buttons .button-primary.button-compact {
+  background: rgba(232, 180, 184, 0.25) !important;
+  border-color: rgba(232, 180, 184, 0.35) !important;
+  color: var(--color-text-main);
+}
+
+.result-buttons .button-primary.button-compact:hover:not(:disabled) {
+  background: rgba(232, 180, 184, 0.35) !important;
+  border-color: rgba(232, 180, 184, 0.45) !important;
+}
+
+.result-buttons .button-secondary.button-compact {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: var(--color-text-main);
+}
+
+.result-buttons .button-secondary.button-compact:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.18) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
 }
 
 /* Загрузка (упрощенная версия без анимации) */
