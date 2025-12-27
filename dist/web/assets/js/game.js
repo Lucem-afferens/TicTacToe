@@ -347,57 +347,57 @@ class TicTacToeGame {
             if (response.game && response.game.board) {
                 // Сохраняем старое состояние доски для сравнения
                 const oldBoard = [...this.board];
+                const serverBoard = [...response.game.board];
                 
                 console.log('Updating board from server response:', {
                     oldBoard: oldBoard,
-                    newBoard: response.game.board,
+                    serverBoard: serverBoard,
                     botMove: response.bot_move,
                     result: response.result
                 });
                 
-                // Сначала обновляем только ход игрока
-                // Временно обновляем доску только с ходом игрока
+                // ШАГ 1: Отображаем ТОЛЬКО ход игрока
+                // Обновляем доску только с ходом игрока (без хода бота)
                 const playerMoveBoard = [...oldBoard];
                 playerMoveBoard[position] = 'X';
                 this.board = playerMoveBoard;
+                
+                // Обновляем только ячейку игрока
                 this.updateCellDisplay(position);
                 
-                // Ждем следующего кадра анимации, чтобы гарантировать отрисовку хода игрока
+                // Ждем следующего кадра анимации для гарантии отрисовки
                 await new Promise(resolve => requestAnimationFrame(() => {
-                    requestAnimationFrame(resolve); // Двойной RAF для гарантии отрисовки
+                    requestAnimationFrame(resolve);
                 }));
                 
-                // Если бот сделал ход, ждем перед отображением его хода
+                // ШАГ 2: Если бот сделал ход, ждем перед отображением
                 if (response.bot_move !== undefined && response.bot_move !== null) {
-                    console.log('Bot made move at position:', response.bot_move);
-                    console.log('Current board before delay:', [...this.board]);
-                    
-                    // Сохраняем позицию хода бота ДО задержки
                     const botMovePosition = response.bot_move;
                     
-                    // ВАЖНО: Убеждаемся, что доска НЕ содержит ход бота до задержки
-                    // Проверяем, что ячейка бота пустая
+                    console.log('Bot will move at position:', botMovePosition);
+                    console.log('Board state before delay (should NOT have bot move):', [...this.board]);
+                    
+                    // ВАЖНО: Проверяем, что доска НЕ содержит ход бота
                     if (this.board[botMovePosition] !== '') {
-                        console.warn('Bot cell is not empty before delay!', this.board[botMovePosition]);
+                        console.error('ERROR: Bot cell is not empty before delay!', this.board[botMovePosition]);
                     }
                     
-                    // Задержка перед ходом бота (2000мс для естественности)
+                    // Задержка перед ходом бота
                     console.log('Starting 2000ms delay before bot move...');
                     await this.delay(2000);
-                    console.log('Delay completed, now updating bot move');
+                    console.log('Delay completed, now displaying bot move');
                     
-                    // ТОЛЬКО ПОСЛЕ ЗАДЕРЖКИ обновляем доску с ходом бота
-                    // ВАЖНО: обновляем только ход бота, не трогая ход игрока
-                    const botMoveBoard = [...this.board];
-                    botMoveBoard[botMovePosition] = 'O';
-                    this.board = botMoveBoard;
-                    console.log('Board after bot move update:', [...this.board]);
+                    // ШАГ 3: ТОЛЬКО ПОСЛЕ ЗАДЕРЖКИ обновляем ход бота
+                    // Обновляем только ячейку бота, не трогая остальные
+                    this.board[botMovePosition] = 'O';
                     this.updateCellDisplay(botMovePosition);
+                    
+                    console.log('Board state after bot move:', [...this.board]);
                 } else {
                     // Если бот не сделал ход (игра окончена), обновляем доску полностью
-                    this.board = [...response.game.board];
+                    this.board = serverBoard;
                     this.updateBoardDisplay();
-                    console.log('No bot move in response');
+                    console.log('No bot move - game ended');
                 }
             } else {
                 console.error('Invalid response from server:', response);
