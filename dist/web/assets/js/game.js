@@ -15,16 +15,9 @@ class TicTacToeGame {
         this.apiUrl = '/api/game.js';
         
         // Определяем путь к изображениям
-        // На Vercel статические файлы из public/ доступны напрямую
-        // Пробуем несколько путей для совместимости
-        const currentPath = window.location.pathname;
-        if (currentPath.includes('/web/')) {
-            // Если мы в /web/, пробуем относительный путь
-            this.imagesPath = 'assets/images/';
-        } else {
-            // Иначе используем абсолютный путь
-            this.imagesPath = '/assets/images/'; // Из public/assets/images/
-        }
+        // На Vercel статические файлы из public/ доступны напрямую от корня
+        // public/assets/images/X.png доступен по /assets/images/X.png
+        this.imagesPath = '/assets/images/';
         
         // Предзагружаем изображения для плавного отображения
         this.imageCache = {
