@@ -30,19 +30,71 @@ class TicTacToeGame {
     
     /**
      * Предзагрузка изображений символов
+     * Используем встроенные SVG вместо PNG для надежности
      */
     preloadImages() {
-        // Предзагружаем изображение X
-        this.imageCache.X = new Image();
-        this.imageCache.X.src = this.imagesPath + 'X.png';
-        this.imageCache.X.alt = 'X';
-        this.imageCache.X.className = 'cell-symbol-img';
+        // Создаем SVG для X
+        this.imageCache.X = this.createXSVG();
         
-        // Предзагружаем изображение O
-        this.imageCache.O = new Image();
-        this.imageCache.O.src = this.imagesPath + 'O.png';
-        this.imageCache.O.alt = 'O';
-        this.imageCache.O.className = 'cell-symbol-img';
+        // Создаем SVG для O
+        this.imageCache.O = this.createOSVG();
+    }
+    
+    /**
+     * Создание SVG для крестика
+     */
+    createXSVG() {
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('viewBox', '0 0 100 100');
+        svg.setAttribute('class', 'cell-symbol-img');
+        svg.setAttribute('width', '100%');
+        svg.setAttribute('height', '100%');
+        
+        // Две диагональные линии для X
+        const line1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line1.setAttribute('x1', '20');
+        line1.setAttribute('y1', '20');
+        line1.setAttribute('x2', '80');
+        line1.setAttribute('y2', '80');
+        line1.setAttribute('stroke', 'currentColor');
+        line1.setAttribute('stroke-width', '8');
+        line1.setAttribute('stroke-linecap', 'round');
+        
+        const line2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line2.setAttribute('x1', '80');
+        line2.setAttribute('y1', '20');
+        line2.setAttribute('x2', '20');
+        line2.setAttribute('y2', '80');
+        line2.setAttribute('stroke', 'currentColor');
+        line2.setAttribute('stroke-width', '8');
+        line2.setAttribute('stroke-linecap', 'round');
+        
+        svg.appendChild(line1);
+        svg.appendChild(line2);
+        return svg;
+    }
+    
+    /**
+     * Создание SVG для нолика
+     */
+    createOSVG() {
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('viewBox', '0 0 100 100');
+        svg.setAttribute('class', 'cell-symbol-img');
+        svg.setAttribute('width', '100%');
+        svg.setAttribute('height', '100%');
+        
+        // Круг для O
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', '50');
+        circle.setAttribute('cy', '50');
+        circle.setAttribute('r', '30');
+        circle.setAttribute('fill', 'none');
+        circle.setAttribute('stroke', 'currentColor');
+        circle.setAttribute('stroke-width', '8');
+        
+        svg.appendChild(circle);
+        return svg;
     }
     
     /**
@@ -358,34 +410,16 @@ class TicTacToeGame {
             cell.innerHTML = '';
         } else if (symbol === 'X') {
             cell.classList.add('x');
-            const img = document.createElement('img');
-            // Используем абсолютный путь для надежности
-            const imageSrc = this.imageCache.X ? this.imageCache.X.src : (this.imagesPath + 'X.png');
-            img.src = imageSrc;
-            img.alt = 'X';
-            img.className = 'cell-symbol-img';
-            // Обработчик ошибок загрузки
-            img.onerror = () => {
-                // Fallback: используем текст если изображение не загрузилось
-                cell.innerHTML = '<span style="font-size: 48px; font-weight: bold; color: var(--color-primary);">X</span>';
-            };
+            // Используем SVG вместо изображения
+            const svg = this.imageCache.X ? this.imageCache.X.cloneNode(true) : this.createXSVG();
             cell.innerHTML = '';
-            cell.appendChild(img);
+            cell.appendChild(svg);
         } else if (symbol === 'O') {
             cell.classList.add('o');
-            const img = document.createElement('img');
-            // Используем абсолютный путь для надежности
-            const imageSrc = this.imageCache.O ? this.imageCache.O.src : (this.imagesPath + 'O.png');
-            img.src = imageSrc;
-            img.alt = 'O';
-            img.className = 'cell-symbol-img';
-            // Обработчик ошибок загрузки
-            img.onerror = () => {
-                // Fallback: используем текст если изображение не загрузилось
-                cell.innerHTML = '<span style="font-size: 48px; font-weight: bold; color: var(--color-secondary);">O</span>';
-            };
+            // Используем SVG вместо изображения
+            const svg = this.imageCache.O ? this.imageCache.O.cloneNode(true) : this.createOSVG();
             cell.innerHTML = '';
-            cell.appendChild(img);
+            cell.appendChild(svg);
         }
         
         if (this.gameOver || symbol !== '') {
