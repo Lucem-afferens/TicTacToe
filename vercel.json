@@ -22,6 +22,10 @@
       "destination": "/api/web/game.js"
     },
     {
+      "source": "/web/assets/(.*)",
+      "destination": "/api/web/assets.js?path=$1"
+    },
+    {
       "source": "/web/(.*)",
       "destination": "/dist/web/$1"
     }
