@@ -1,11 +1,17 @@
-name: Deploy to Beget
+name: Deploy to Beget (DISABLED - Now using Vercel)
+
+# ⚠️ ЭТОТ WORKFLOW ОТКЛЮЧЕН
+# Проект теперь деплоится на Vercel автоматически через GitHub интеграцию
+# Vercel автоматически деплоит при пуше в main/master
+# Домен: https://tic-tac-toe-virid-two.vercel.app
 
 on:
-  push:
-    branches:
-      - main
-      - master
-  workflow_dispatch:
+  # Отключено - не запускается автоматически
+  # push:
+  #   branches:
+  #     - main
+  #     - master
+  workflow_dispatch: # Можно запустить вручную, если нужно
 
 jobs:
   deploy:
@@ -86,12 +92,13 @@ jobs:
       
       - name: Deployment summary
         run: |
-          echo "✅ Deployment completed successfully!"
-          echo "📁 Files deployed to: ${{ secrets.FTP_PATH }}"
-          echo "🌐 Domain: develonik.ru"
+          echo "⚠️  ВНИМАНИЕ: Этот workflow отключен!"
+          echo "📁 Проект теперь деплоится на Vercel автоматически"
+          echo "🌐 Vercel Domain: https://tic-tac-toe-virid-two.vercel.app"
+          echo "🌐 Старый домен (Beget): develonik.ru (больше не используется)"
           echo "🤖 Bot: @TicTacToe_ru_bot"
           echo ""
-          echo "⚠️  Next steps:"
-          echo "1. ✅ BOT_TOKEN automatically set from GitHub Secrets (config.local.php created)"
-          echo "2. Run https://develonik.ru/setup/setup-webhook.php to configure Telegram webhook"
-          echo "3. Test the bot: https://t.me/TicTacToe_ru_bot"
+          echo "✅ Vercel автоматически деплоит при пуше в main/master"
+          echo "📝 Настройка webhook: https://tic-tac-toe-virid-two.vercel.app/api/setup-webhook.js"
+          echo "🔍 Проверка настроек: https://tic-tac-toe-virid-two.vercel.app/api/check-webhook"
+          echo "🧪 Тест бота: https://t.me/TicTacToe_ru_bot"
