@@ -300,11 +300,7 @@ class TicTacToeGame {
             // ВАЖНО: Сохраняем состояние доски ДО хода
             const boardBeforeMove = [...this.board];
             
-            // Визуально обновляем только одну ячейку (оптимистичное обновление UI)
-            this.board[position] = symbol;
-            this.updateCellDisplay(position);
-            
-            // Отправляем ход на сервер с состоянием ДО хода
+            // Отправляем ход на сервер с состоянием ДО хода (без оптимистичного обновления)
             const response = await this.apiRequest('move', {
                 tg_id: this.tgId,
                 game_id: this.gameId,
@@ -318,16 +314,13 @@ class TicTacToeGame {
             
             if (!response.success) {
                 this.showError(response.error || 'Ошибка при выполнении хода');
-                // Откатываем ход
-                this.board = boardBeforeMove;
-                this.updateCellDisplay(position);
                 // Разблокируем ячейки
                 this.isProcessingMove = false;
                 this.unblockAllCells();
                 return;
             }
             
-            // Обновляем состояние игры
+            // Обновляем состояние игры из ответа сервера
             if (response.game && response.game.board) {
                 // Сохраняем старое состояние доски для сравнения
                 const oldBoard = [...this.board];
@@ -339,7 +332,7 @@ class TicTacToeGame {
                     result: response.result
                 });
                 
-                // Обновляем доску из ответа сервера
+                // Обновляем доску из ответа сервера (содержит ход игрока + ход бота)
                 this.board = [...response.game.board];
                 
                 // Находим измененные ячейки (ход игрока + ход бота)
