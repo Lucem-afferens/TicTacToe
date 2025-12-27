@@ -7,7 +7,17 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // Определяем путь к корню проекта
-$base_path = dirname(__DIR__) . '/dist';
+// На Vercel файлы из dist/ доступны напрямую
+$base_path = __DIR__ . '/../dist';
+
+// Проверяем существование пути
+if (!file_exists($base_path . '/config.php')) {
+    // Альтернативный путь для Vercel
+    $base_path = __DIR__ . '/../dist';
+    if (!file_exists($base_path . '/config.php')) {
+        die("<h1>❌ Ошибка</h1><p>Не удалось найти config.php. Проверьте структуру проекта.</p>");
+    }
+}
 
 // Подключаем конфигурацию
 require_once $base_path . '/config.php';
