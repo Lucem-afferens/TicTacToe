@@ -354,6 +354,22 @@ module.exports = async (req, res) => {
         return res.status(200).json(response);
       }
       
+      case 'history': {
+        // История игр - упрощенная версия (без сохранения в файл)
+        // В продакшене можно добавить сохранение в базу данных
+        return res.status(200).json({
+          success: true,
+          games: [], // Пока возвращаем пустую историю
+          stats: {
+            total_games: 0,
+            wins: 0,
+            losses: 0,
+            draws: 0,
+            win_rate: 0
+          }
+        });
+      }
+      
       default:
         return res.status(400).json({ error: `Unknown action: ${action}` });
     }
