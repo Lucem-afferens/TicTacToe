@@ -1,28 +1,16 @@
 {
   "version": 2,
-  "functions": {
-    "dist/**/*.php": {
-      "runtime": "@vercel/php@2.0.0"
-    },
-    "api/**/*.php": {
-      "runtime": "@vercel/php@2.0.0"
-    }
-  },
   "rewrites": [
     {
       "source": "/webhook.php",
-      "destination": "/dist/webhook.php"
+      "destination": "/api/webhook.php"
     },
     {
       "source": "/api/game.php",
-      "destination": "/dist/api/game.php"
+      "destination": "/api/game.php"
     },
     {
       "source": "/setup/setup-webhook.php",
-      "destination": "/api/setup-webhook.php"
-    },
-    {
-      "source": "/api/setup-webhook.php",
       "destination": "/api/setup-webhook.php"
     },
     {
