@@ -2,8 +2,8 @@
   "name": "tic-tac-toe-telegram-bot",
   "version": "1.0.0",
   "description": "TicTacToe Telegram Bot",
-  "dependencies": {
-    "vercel-php": "0.4.0"
+  "engines": {
+    "node": "18.x"
   }
 }
 

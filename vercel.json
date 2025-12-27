@@ -1,18 +1,17 @@
 {
   "version": 2,
-  "functions": {
-    "api/**/*.php": {
-      "runtime": "vercel-php@0.4.0"
-    }
-  },
   "rewrites": [
     {
       "source": "/webhook.php",
-      "destination": "/api/webhook.php"
+      "destination": "/api/webhook.js"
     },
     {
       "source": "/setup/setup-webhook.php",
-      "destination": "/api/setup-webhook.php"
+      "destination": "/api/setup-webhook.js"
+    },
+    {
+      "source": "/api/setup-webhook.php",
+      "destination": "/api/setup-webhook.js"
     },
     {
       "source": "/web/:path*",
