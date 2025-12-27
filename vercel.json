@@ -18,6 +18,10 @@
       "destination": "/api/check-webhook.js"
     },
     {
+      "source": "/web/game.html",
+      "destination": "/api/web/game.js"
+    },
+    {
       "source": "/web/(.*)",
       "destination": "/dist/web/$1"
     }
