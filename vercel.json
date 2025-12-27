@@ -5,6 +5,9 @@
   "functions": {
     "dist/**/*.php": {
       "runtime": "@vercel/php@2.0.0"
+    },
+    "api/**/*.php": {
+      "runtime": "@vercel/php@2.0.0"
     }
   },
   "routes": [
