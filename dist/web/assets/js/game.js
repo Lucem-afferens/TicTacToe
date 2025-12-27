@@ -404,8 +404,10 @@ class TicTacToeGame {
             }
             
             // Проверяем результат
+            // ВАЖНО: Проверяем результат только ПОСЛЕ того, как отобразили ход бота
             if (response.result && response.result !== 'in_progress') {
                 // При окончании игры обновляем все ячейки для disabled состояния
+                // Но только если мы уже отобразили ход бота (или его нет)
                 this.updateBoardDisplay();
                 this.handleGameEnd(response.result, response.promo_code);
                 // Игра окончена - не разблокируем ячейки
@@ -414,6 +416,7 @@ class TicTacToeGame {
             }
             
             // Разблокируем ячейки после завершения хода бота
+            // ВАЖНО: Это происходит только ПОСЛЕ задержки и отображения хода бота
             this.isProcessingMove = false;
             this.unblockAllCells();
             
