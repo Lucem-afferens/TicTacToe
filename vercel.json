@@ -18,6 +18,10 @@
       "destination": "/api/check-webhook.js"
     },
     {
+      "source": "/web/assets/images/:path*",
+      "destination": "/dist/web/assets/images/:path*"
+    },
+    {
       "source": "/web/:path*",
       "destination": "/dist/web/:path*"
     }
