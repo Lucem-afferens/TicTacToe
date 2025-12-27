@@ -212,6 +212,20 @@ module.exports = async (req, res) => {
     return res.status(500).json({ error: 'BOT_TOKEN not configured' });
   }
   
+  // Если это GET-запрос (прямое открытие в браузере), возвращаем информационное сообщение
+  if (req.method === 'GET') {
+    return res.status(200).json({ 
+      status: 'ok',
+      message: 'Webhook endpoint is active. This endpoint receives POST requests from Telegram.',
+      method: req.method
+    });
+  }
+  
+  // Проверяем, что это POST-запрос
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed. Use POST.' });
+  }
+  
   const API_URL = `https://api.telegram.org/bot${BOT_TOKEN}`;
   
   try {
