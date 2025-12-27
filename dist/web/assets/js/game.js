@@ -372,24 +372,9 @@ class TicTacToeGame {
                 if (response.bot_move !== undefined && response.bot_move !== null) {
                     const botMovePosition = response.bot_move;
                     
-                    console.log('Bot will move at position:', botMovePosition);
-                    console.log('Board state before delay (should NOT have bot move):', [...this.board]);
-                    
-                    // ВАЖНО: Проверяем, что доска НЕ содержит ход бота
-                    if (this.board[botMovePosition] !== '') {
-                        console.error('ERROR: Bot cell is not empty before delay!', this.board[botMovePosition]);
-                    }
-                    
-                    // Задержка перед ходом бота (800мс) - ВАЖНО: именно 800мс, не 2000мс!
-                    const delayStartTime = Date.now();
-                    console.log('Starting 800ms delay before bot move...', delayStartTime);
-                    await new Promise(resolve => setTimeout(resolve, 800)); // ТОЧНО 800мс
-                    const delayEndTime = Date.now();
-                    const actualDelay = delayEndTime - delayStartTime;
-                    console.log('Delay completed, actual delay:', actualDelay, 'ms', delayEndTime);
-                    if (actualDelay > 1000) {
-                        console.error('WARNING: Delay was longer than expected!', actualDelay);
-                    }
+                    // Задержка перед ходом бота - ТОЧНО 800мс (не 2000мс!)
+                    // Используем прямой setTimeout без оберток
+                    await new Promise(resolve => setTimeout(resolve, 800));
                     
                     // ШАГ 3: ТОЛЬКО ПОСЛЕ ЗАДЕРЖКИ обновляем ход бота
                     // Обновляем только ячейку бота, не трогая остальные
