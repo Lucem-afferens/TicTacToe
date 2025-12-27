@@ -10,15 +10,9 @@ class TicTacToeGame {
         this.gameId = null;
         this.tgId = null;
         this.isProcessingMove = false; // Флаг блокировки во время обработки хода
-        // Определяем путь к API относительно текущей страницы
-        // Определяем путь к API относительно текущей страницы
-        // Если game.php находится в /web/, то API в /api/
-        const currentPath = window.location.pathname;
-        if (currentPath.includes('/web/')) {
-            this.apiUrl = '../api/game.php';
-        } else {
-            this.apiUrl = '/api/game.php';
-        }
+        // Определяем путь к API
+        // На Vercel API находится в /api/game.js (Node.js версия)
+        this.apiUrl = '/api/game.js';
         
         // Определяем путь к изображениям - используем тот же подход
         // game.php находится в /web/, assets/images/ находится в /web/assets/images/
