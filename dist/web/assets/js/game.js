@@ -585,13 +585,24 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Обработчик кнопки копирования промокода
+    // Обработчик кнопки копирования промокода (старая кнопка)
     const copyPromoBtn = document.getElementById('copy-promo-btn');
     if (copyPromoBtn) {
         copyPromoBtn.addEventListener('click', () => {
             const promoValue = document.getElementById('promo-code-value');
             if (promoValue) {
                 PromoCodeDisplay.copyToClipboard(promoValue.textContent);
+            }
+        });
+    }
+    
+    // Обработчик кнопки копирования промокода в модальном окне
+    const resultCopyPromoBtn = document.getElementById('result-copy-promo-btn');
+    if (resultCopyPromoBtn) {
+        resultCopyPromoBtn.addEventListener('click', () => {
+            const resultPromoValue = document.getElementById('result-promo-value');
+            if (resultPromoValue) {
+                PromoCodeDisplay.copyToClipboard(resultPromoValue.textContent);
             }
         });
     }
