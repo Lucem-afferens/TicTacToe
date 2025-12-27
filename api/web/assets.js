@@ -5,7 +5,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const { URL } = require('url');
 
 // MIME types for different file extensions
 const mimeTypes = {
@@ -21,31 +20,21 @@ const mimeTypes = {
 
 module.exports = async (req, res) => {
   try {
-    // Get the file path from the request
-    // URL from rewrite: /web/assets/css/main.css -> /api/web/assets.js?path=css/main.css
+    // Extract path from query parameter (from rewrite: /web/assets/css/main.css -> /api/web/assets.js?path=css/main.css)
     let assetPath = req.query.path || '';
     
-    // If path is not in query, try to extract from URL
-    if (!assetPath && req.url) {
-      const urlObj = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
-      assetPath = urlObj.searchParams.get('path') || '';
-      
-      // If still not found, try to extract from URL path
-      if (!assetPath) {
-        const urlPath = req.url.split('?')[0];
-        if (urlPath.includes('/assets/')) {
-          assetPath = urlPath.split('/assets/')[1];
-        }
-      }
-    }
-    
-    if (!assetPath) {
-      return res.status(400).send('Missing path parameter');
-    }
-    
-    // Ensure path starts with assets/
-    if (!assetPath.startsWith('assets/')) {
+    // If path is in query, construct full path
+    if (assetPath) {
       assetPath = 'assets/' + assetPath;
+    } else {
+      // Fallback: try to extract from URL
+      // This handles direct requests to /api/web/assets.js/assets/css/main.css
+      const urlMatch = req.url.match(/\/assets\/(.+)$/);
+      if (urlMatch) {
+        assetPath = 'assets/' + urlMatch[1];
+      } else {
+        return res.status(400).send('Missing path parameter');
+      }
     }
     
     const filePath = path.join(process.cwd(), 'dist', 'web', assetPath);
@@ -60,7 +49,7 @@ module.exports = async (req, res) => {
     
     // Check if file exists
     if (!fs.existsSync(filePath)) {
-      console.error('File not found:', filePath);
+      console.error('File not found:', filePath, 'Requested path:', assetPath);
       return res.status(404).send('File not found: ' + assetPath);
     }
     
