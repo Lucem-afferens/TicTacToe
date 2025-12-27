@@ -576,6 +576,11 @@ h2 {
   padding: var(--spacing-xs) 0;
 }
 
+/* Кнопка копирования промокода в модальном окне */
+.result-promo .button-compact {
+  margin-top: var(--spacing-xs);
+}
+
 /* Контейнер для кнопок - вертикальное расположение */
 .result-buttons {
   display: flex;
