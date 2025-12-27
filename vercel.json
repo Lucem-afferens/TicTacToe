@@ -22,27 +22,9 @@
       "destination": "/dist/web/:path*"
     }
   ],
-  "routes": [
-    {
-      "src": "/web/assets/images/(.*)",
-      "dest": "/dist/web/assets/images/$1",
-      "headers": {
-        "Cache-Control": "public, max-age=31536000, immutable"
-      }
-    }
-  ],
   "headers": [
     {
       "source": "/web/assets/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        }
-      ]
-    },
-    {
-      "source": "/public/web/assets/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
