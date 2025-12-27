@@ -466,6 +466,7 @@ class TicTacToeGame {
         const cell = document.querySelector(`.game-cell[data-index="${index}"]`);
         if (!cell) return;
         
+        // ВАЖНО: Читаем символ ТОЛЬКО из this.board, не из response.game.board
         const symbol = this.board[index];
         const currentSymbol = cell.dataset.symbol || '';
         
