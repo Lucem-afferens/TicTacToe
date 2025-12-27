@@ -137,7 +137,7 @@ async function handleUpdate(update, apiUrl) {
     switch (text) {
       case '/start':
         const welcomeMessage = BotMessages.WELCOME;
-        const webappUrl = `${FULL_URL}/web/game.php?tg_id=${chatId}`;
+        const webappUrl = `${FULL_URL}/web/game.html?tg_id=${chatId}`;
         const keyboard = createWebAppKeyboard(webappUrl);
         await sendMessage(chatId, welcomeMessage, keyboard, apiUrl);
         break;

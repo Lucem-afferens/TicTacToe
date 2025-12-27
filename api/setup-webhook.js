@@ -158,7 +158,7 @@ async function setupWebhook() {
           type: 'web_app',
           text: '🎮 Играть',
           web_app: {
-            url: `${FULL_URL}/web/game.php`
+            url: `${FULL_URL}/web/game.html`
           }
         }
       }
