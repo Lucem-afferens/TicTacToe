@@ -89,7 +89,7 @@ class TicTacToeGame {
                     console.error('Telegram ID not found after retry');
                     // Показываем ошибку только если это точно не Telegram WebApp
                     if (!window.Telegram || !window.Telegram.WebApp) {
-                        this.showError('Не удалось определить пользователя. Откройте игру через Telegram бота.');
+            this.showError('Не удалось определить пользователя. Откройте игру через Telegram бота.');
                         return;
                     }
                     // Если Telegram WebApp доступен, но tg_id нет, продолжаем с предупреждением
@@ -510,7 +510,7 @@ class TicTacToeGame {
         const boardElement = document.getElementById('game-board');
         if (boardElement) {
             this.forceStyleUpdate(boardElement);
-        }
+            }
     }
     
     /**

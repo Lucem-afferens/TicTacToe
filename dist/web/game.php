@@ -74,8 +74,8 @@ $js_version = file_exists(__DIR__ . '/assets/js/game.js') ? filemtime(__DIR__ . 
                 <div class="result-modal-backdrop"></div>
                 <div class="result-modal-content">
                     <div id="result-icon" class="result-icon" style="display: none;"></div>
-                    <h2 id="result-title" class="result-title"></h2>
-                    <p class="result-message">Сыграем ещё раз?</p>
+                <h2 id="result-title" class="result-title"></h2>
+                <p class="result-message">Сыграем ещё раз?</p>
                     
                     <!-- Промокод в модальном окне (скрыт по умолчанию) -->
                     <div id="result-promo-container" class="result-promo hidden">
