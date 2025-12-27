@@ -5,26 +5,50 @@
 
 const fs = require('fs');
 const path = require('path');
+const { URL } = require('url');
 
 // MIME types for different file extensions
 const mimeTypes = {
-  '.css': 'text/css',
-  '.js': 'text/javascript',
+  '.css': 'text/css; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg',
   '.svg': 'image/svg+xml',
   '.json': 'application/json',
-  '.html': 'text/html'
+  '.html': 'text/html; charset=utf-8'
 };
 
 module.exports = async (req, res) => {
   try {
     // Get the file path from the request
-    // URL will be like /web/assets/css/main.css
-    // We need to extract /assets/css/main.css
-    const urlPath = req.url.replace('/web', '');
-    const filePath = path.join(process.cwd(), 'dist', 'web', urlPath);
+    // URL from rewrite: /web/assets/css/main.css -> /api/web/assets.js?path=css/main.css
+    let assetPath = req.query.path || '';
+    
+    // If path is not in query, try to extract from URL
+    if (!assetPath && req.url) {
+      const urlObj = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+      assetPath = urlObj.searchParams.get('path') || '';
+      
+      // If still not found, try to extract from URL path
+      if (!assetPath) {
+        const urlPath = req.url.split('?')[0];
+        if (urlPath.includes('/assets/')) {
+          assetPath = urlPath.split('/assets/')[1];
+        }
+      }
+    }
+    
+    if (!assetPath) {
+      return res.status(400).send('Missing path parameter');
+    }
+    
+    // Ensure path starts with assets/
+    if (!assetPath.startsWith('assets/')) {
+      assetPath = 'assets/' + assetPath;
+    }
+    
+    const filePath = path.join(process.cwd(), 'dist', 'web', assetPath);
     
     // Security check - ensure the path is within dist/web/
     const normalizedPath = path.normalize(filePath);
@@ -36,7 +60,8 @@ module.exports = async (req, res) => {
     
     // Check if file exists
     if (!fs.existsSync(filePath)) {
-      return res.status(404).send('File not found');
+      console.error('File not found:', filePath);
+      return res.status(404).send('File not found: ' + assetPath);
     }
     
     // Get file extension for MIME type
@@ -59,7 +84,6 @@ module.exports = async (req, res) => {
     res.send(fileContent);
   } catch (error) {
     console.error('Error serving asset:', error);
-    res.status(500).send('Internal server error');
+    res.status(500).send('Internal server error: ' + error.message);
   }
 };
-
