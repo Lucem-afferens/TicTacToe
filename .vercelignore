@@ -1,0 +1,20 @@
+# Игнорируем файлы, которые не нужны на Vercel
+node_modules/
+.git/
+.github/
+*.md
+!README.md
+composer.json
+composer.lock
+config/
+includes/
+O.png
+X.png
+запрос.md
+PLAN.md
+DEPLOYMENT.md
+SETUP_BEGET.md
+VERCEL_*.md
+*.bak
+.DS_Store
+
