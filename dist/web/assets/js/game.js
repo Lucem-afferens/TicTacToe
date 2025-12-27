@@ -383,8 +383,8 @@ class TicTacToeGame {
                     }
                     
                     // Задержка перед ходом бота
-                    console.log('Starting 2000ms delay before bot move...');
-                    await this.delay(2000);
+                    console.log('Starting 800ms delay before bot move...');
+                    await this.delay(800);
                     console.log('Delay completed, now displaying bot move');
                     
                     // ШАГ 3: ТОЛЬКО ПОСЛЕ ЗАДЕРЖКИ обновляем ход бота
