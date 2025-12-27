@@ -362,8 +362,10 @@ class TicTacToeGame {
                 this.board = playerMoveBoard;
                 this.updateCellDisplay(position);
                 
-                // Даем браузеру время отрисовать ход игрока
-                await this.delay(100);
+                // Ждем следующего кадра анимации, чтобы гарантировать отрисовку хода игрока
+                await new Promise(resolve => requestAnimationFrame(() => {
+                    requestAnimationFrame(resolve); // Двойной RAF для гарантии отрисовки
+                }));
                 
                 // Если бот сделал ход, ждем перед отображением его хода
                 if (response.bot_move !== undefined && response.bot_move !== null) {
@@ -373,7 +375,10 @@ class TicTacToeGame {
                     await this.delay(2000);
                     
                     // Теперь обновляем доску с ходом бота
-                    this.board = [...response.game.board];
+                    // ВАЖНО: обновляем только ход бота, не трогая ход игрока
+                    const botMoveBoard = [...this.board];
+                    botMoveBoard[response.bot_move] = 'O';
+                    this.board = botMoveBoard;
                     this.updateCellDisplay(response.bot_move);
                 } else {
                     // Если бот не сделал ход (игра окончена), обновляем доску полностью
