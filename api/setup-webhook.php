@@ -139,7 +139,11 @@ if ($result && $result['ok']) {
 
 // 5. Устанавливаем команды бота
 echo "<h2>5. Установка команд бота...</h2>";
-require_once $base_path . '/bot/messages.php';
+if (file_exists($base_path . '/bot/messages.php')) {
+    require_once $base_path . '/bot/messages.php';
+} else {
+    echo "<p style='color: orange;'>⚠️ Файл messages.php не найден, используем стандартные команды</p>";
+}
 
 $commands = [
     ['command' => 'start', 'description' => 'Начать игру'],
