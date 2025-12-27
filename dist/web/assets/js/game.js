@@ -365,10 +365,8 @@ class TicTacToeGame {
                 // Обновляем только ячейку игрока
                 this.updateCellDisplay(position);
                 
-                // Ждем следующего кадра анимации для гарантии отрисовки
-                await new Promise(resolve => requestAnimationFrame(() => {
-                    requestAnimationFrame(resolve);
-                }));
+                // Ждем следующего кадра анимации для гарантии отрисовки (минимальная задержка)
+                await new Promise(resolve => requestAnimationFrame(resolve));
                 
                 // ШАГ 2: Если бот сделал ход, ждем перед отображением
                 if (response.bot_move !== undefined && response.bot_move !== null) {
