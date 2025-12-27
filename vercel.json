@@ -1,5 +1,7 @@
 {
   "version": 2,
+  "buildCommand": "echo 'No build needed'",
+  "outputDirectory": "dist",
   "functions": {
     "dist/**/*.php": {
       "runtime": "@vercel/php@2.0.0"
@@ -16,7 +18,11 @@
     },
     {
       "src": "/setup/setup-webhook.php",
-      "dest": "/dist/setup/setup-webhook.php"
+      "dest": "/api/setup-webhook.php"
+    },
+    {
+      "src": "/api/setup-webhook.php",
+      "dest": "/api/setup-webhook.php"
     },
     {
       "src": "/web/(.*)",
@@ -25,12 +31,6 @@
     {
       "src": "/web",
       "dest": "/dist/web/game.php"
-    },
-    {
-      "src": "/(.*\\.(css|js|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot))",
-      "headers": {
-        "cache-control": "public, max-age=31536000, immutable"
-      }
     }
   ],
   "rewrites": [
@@ -44,7 +44,11 @@
     },
     {
       "source": "/setup/setup-webhook.php",
-      "destination": "/dist/setup/setup-webhook.php"
+      "destination": "/api/setup-webhook.php"
+    },
+    {
+      "source": "/api/setup-webhook.php",
+      "destination": "/api/setup-webhook.php"
     },
     {
       "source": "/web/:path*",
@@ -52,6 +56,15 @@
     }
   ],
   "headers": [
+    {
+      "source": "/dist/web/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
     {
       "source": "/(.*)",
       "headers": [
