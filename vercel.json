@@ -34,6 +34,10 @@
     {
       "src": "/web",
       "dest": "/dist/web/game.php"
+    },
+    {
+      "src": "/(.*\\.php)",
+      "dest": "/dist/$1"
     }
   ],
   "rewrites": [
