@@ -62,7 +62,29 @@ class TelegramAPI {
      */
     getUserId() {
         const user = this.getUserData();
-        return user?.id || null;
+        const userId = user?.id || null;
+        
+        // Дополнительная проверка через initDataUnsafe напрямую
+        if (!userId && this.tg && this.tg.initDataUnsafe) {
+            const directUserId = this.tg.initDataUnsafe.user?.id;
+            if (directUserId) {
+                console.log('Got userId from initDataUnsafe directly:', directUserId);
+                return String(directUserId); // Преобразуем в строку для консистентности
+            }
+        }
+        
+        if (userId) {
+            console.log('Got userId from getUserData:', userId);
+            return String(userId); // Преобразуем в строку для консистентности
+        }
+        
+        console.warn('getUserId: No user ID found', {
+            hasTg: !!this.tg,
+            hasInitDataUnsafe: !!(this.tg && this.tg.initDataUnsafe),
+            hasUser: !!(this.tg && this.tg.initDataUnsafe && this.tg.initDataUnsafe.user)
+        });
+        
+        return null;
     }
     
     /**

@@ -55,28 +55,53 @@ class TicTacToeGame {
      * Инициализация игры
      */
     init() {
+        console.log('Game init started');
+        
         // Сначала инициализируем Telegram API (чтобы получить доступ к WebApp SDK)
-        telegramAPI.init();
+        const telegramInitialized = telegramAPI.init();
+        console.log('Telegram API initialized:', telegramInitialized);
         
         // Получаем Telegram ID из URL или из Telegram WebApp API
         const urlParams = new URLSearchParams(window.location.search);
-        this.tgId = urlParams.get('tg_id') || telegramAPI.getUserId();
+        const tgIdFromUrl = urlParams.get('tg_id');
+        const tgIdFromAPI = telegramAPI.getUserId();
+        
+        console.log('tg_id from URL:', tgIdFromUrl);
+        console.log('tg_id from Telegram API:', tgIdFromAPI);
+        console.log('Telegram WebApp available:', typeof window.Telegram !== 'undefined' && !!window.Telegram.WebApp);
+        
+        if (window.Telegram && window.Telegram.WebApp) {
+            console.log('Telegram WebApp initDataUnsafe:', window.Telegram.WebApp.initDataUnsafe);
+            console.log('Telegram WebApp initDataUnsafe.user:', window.Telegram.WebApp.initDataUnsafe?.user);
+        }
+        
+        this.tgId = tgIdFromUrl || tgIdFromAPI;
         
         // Если tg_id все еще не найден, пытаемся получить его после небольшой задержки
         // (на случай, если Telegram WebApp SDK еще не полностью загружен)
         if (!this.tgId) {
+            console.warn('tg_id not found immediately, retrying after delay...');
             setTimeout(() => {
                 this.tgId = telegramAPI.getUserId();
+                console.log('tg_id after delay:', this.tgId);
+                
                 if (!this.tgId) {
-                    console.error('Telegram ID not found');
-                    this.showError('Не удалось определить пользователя. Откройте игру через Telegram бота.');
-                    return;
+                    console.error('Telegram ID not found after retry');
+                    // Показываем ошибку только если это точно не Telegram WebApp
+                    if (!window.Telegram || !window.Telegram.WebApp) {
+                        this.showError('Не удалось определить пользователя. Откройте игру через Telegram бота.');
+                        return;
+                    }
+                    // Если Telegram WebApp доступен, но tg_id нет, продолжаем с предупреждением
+                    console.warn('Continuing without tg_id - Telegram WebApp is available');
                 }
-                // Если tg_id найден после задержки, продолжаем инициализацию
+                // Продолжаем инициализацию
                 this.createBoard();
-            }, 100);
+            }, 500); // Увеличиваем задержку до 500мс
             return;
         }
+        
+        console.log('Using tg_id:', this.tgId);
         
         // Создаем игровое поле
         this.createBoard();
