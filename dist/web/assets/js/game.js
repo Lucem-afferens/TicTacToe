@@ -15,7 +15,8 @@ class TicTacToeGame {
         this.apiUrl = '/api/game.js';
         
         // Определяем путь к изображениям
-        // На Vercel используем абсолютный путь от корня
+        // На Vercel статические файлы из public/ доступны напрямую
+        // Также пробуем dist/web/assets/images/ через rewrites
         this.imagesPath = '/web/assets/images/';
         
         // Предзагружаем изображения для плавного отображения
@@ -30,14 +31,39 @@ class TicTacToeGame {
     
     /**
      * Предзагрузка изображений символов
-     * Используем встроенные SVG вместо PNG для надежности
+     * Пробуем загрузить PNG, если не получится - используем SVG
      */
     preloadImages() {
-        // Создаем SVG для X
-        this.imageCache.X = this.createXSVG();
+        // Пробуем загрузить PNG изображения
+        const xImg = new Image();
+        xImg.src = this.imagesPath + 'X.png';
+        xImg.onload = () => {
+            this.imageCache.X = xImg;
+            console.log('X.png loaded successfully');
+        };
+        xImg.onerror = () => {
+            console.warn('X.png failed to load, using SVG fallback');
+            this.imageCache.X = this.createXSVG();
+        };
         
-        // Создаем SVG для O
-        this.imageCache.O = this.createOSVG();
+        const oImg = new Image();
+        oImg.src = this.imagesPath + 'O.png';
+        oImg.onload = () => {
+            this.imageCache.O = oImg;
+            console.log('O.png loaded successfully');
+        };
+        oImg.onerror = () => {
+            console.warn('O.png failed to load, using SVG fallback');
+            this.imageCache.O = this.createOSVG();
+        };
+        
+        // Устанавливаем SVG как fallback по умолчанию
+        if (!this.imageCache.X) {
+            this.imageCache.X = this.createXSVG();
+        }
+        if (!this.imageCache.O) {
+            this.imageCache.O = this.createOSVG();
+        }
     }
     
     /**
@@ -410,16 +436,38 @@ class TicTacToeGame {
             cell.innerHTML = '';
         } else if (symbol === 'X') {
             cell.classList.add('x');
-            // Используем SVG вместо изображения
-            const svg = this.imageCache.X ? this.imageCache.X.cloneNode(true) : this.createXSVG();
             cell.innerHTML = '';
-            cell.appendChild(svg);
+            
+            // Используем изображение если загружено, иначе SVG
+            if (this.imageCache.X && this.imageCache.X instanceof Image && this.imageCache.X.complete) {
+                const img = this.imageCache.X.cloneNode(false);
+                img.className = 'cell-symbol-img';
+                cell.appendChild(img);
+            } else if (this.imageCache.X && this.imageCache.X instanceof SVGElement) {
+                const svg = this.imageCache.X.cloneNode(true);
+                cell.appendChild(svg);
+            } else {
+                // Fallback: создаем новый SVG
+                const svg = this.createXSVG();
+                cell.appendChild(svg);
+            }
         } else if (symbol === 'O') {
             cell.classList.add('o');
-            // Используем SVG вместо изображения
-            const svg = this.imageCache.O ? this.imageCache.O.cloneNode(true) : this.createOSVG();
             cell.innerHTML = '';
-            cell.appendChild(svg);
+            
+            // Используем изображение если загружено, иначе SVG
+            if (this.imageCache.O && this.imageCache.O instanceof Image && this.imageCache.O.complete) {
+                const img = this.imageCache.O.cloneNode(false);
+                img.className = 'cell-symbol-img';
+                cell.appendChild(img);
+            } else if (this.imageCache.O && this.imageCache.O instanceof SVGElement) {
+                const svg = this.imageCache.O.cloneNode(true);
+                cell.appendChild(svg);
+            } else {
+                // Fallback: создаем новый SVG
+                const svg = this.createOSVG();
+                cell.appendChild(svg);
+            }
         }
         
         if (this.gameOver || symbol !== '') {
