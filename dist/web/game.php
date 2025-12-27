@@ -4,7 +4,8 @@
  * Telegram WebApp
  */
 
-// Получаем Telegram ID из параметров
+// Получаем Telegram ID из параметров (опционально, для обратной совместимости)
+// Основной способ получения tg_id - через Telegram WebApp API в JavaScript
 $tg_id = $_GET['tg_id'] ?? '';
 
 // Версия для кэш-бастинга (обновляется при каждом деплое)
@@ -13,33 +14,8 @@ $assets_version = '1.0.0';
 $css_version = file_exists(__DIR__ . '/assets/css/main.css') ? filemtime(__DIR__ . '/assets/css/main.css') : time();
 $js_version = file_exists(__DIR__ . '/assets/js/game.js') ? filemtime(__DIR__ . '/assets/js/game.js') : time();
 
-// Если нет Telegram ID, показываем сообщение
-if (empty($tg_id)) {
-    echo '<!DOCTYPE html>
-    <html lang="ru">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Крестики-Нолики</title>
-        <link rel="stylesheet" href="assets/css/variables.css?v=<?php echo $css_version; ?>">
-        <link rel="stylesheet" href="assets/css/main.css?v=<?php echo $css_version; ?>">
-        
-        <!-- Prevent caching -->
-        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-        <meta http-equiv="Pragma" content="no-cache">
-        <meta http-equiv="Expires" content="0">
-    </head>
-    <body>
-        <div class="game-container">
-            <h1>🎮 Крестики-Нолики</h1>
-            <div class="message error">
-                Для доступа к игре необходимо открыть приложение через Telegram-бота.
-            </div>
-        </div>
-    </body>
-    </html>';
-    exit;
-}
+// Убираем проверку tg_id в PHP - теперь получаем его через JavaScript из Telegram WebApp API
+// Это позволяет работать как с кнопкой меню (без параметров), так и с inline кнопкой (с параметром)
 ?>
 <!DOCTYPE html>
 <html lang="ru">

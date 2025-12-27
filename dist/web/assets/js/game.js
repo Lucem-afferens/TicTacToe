@@ -55,18 +55,28 @@ class TicTacToeGame {
      * Инициализация игры
      */
     init() {
-        // Получаем Telegram ID из URL
+        // Сначала инициализируем Telegram API (чтобы получить доступ к WebApp SDK)
+        telegramAPI.init();
+        
+        // Получаем Telegram ID из URL или из Telegram WebApp API
         const urlParams = new URLSearchParams(window.location.search);
         this.tgId = urlParams.get('tg_id') || telegramAPI.getUserId();
         
+        // Если tg_id все еще не найден, пытаемся получить его после небольшой задержки
+        // (на случай, если Telegram WebApp SDK еще не полностью загружен)
         if (!this.tgId) {
-            console.error('Telegram ID not found');
-            this.showError('Не удалось определить пользователя. Откройте игру через Telegram бота.');
+            setTimeout(() => {
+                this.tgId = telegramAPI.getUserId();
+                if (!this.tgId) {
+                    console.error('Telegram ID not found');
+                    this.showError('Не удалось определить пользователя. Откройте игру через Telegram бота.');
+                    return;
+                }
+                // Если tg_id найден после задержки, продолжаем инициализацию
+                this.createBoard();
+            }, 100);
             return;
         }
-        
-        // Инициализируем Telegram API
-        telegramAPI.init();
         
         // Создаем игровое поле
         this.createBoard();
