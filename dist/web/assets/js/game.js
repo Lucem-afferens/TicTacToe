@@ -355,30 +355,27 @@ class TicTacToeGame {
                     result: response.result
                 });
                 
-                // Обновляем доску из ответа сервера (содержит ход игрока + ход бота)
-                this.board = [...response.game.board];
+                // Сначала обновляем только ход игрока
+                // Временно обновляем доску только с ходом игрока
+                const playerMoveBoard = [...oldBoard];
+                playerMoveBoard[position] = 'X';
+                this.board = playerMoveBoard;
+                this.updateCellDisplay(position);
                 
-                // Находим измененные ячейки (ход игрока + ход бота)
-                const changedCells = [];
-                for (let i = 0; i < 9; i++) {
-                    if (oldBoard[i] !== this.board[i]) {
-                        changedCells.push(i);
-                    }
-                }
-                
-                console.log('Changed cells:', changedCells);
-                
-                // Обновляем только измененные ячейки
-                changedCells.forEach(index => {
-                    this.updateCellDisplay(index);
-                });
-                
-                // Если бот сделал ход, добавляем небольшую задержку для визуализации
+                // Если бот сделал ход, ждем перед отображением его хода
                 if (response.bot_move !== undefined && response.bot_move !== null) {
                     console.log('Bot made move at position:', response.bot_move);
-                    // Небольшая задержка для визуализации хода бота
-                    await this.delay(500);
+                    
+                    // Задержка перед ходом бота (800-1000мс для естественности)
+                    await this.delay(800);
+                    
+                    // Теперь обновляем доску с ходом бота
+                    this.board = [...response.game.board];
+                    this.updateCellDisplay(response.bot_move);
                 } else {
+                    // Если бот не сделал ход (игра окончена), обновляем доску полностью
+                    this.board = [...response.game.board];
+                    this.updateBoardDisplay();
                     console.log('No bot move in response');
                 }
             } else {
