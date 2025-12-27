@@ -334,18 +334,24 @@ module.exports = async (req, res) => {
             const botSymbol = 'O';
             const botPosition = GameAI.makeMove(updatedGameData.board, botSymbol, playerSymbol);
             
-            if (botPosition !== null) {
-              updatedGameData = GameState.makeMove(updatedGameData, botPosition, botSymbol);
+            if (botPosition !== null && botPosition !== undefined) {
+              const botMoveResult = GameState.makeMove(updatedGameData, botPosition, botSymbol);
               
-              if (updatedGameData) {
+              if (botMoveResult) {
+                updatedGameData = botMoveResult;
                 const finalResult = GameState.getResult(updatedGameData);
                 response.game = updatedGameData;
                 response.result = finalResult;
                 response.bot_move = botPosition;
+              } else {
+                console.error('Failed to make bot move - GameState.makeMove returned null');
               }
+            } else {
+              console.error('Bot could not find a move - GameAI.makeMove returned null/undefined');
             }
           } catch (error) {
             console.error('Error in bot move:', error);
+            // Продолжаем выполнение даже если бот не смог сделать ход
           }
         }
         

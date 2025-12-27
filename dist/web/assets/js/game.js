@@ -328,12 +328,14 @@ class TicTacToeGame {
             }
             
             // Обновляем состояние игры
-            if (response.game) {
-                // Обновляем только измененные ячейки
+            if (response.game && response.game.board) {
+                // Сохраняем старое состояние доски для сравнения
                 const oldBoard = [...this.board];
-                this.board = response.game.board;
                 
-                // Находим измененные ячейки
+                // Обновляем доску из ответа сервера
+                this.board = [...response.game.board];
+                
+                // Находим измененные ячейки (ход игрока + ход бота)
                 const changedCells = [];
                 for (let i = 0; i < 9; i++) {
                     if (oldBoard[i] !== this.board[i]) {
@@ -346,11 +348,13 @@ class TicTacToeGame {
                     this.updateCellDisplay(index);
                 });
                 
-                // Если бот сделал ход
-                if (response.bot_move !== undefined) {
-                    // Небольшая задержка для визуализации
+                // Если бот сделал ход, добавляем небольшую задержку для визуализации
+                if (response.bot_move !== undefined && response.bot_move !== null) {
+                    // Небольшая задержка для визуализации хода бота
                     await this.delay(500);
                 }
+            } else {
+                console.error('Invalid response from server:', response);
             }
             
             // Проверяем результат
