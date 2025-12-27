@@ -18,12 +18,8 @@
       "destination": "/api/check-webhook.js"
     },
     {
-      "source": "/web/game.html",
-      "destination": "/game.html"
-    },
-    {
-      "source": "/web/:path*",
-      "destination": "/dist/web/:path*"
+      "source": "/web/(.*)",
+      "destination": "/dist/web/$1"
     }
   ],
   "headers": [
