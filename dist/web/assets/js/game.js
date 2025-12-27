@@ -382,10 +382,10 @@ class TicTacToeGame {
                         console.error('ERROR: Bot cell is not empty before delay!', this.board[botMovePosition]);
                     }
                     
-                    // Задержка перед ходом бота
-                    console.log('Starting 800ms delay before bot move...');
-                    await this.delay(800);
-                    console.log('Delay completed, now displaying bot move');
+                    // Задержка перед ходом бота (800мс)
+                    console.log('Starting 800ms delay before bot move...', new Date().getTime());
+                    await new Promise(resolve => setTimeout(resolve, 800)); // Используем напрямую setTimeout для гарантии
+                    console.log('Delay completed, now displaying bot move', new Date().getTime());
                     
                     // ШАГ 3: ТОЛЬКО ПОСЛЕ ЗАДЕРЖКИ обновляем ход бота
                     // Обновляем только ячейку бота, не трогая остальные
