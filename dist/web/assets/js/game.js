@@ -782,7 +782,22 @@ class TicTacToeGame {
      */
     hidePrizeImage() {
         const prizeModal = document.getElementById('prize-image-modal');
+        const prizeImage = document.getElementById('prize-image');
+        
         if (prizeModal) {
+            // Удаляем сообщение об ошибке, если есть
+            const errorMessage = prizeModal.querySelector('.prize-error-message');
+            if (errorMessage) {
+                errorMessage.remove();
+            }
+            
+            // Сбрасываем изображение
+            if (prizeImage) {
+                prizeImage.src = '';
+                prizeImage.style.display = 'none';
+                prizeImage.style.opacity = '1';
+            }
+            
             prizeModal.classList.add('hidden');
         }
         
