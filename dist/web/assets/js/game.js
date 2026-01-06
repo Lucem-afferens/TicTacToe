@@ -660,8 +660,15 @@ class TicTacToeGame {
         if (!canvas) return;
         
         const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        const resultModal = document.getElementById('result-modal');
+        if (resultModal) {
+            const rect = resultModal.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+        } else {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
         
         const confetti = [];
         const confettiCount = 150;
