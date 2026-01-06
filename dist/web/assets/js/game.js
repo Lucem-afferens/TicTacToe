@@ -550,10 +550,10 @@ class TicTacToeGame {
                 message = 'Вы выиграли! Откройте свой приз!';
                 icon = '';
                 prizeImage = '/web/assets/images/prizes/win.jpg'; // Путь к изображению приза за победу
-                telegramAPI.sendData({
-                    action: 'win',
-                    game_id: this.gameId
-                });
+                    telegramAPI.sendData({
+                        action: 'win',
+                        game_id: this.gameId
+                    });
                 break;
             case 'bot_win':
                 title = '😔 Не отчаивайтесь!';
@@ -646,7 +646,81 @@ class TicTacToeGame {
             }
             
             resultModal.classList.remove('hidden');
+            
+            // Запускаем поздравительные вспышки
+            this.startConfetti();
         }
+    }
+    
+    /**
+     * Запуск поздравительных вспышек (confetti)
+     */
+    startConfetti() {
+        const canvas = document.getElementById('confetti-canvas');
+        if (!canvas) return;
+        
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        const confetti = [];
+        const confettiCount = 150;
+        const colors = ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE'];
+        
+        // Создаем конфетти
+        for (let i = 0; i < confettiCount; i++) {
+            confetti.push({
+                x: Math.random() * canvas.width,
+                y: -Math.random() * canvas.height,
+                width: Math.random() * 10 + 5,
+                height: Math.random() * 10 + 5,
+                speed: Math.random() * 3 + 2,
+                rotation: Math.random() * 360,
+                rotationSpeed: Math.random() * 10 - 5,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                opacity: Math.random() * 0.5 + 0.5
+            });
+        }
+        
+        let animationId;
+        const animate = () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            confetti.forEach((piece, index) => {
+                ctx.save();
+                ctx.globalAlpha = piece.opacity;
+                ctx.fillStyle = piece.color;
+                ctx.translate(piece.x, piece.y);
+                ctx.rotate((piece.rotation * Math.PI) / 180);
+                ctx.fillRect(-piece.width / 2, -piece.height / 2, piece.width, piece.height);
+                ctx.restore();
+                
+                piece.y += piece.speed;
+                piece.x += Math.sin(piece.y * 0.01) * 2;
+                piece.rotation += piece.rotationSpeed;
+                
+                // Если конфетти упало за экран, перезапускаем его сверху
+                if (piece.y > canvas.height + 50) {
+                    piece.y = -50;
+                    piece.x = Math.random() * canvas.width;
+                }
+            });
+            
+            animationId = requestAnimationFrame(animate);
+        };
+        
+        animate();
+        
+        // Останавливаем анимацию через 5 секунд
+        setTimeout(() => {
+            cancelAnimationFrame(animationId);
+            // Плавно скрываем canvas
+            canvas.style.transition = 'opacity 1s ease-out';
+            canvas.style.opacity = '0';
+            setTimeout(() => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }, 1000);
+        }, 5000);
     }
     
     /**
@@ -674,6 +748,26 @@ class TicTacToeGame {
         if (prizeModal) {
             prizeModal.classList.add('hidden');
         }
+        
+        // После закрытия окна с призом возвращаемся в меню
+        this.returnToMenu();
+    }
+    
+    /**
+     * Возврат в меню после закрытия приза
+     */
+    returnToMenu() {
+        // Скрываем модальное окно результатов
+        this.hideResultScreen();
+        
+        // Возвращаемся в меню через навигацию
+        setTimeout(() => {
+            if (window.navigation && typeof window.navigation.showMenu === 'function') {
+                window.navigation.showMenu();
+            } else if (typeof navigation !== 'undefined' && navigation && typeof navigation.showMenu === 'function') {
+                navigation.showMenu();
+            }
+        }, 300);
     }
     
     /**
@@ -754,14 +848,6 @@ document.addEventListener('DOMContentLoaded', () => {
     game = new TicTacToeGame();
     // Делаем доступным глобально
     window.game = game;
-    
-    // Обработчик кнопки "Сыграть ещё раз"
-    const playAgainBtn = document.getElementById('play-again-btn');
-    if (playAgainBtn) {
-        playAgainBtn.addEventListener('click', () => {
-            game.startNewGame();
-        });
-    }
     
     // Обработчик кнопки "Открыть приз"
     const openPrizeBtn = document.getElementById('open-prize-btn');

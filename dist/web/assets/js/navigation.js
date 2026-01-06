@@ -29,12 +29,6 @@ class Navigation {
             historyBtn.addEventListener('click', () => this.showHistory());
         }
         
-        // Кнопка "В меню" из игры
-        const backToMenuBtn = document.getElementById('back-to-menu-btn');
-        if (backToMenuBtn) {
-            backToMenuBtn.addEventListener('click', () => this.showMenu());
-        }
-        
         // Кнопка "В меню" из истории
         const backToMenuFromHistoryBtn = document.getElementById('back-to-menu-from-history-btn');
         if (backToMenuFromHistoryBtn) {
