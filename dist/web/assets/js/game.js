@@ -744,16 +744,35 @@ class TicTacToeGame {
             prizeImage.style.maxWidth = '';
             prizeImage.style.maxHeight = '';
             
-            prizeImage.src = imagePath;
-            prizeImage.onload = () => {
-                // После загрузки убеждаемся, что изображение правильно отображается
-                prizeImage.style.display = 'block';
+            // Показываем изображение сразу
+            prizeImage.style.display = 'block';
+            
+            // Пробуем загрузить изображение
+            const img = new Image();
+            img.onload = () => {
+                prizeImage.src = imagePath;
+                prizeImage.style.opacity = '1';
             };
-            prizeImage.onerror = () => {
-                // Если изображение не загрузилось, показываем placeholder
-                prizeImage.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2Y1ZjVmNSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM5OTk5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj7Qn9C+0YLQvtCy0YvQuSDQv9GA0L7QuNC3PC90ZXh0Pjwvc3ZnPg==';
-                prizeImage.style.display = 'block';
+            img.onerror = () => {
+                // Если изображение не загрузилось, создаем красивое сообщение
+                prizeImage.style.display = 'none';
+                const errorMessage = document.createElement('div');
+                errorMessage.className = 'prize-error-message';
+                errorMessage.innerHTML = `
+                    <div class="prize-error-icon">🎁</div>
+                    <div class="prize-error-text">Изображение приза загружается...</div>
+                    <div class="prize-error-subtext">Пожалуйста, попробуйте позже</div>
+                `;
+                const container = prizeModal.querySelector('.prize-image-container');
+                if (container) {
+                    const existingError = container.querySelector('.prize-error-message');
+                    if (existingError) {
+                        existingError.remove();
+                    }
+                    container.appendChild(errorMessage);
+                }
             };
+            img.src = imagePath;
             prizeModal.classList.remove('hidden');
         }
     }
