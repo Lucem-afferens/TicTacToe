@@ -56,7 +56,7 @@
                 <div class="result-modal-content">
                     <div id="result-icon" class="result-icon" style="display: none;"></div>
                     <h2 id="result-title" class="result-title"></h2>
-                    <p class="result-message">Сыграем ещё раз?</p>
+                    <p id="result-message" class="result-message"></p>
                     
                     <!-- Промокод в модальном окне (скрыт по умолчанию) -->
                     <div id="result-promo-container" class="result-promo hidden">
@@ -65,10 +65,22 @@
                         <button id="result-copy-promo-btn" class="button button-secondary button-compact">📋 Копировать</button>
                     </div>
                     
+                    <!-- Кнопка открыть приз -->
+                    <button id="open-prize-btn" class="button button-primary button-prize">🎁 Открыть приз</button>
+                    
                     <div class="result-buttons">
                         <button id="play-again-btn" class="button button-primary button-compact">✨ Сыграть ещё</button>
                         <button id="back-to-menu-btn" class="button button-secondary button-compact">🏠 В меню</button>
                     </div>
+                </div>
+            </div>
+            
+            <!-- Полноэкранное модальное окно для изображения приза -->
+            <div id="prize-image-modal" class="prize-image-modal hidden">
+                <div class="prize-image-backdrop"></div>
+                <div class="prize-image-container">
+                    <button id="close-prize-btn" class="prize-close-btn">✕</button>
+                    <img id="prize-image" class="prize-image" src="" alt="Приз">
                 </div>
             </div>
         </div>
@@ -84,11 +96,11 @@
     </div>
     
     <!-- Scripts -->
-    <script src="/web/assets/js/telegram-api.js?v=4"></script>
-    <script src="/web/assets/js/promo.js?v=4"></script>
-    <script src="/web/assets/js/game.js?v=4"></script>
-    <script src="/web/assets/js/history.js?v=4"></script>
-    <script src="/web/assets/js/navigation.js?v=4"></script>
+    <script src="/web/assets/js/telegram-api.js?v=5"></script>
+    <script src="/web/assets/js/promo.js?v=5"></script>
+    <script src="/web/assets/js/game.js?v=5"></script>
+    <script src="/web/assets/js/history.js?v=5"></script>
+    <script src="/web/assets/js/navigation.js?v=5"></script>
     
     <!-- Force reload styles and scripts on page load -->
     <script>

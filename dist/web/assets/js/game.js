@@ -543,13 +543,17 @@ class TicTacToeGame {
     handleGameEnd(result, promoCode) {
         this.gameOver = true;
         
+        let title = '';
         let message = '';
         let icon = '';
+        let prizeImage = '';
         
         switch (result) {
             case 'player_win':
-                message = 'Победа!';
+                title = '🎉 Поздравляем!';
+                message = 'Вы выиграли! Откройте свой приз!';
                 icon = '';
+                prizeImage = '/web/assets/images/prizes/win.jpg'; // Путь к изображению приза за победу
                 if (promoCode) {
                     // Показываем промокод в модальном окне
                     this.showPromoInModal(promoCode);
@@ -565,8 +569,10 @@ class TicTacToeGame {
                 }
                 break;
             case 'bot_win':
-                message = 'Проигрыш';
+                title = '😔 Не отчаивайтесь!';
+                message = 'Вот утешительный приз для вас!';
                 icon = '';
+                prizeImage = '/web/assets/images/prizes/consolation.jpg'; // Путь к изображению утешительного приза
                 this.hidePromoInModal();
                 telegramAPI.sendData({
                     action: 'lose',
@@ -574,8 +580,10 @@ class TicTacToeGame {
                 });
                 break;
             case 'draw':
-                message = 'Ничья';
+                title = '🤝 Ничья!';
+                message = 'Отличная игра! Откройте свой приз!';
                 icon = '';
+                prizeImage = '/web/assets/images/prizes/draw.jpg'; // Путь к изображению приза за ничью
                 this.hidePromoInModal();
                 telegramAPI.sendData({
                     action: 'draw',
@@ -584,7 +592,7 @@ class TicTacToeGame {
                 break;
         }
         
-        this.showResultScreen(message, icon);
+        this.showResultScreen(title, message, icon, prizeImage);
     }
     
     /**
@@ -648,10 +656,12 @@ class TicTacToeGame {
     /**
      * Показ экрана результатов (модальное окно)
      */
-    showResultScreen(message, icon) {
+    showResultScreen(title, message, icon, prizeImage) {
         const resultModal = document.getElementById('result-modal');
         const resultIcon = document.getElementById('result-icon');
         const resultTitle = document.getElementById('result-title');
+        const resultMessage = document.getElementById('result-message');
+        const openPrizeBtn = document.getElementById('open-prize-btn');
         
         if (resultModal) {
             // Иконка скрыта, не показываем смайлы
@@ -659,9 +669,48 @@ class TicTacToeGame {
                 resultIcon.style.display = 'none';
             }
             if (resultTitle) {
-                resultTitle.textContent = message;
+                resultTitle.textContent = title;
             }
+            if (resultMessage) {
+                resultMessage.textContent = message;
+            }
+            
+            // Сохраняем путь к изображению приза для использования при клике
+            if (openPrizeBtn && prizeImage) {
+                openPrizeBtn.dataset.prizeImage = prizeImage;
+                openPrizeBtn.style.display = 'block';
+            } else if (openPrizeBtn) {
+                openPrizeBtn.style.display = 'none';
+            }
+            
             resultModal.classList.remove('hidden');
+        }
+    }
+    
+    /**
+     * Показ полноэкранного изображения приза
+     */
+    showPrizeImage(imagePath) {
+        const prizeModal = document.getElementById('prize-image-modal');
+        const prizeImage = document.getElementById('prize-image');
+        
+        if (prizeModal && prizeImage) {
+            prizeImage.src = imagePath;
+            prizeImage.onerror = () => {
+                // Если изображение не загрузилось, показываем placeholder
+                prizeImage.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2Y1ZjVmNSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM5OTk5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj7Qn9C+0YLQvtCy0YvQuSDQv9GA0L7QuNC3PC90ZXh0Pjwvc3ZnPg==';
+            };
+            prizeModal.classList.remove('hidden');
+        }
+    }
+    
+    /**
+     * Скрытие полноэкранного изображения приза
+     */
+    hidePrizeImage() {
+        const prizeModal = document.getElementById('prize-image-modal');
+        if (prizeModal) {
+            prizeModal.classList.add('hidden');
         }
     }
     
@@ -770,6 +819,35 @@ document.addEventListener('DOMContentLoaded', () => {
             const resultPromoValue = document.getElementById('result-promo-value');
             if (resultPromoValue) {
                 PromoCodeDisplay.copyToClipboard(resultPromoValue.textContent);
+            }
+        });
+    }
+    
+    // Обработчик кнопки "Открыть приз"
+    const openPrizeBtn = document.getElementById('open-prize-btn');
+    if (openPrizeBtn) {
+        openPrizeBtn.addEventListener('click', () => {
+            const prizeImage = openPrizeBtn.dataset.prizeImage;
+            if (prizeImage && window.game) {
+                window.game.showPrizeImage(prizeImage);
+            }
+        });
+    }
+    
+    // Обработчик закрытия полноэкранного изображения приза
+    const closePrizeBtn = document.getElementById('close-prize-btn');
+    const prizeImageBackdrop = document.querySelector('.prize-image-backdrop');
+    if (closePrizeBtn) {
+        closePrizeBtn.addEventListener('click', () => {
+            if (window.game) {
+                window.game.hidePrizeImage();
+            }
+        });
+    }
+    if (prizeImageBackdrop) {
+        prizeImageBackdrop.addEventListener('click', () => {
+            if (window.game) {
+                window.game.hidePrizeImage();
             }
         });
     }
