@@ -738,10 +738,21 @@ class TicTacToeGame {
         const prizeImage = document.getElementById('prize-image');
         
         if (prizeModal && prizeImage) {
+            // Сбрасываем стили изображения перед загрузкой
+            prizeImage.style.width = 'auto';
+            prizeImage.style.height = 'auto';
+            prizeImage.style.maxWidth = '';
+            prizeImage.style.maxHeight = '';
+            
             prizeImage.src = imagePath;
+            prizeImage.onload = () => {
+                // После загрузки убеждаемся, что изображение правильно отображается
+                prizeImage.style.display = 'block';
+            };
             prizeImage.onerror = () => {
                 // Если изображение не загрузилось, показываем placeholder
                 prizeImage.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2Y1ZjVmNSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM5OTk5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj7Qn9C+0YLQvtCy0YvQuSDQv9GA0L7QuNC3PC90ZXh0Pjwvc3ZnPg==';
+                prizeImage.style.display = 'block';
             };
             prizeModal.classList.remove('hidden');
         }
