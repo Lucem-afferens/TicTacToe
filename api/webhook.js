@@ -17,14 +17,13 @@ const BotMessages = {
         "1. Нажмите кнопку '🎮 Играть'\n" +
         "2. Делайте ходы, кликая на ячейки\n" +
         "3. Бот будет отвечать автоматически\n" +
-        "4. При победе получите промокод!\n\n" +
+        "4. Играйте и получайте призы!\n\n" +
         "📱 <b>Команды:</b>\n" +
         "/start - Начать игру\n" +
         "/help - Показать эту справку",
-  win: (code) => "🎉 <b>Поздравляем с победой!</b>\n\n" +
+  win: () => "🎉 <b>Поздравляем с победой!</b>\n\n" +
                   "Вы выиграли в крестики-нолики! 🎊\n\n" +
-                  "💝 <b>Ваш промокод:</b> <code>" + code + "</code>\n\n" +
-                  "Сохраните его, он может пригодиться! ✨",
+                  "Откройте свой приз в игре! ✨",
   LOSE: "Вы проиграли битву, но не войну! 💫\n\nПопробуйте ещё раз!",
   DRAW: "Ничья 💫\n\nСыграем ещё раз?"
 };
@@ -155,10 +154,8 @@ async function handleUpdate(update, apiUrl) {
             if (webappData && webappData.action) {
               switch (webappData.action) {
                 case 'win':
-                  if (webappData.promo_code) {
-                    await sendMessage(chatId, BotMessages.win(webappData.promo_code), null, apiUrl);
-                    console.log('Game won (via WebApp sendData)', { chatId, promoCode: webappData.promo_code });
-                  }
+                  await sendMessage(chatId, BotMessages.win(), null, apiUrl);
+                  console.log('Game won (via WebApp sendData)', { chatId });
                   break;
                   
                 case 'lose':

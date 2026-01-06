@@ -227,15 +227,6 @@ const GameAI = {
   }
 };
 
-// Генерация промокода
-function generatePromoCode(tgId, gameId) {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let code = '';
-  for (let i = 0; i < 8; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return code;
-}
 
 // Vercel serverless function handler
 module.exports = async (req, res) => {
@@ -366,12 +357,6 @@ module.exports = async (req, res) => {
           }
         }
         
-        // Если игра закончена и игрок выиграл, генерируем промокод
-        if (response.result === 'player_win') {
-          const promoCode = generatePromoCode(tgId, gameId);
-          response.promo_code = promoCode;
-          updatedGameData.promo_code = promoCode;
-        }
         
         // Сохраняем завершенную игру в историю
         if (response.result !== 'in_progress') {

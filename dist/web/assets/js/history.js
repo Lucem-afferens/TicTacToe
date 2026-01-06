@@ -115,16 +115,11 @@ class HistoryManager {
             
             let statusIcon = '';
             let statusText = '';
-            let promoCode = '';
             
             switch (status) {
                 case 'player_win':
                     statusIcon = '🎉';
                     statusText = 'Победа';
-                    // Ищем промокод для этой игры
-                    if (typeof game.promo_code !== 'undefined') {
-                        promoCode = `<div class="game-promo-code"><span class="promo-label">💝 Промокод:</span><code>${game.promo_code}</code></div>`;
-                    }
                     break;
                 case 'bot_win':
                     statusIcon = '😔';
@@ -148,7 +143,6 @@ class HistoryManager {
                         </span>
                         <span class="game-date">${date}</span>
                     </div>
-                    ${promoCode}
                 </div>
             `;
         });

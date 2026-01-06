@@ -227,12 +227,8 @@ class TicTacToeGame {
                 cell.innerHTML = ''; // Полностью очищаем содержимое
             });
             
-            // Скрываем экран результатов и промокод
+            // Скрываем экран результатов
             this.hideResultScreen();
-            this.hidePromoInModal();
-            if (typeof PromoCodeDisplay !== 'undefined') {
-                PromoCodeDisplay.hide();
-            }
             
             // Убеждаемся, что игровой экран виден
             const gameScreen = document.getElementById('game-screen');
@@ -398,7 +394,7 @@ class TicTacToeGame {
                 // При окончании игры обновляем все ячейки для disabled состояния
                 // Но только если мы уже отобразили ход бота (или его нет)
                 this.updateBoardDisplay();
-                this.handleGameEnd(response.result, response.promo_code);
+                this.handleGameEnd(response.result);
                 // Игра окончена - не разблокируем ячейки
                 this.isProcessingMove = false;
                 return;
@@ -540,7 +536,7 @@ class TicTacToeGame {
     /**
      * Обработка окончания игры
      */
-    handleGameEnd(result, promoCode) {
+    handleGameEnd(result) {
         this.gameOver = true;
         
         let title = '';
@@ -554,26 +550,16 @@ class TicTacToeGame {
                 message = 'Вы выиграли! Откройте свой приз!';
                 icon = '';
                 prizeImage = '/web/assets/images/prizes/win.jpg'; // Путь к изображению приза за победу
-                if (promoCode) {
-                    // Показываем промокод в модальном окне
-                    this.showPromoInModal(promoCode);
-                    // Отправляем данные в бот
-                    telegramAPI.sendData({
-                        action: 'win',
-                        promo_code: promoCode,
-                        game_id: this.gameId
-                    });
-                } else {
-                    // Скрываем промокод если его нет
-                    this.hidePromoInModal();
-                }
+                telegramAPI.sendData({
+                    action: 'win',
+                    game_id: this.gameId
+                });
                 break;
             case 'bot_win':
                 title = '😔 Не отчаивайтесь!';
                 message = 'Вот утешительный приз для вас!';
                 icon = '';
                 prizeImage = '/web/assets/images/prizes/consolation.jpg'; // Путь к изображению утешительного приза
-                this.hidePromoInModal();
                 telegramAPI.sendData({
                     action: 'lose',
                     game_id: this.gameId
@@ -584,7 +570,6 @@ class TicTacToeGame {
                 message = 'Отличная игра! Откройте свой приз!';
                 icon = '';
                 prizeImage = '/web/assets/images/prizes/draw.jpg'; // Путь к изображению приза за ничью
-                this.hidePromoInModal();
                 telegramAPI.sendData({
                     action: 'draw',
                     game_id: this.gameId
@@ -593,29 +578,6 @@ class TicTacToeGame {
         }
         
         this.showResultScreen(title, message, icon, prizeImage);
-    }
-    
-    /**
-     * Показ промокода в модальном окне
-     */
-    showPromoInModal(promoCode) {
-        const promoContainer = document.getElementById('result-promo-container');
-        const promoValue = document.getElementById('result-promo-value');
-        
-        if (promoContainer && promoValue) {
-            promoValue.textContent = promoCode;
-            promoContainer.classList.remove('hidden');
-        }
-    }
-    
-    /**
-     * Скрытие промокода в модальном окне
-     */
-    hidePromoInModal() {
-        const promoContainer = document.getElementById('result-promo-container');
-        if (promoContainer) {
-            promoContainer.classList.add('hidden');
-        }
     }
     
     /**
@@ -798,28 +760,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (playAgainBtn) {
         playAgainBtn.addEventListener('click', () => {
             game.startNewGame();
-        });
-    }
-    
-    // Обработчик кнопки копирования промокода (старая кнопка)
-    const copyPromoBtn = document.getElementById('copy-promo-btn');
-    if (copyPromoBtn) {
-        copyPromoBtn.addEventListener('click', () => {
-            const promoValue = document.getElementById('promo-code-value');
-            if (promoValue) {
-                PromoCodeDisplay.copyToClipboard(promoValue.textContent);
-            }
-        });
-    }
-    
-    // Обработчик кнопки копирования промокода в модальном окне
-    const resultCopyPromoBtn = document.getElementById('result-copy-promo-btn');
-    if (resultCopyPromoBtn) {
-        resultCopyPromoBtn.addEventListener('click', () => {
-            const resultPromoValue = document.getElementById('result-promo-value');
-            if (resultPromoValue) {
-                PromoCodeDisplay.copyToClipboard(resultPromoValue.textContent);
-            }
         });
     }
     
